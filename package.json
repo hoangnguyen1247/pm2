@@ -1,7 +1,7 @@
 {
   "name": "pm2t",
   "preferGlobal": true,
-  "version": "4.5.1",
+  "version": "4.5.2",
   "engines": {
     "node": ">=8.10.0"
   },
@@ -164,10 +164,10 @@
     "dev ops"
   ],
   "bin": {
-    "pm2": "./bin/pm2",
-    "pm2-dev": "./bin/pm2-dev",
-    "pm2-docker": "./bin/pm2-docker",
-    "pm2-runtime": "./bin/pm2-runtime"
+    "pm2t": "./bin/pm2t",
+    "pm2t-dev": "./bin/pm2t-dev",
+    "pm2t-docker": "./bin/pm2t-docker",
+    "pm2t-runtime": "./bin/pm2t-runtime"
   },
   "dependencies": {
     "@pm2/agent": "~1.0.2",
