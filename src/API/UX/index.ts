@@ -1,9 +1,13 @@
+import helpers from './helpers'
+import describe from './pm2-describe'
+import list from './pm2-ls'
+import list_min from './pm2-ls-minimal'
 
 const UX = {
-  helpers: require('./helpers.js'),
-  describe: require('./pm2-describe.js'),
-  list: require('./pm2-ls.js'),
-  list_min: require('./pm2-ls-minimal.js')
+  helpers: helpers,
+  describe: describe,
+  list: list,
+  list_min: list_min
 }
 
 export default UX

@@ -17,6 +17,8 @@ import God from './God';
 import eachLimit from 'async/eachLimit';
 import * as fmt from './tools/fmt';
 import semver from 'semver';
+import { spawn } from 'child_process';
+import inspector from 'inspector'
 
 const debug = debugLogger('pm2:daemon');
 
@@ -48,7 +50,7 @@ Daemon.prototype.start = function () {
     console.error('[PM2] Resurrecting PM2');
 
     var path = cst.IS_WINDOWS ? __dirname + '/../bin/pm2' : process.env['_'];
-    var fork_new_pm2 = require('child_process').spawn('node', [path, 'update'], {
+    var fork_new_pm2 = spawn('node', [path, 'update'], {
       detached: true,
       stdio: 'inherit'
     });
@@ -181,7 +183,6 @@ Daemon.prototype.innerStart = function (cb) {
       }
     }
 
-    const inspector = require('inspector')
     var session = new inspector.Session()
 
     session.connect()
@@ -196,7 +197,7 @@ Daemon.prototype.innerStart = function (cb) {
         if (err) return cb(null, { error: err.message || err })
 
         setTimeout(() => {
-          session.post(cmd.stop, (err, data) => {
+          session.post(cmd.stop, (err, data: any) => {
             if (err) return cb(null, { error: err.message || err })
             const profile = data.profile
 

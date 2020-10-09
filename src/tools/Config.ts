@@ -4,6 +4,7 @@
  * can be found in the LICENSE file.
  */
 import util from 'util';
+import schema from '../API/schema';
 
 /**
  * Validator of configured file / commander options.
@@ -26,7 +27,7 @@ const Config = {
       return this._schema;
     }
     // Render aliases.
-    this._schema = require('../API/schema');
+    this._schema = schema;
     for (var k in this._schema) {
       if (k.indexOf('\\') > 0) {
         continue;

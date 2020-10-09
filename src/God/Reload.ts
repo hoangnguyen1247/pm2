@@ -177,7 +177,7 @@ function hardReload(God, id, wait_msg, cb) {
  * @param {} God
  * @return
  */
-module.exports = function(God) {
+export default function(God) {
 
   /**
    * Reload

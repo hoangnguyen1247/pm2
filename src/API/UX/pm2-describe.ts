@@ -27,7 +27,7 @@ var postModuleInfos = function(module_name, human_info) {
  * @method describeTable
  * @param {Object} proc process list
  */
-module.exports = function(proc) {
+export default function(proc) {
   var table = new Table({
     style : {'padding-left' : 1, head : ['cyan', 'bold'], compact : true}
   })

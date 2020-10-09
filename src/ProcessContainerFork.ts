@@ -5,7 +5,7 @@
  */
 import url from 'url';
 // Inject custom modules
-var ProcessUtils = require('./ProcessUtils')
+import ProcessUtils from './ProcessUtils'
 ProcessUtils.injectModules()
 
 if (typeof(process.env.source_map_support) != "undefined" &&

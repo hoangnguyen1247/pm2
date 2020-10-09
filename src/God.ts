@@ -22,10 +22,24 @@ import fs            from 'fs';
 import vizion        from 'vizion';
 import debugLogger         from 'debug';
 import Utility       from './Utility';
-import cst           from '../constants.js';
+import cst           from '../constants';
 import timesLimit    from 'async/timesLimit';
 import Configuration from './Configuration';
 import semver        from 'semver';
+
+/**
+ * Populate God namespace
+ */
+import GodEvent from './Event';
+import GodMethods from './God/Methods';
+import GodForkMode from './God/ForkMode';
+import GodClusterMode from './God/ClusterMode';
+import GodReload from './God/Reload';
+import GodActionMethods from './God/ActionMethods';
+import GodWatcher from './Watcher';
+import GodWorker from './Worker';
+
+import sysinfo from './Sysinfo/SystemInfo'
 
 const numCPUs = os.cpus() ? os.cpus().length : 1;
 const debug = debugLogger('pm2:god');
@@ -70,16 +84,16 @@ Utility.overrideConsole(God.bus);
 /**
  * Populate God namespace
  */
-require('./Event.js')(God);
-require('./God/Methods.js')(God);
-require('./God/ForkMode.js')(God);
-require('./God/ClusterMode.js')(God);
-require('./God/Reload')(God);
-require('./God/ActionMethods')(God);
-require('./Watcher')(God);
+GodEvent(God);
+GodMethods(God);
+GodForkMode(God);
+GodClusterMode(God);
+GodReload(God);
+GodActionMethods(God);
+GodWatcher(God);
 
 God.init = function() {
-  require('./Worker.js')(this)
+  GodWorker(this)
   God.system_infos_proc = null
 
   this.configuration = Configuration.getSync('pm2')
@@ -596,7 +610,6 @@ God.launchSysMonitoring = function(env, cb) {
     return cb(new Error('Sys Monitoring already launched'))
 
   try {
-    var sysinfo = require('./Sysinfo/SystemInfo.js')
     God.system_infos_proc = new sysinfo()
 
     setInterval(() => {

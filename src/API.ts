@@ -29,6 +29,10 @@ import hf from './API/Modules/flagExt';
 import Configuration from './Configuration';
 import semver from 'semver';
 import sexec from './tools/sexec';
+import crypto from 'crypto';
+import json5 from './tools/json5'
+import dayjs from 'dayjs';
+import treeify from './tools/treeify'
 
 //////////////////////////
 // Load all API methods //
@@ -132,7 +136,6 @@ class API {
     }
     else if (opts.independent == true && conf.IS_WINDOWS === false) {
       // Create an unique pm2 instance
-      const crypto = require('crypto');
       var random_file = crypto.randomBytes(8).toString('hex');
       this.pm2_home = path.join('/tmp', random_file);
 
@@ -187,7 +190,6 @@ class API {
             try {
               that.gl_interact_infos = JSON.parse(_conf.toString())
             } catch(e) {
-              var json5 = require('./tools/json5.js')
               try {
                 that.gl_interact_infos = json5.parse(_conf.toString())
               } catch(e) {
@@ -657,7 +659,6 @@ class API {
       }
 
       if (opts && opts.rawArgs && opts.rawArgs.indexOf('--watch') > -1) {
-        var dayjs = require('dayjs');
         function show() {
           process.stdout.write('\x1b[2J');
           process.stdout.write('\x1b[0f');
@@ -1744,8 +1745,7 @@ class API {
       }
 
       if (tree === true) {
-        var treeify = require('./tools/treeify.js')
-        console.log(treeify.asTree(sys_infos, true))
+        // console.log(treeify.asTree(sys_infos, true))
       }
       else
         process.stdout.write(util.inspect(sys_infos, false, null, false))

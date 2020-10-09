@@ -14,6 +14,7 @@ import pkg from '../../package.json';
 import * as tabtab from '../completion';
 import Common from '../Common';
 import PM2ioHandler from '../API/pm2-plus/PM2IO';
+import Logs from '../API/Log';
 
 const debug = debugLogger('pm2:cli');
 
@@ -886,7 +887,6 @@ commander.command('logs [id|name|namespace]')
   .option('--highlight [value]', 'highlights the given value')
   .description('stream logs file. Default stream all logs')
   .action(function (id, cmd) {
-    var Logs = require('../API/Log.js');
 
     if (!id) id = 'all';
 

@@ -750,3 +750,5 @@ JSON5.stringify = function (obj, replacer, space) {
   }
   return internalStringify(topLevelHolder, '', true);
 };
+
+export default JSON5

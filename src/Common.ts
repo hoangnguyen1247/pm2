@@ -26,6 +26,8 @@ import which from './tools/which';
 import yamljs from 'yamljs';
 import vm from 'vm';
 import { CronJob } from 'cron';
+import mkdirp from 'mkdirp'
+import passwd from './tools/passwd'
 
 const Common: any = {};
 
@@ -245,7 +247,7 @@ Common.prepareAppConf = function (opts, app) {
         Common.printError(cst.PREFIX_MSG_WARNING + 'Folder does not exist: ' + dir);
         Common.printOut(cst.PREFIX_MSG + 'Creating folder: ' + dir);
         try {
-          require('mkdirp').sync(dir);
+          mkdirp.sync(dir);
         } catch (err) {
           Common.printError(cst.PREFIX_MSG_ERR + 'Could not create folder: ' + path.dirname(af));
           throw new Error('Could not create folder');
@@ -750,7 +752,6 @@ Common.verifyConfs = function (appConfs) {
       }
 
       // 3/ Resolve user info via /etc/password
-      var passwd = require('./tools/passwd.js')
       var users
       try {
         users = passwd.getUsers()

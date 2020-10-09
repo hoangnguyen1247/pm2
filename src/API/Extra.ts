@@ -15,6 +15,9 @@ import dayjs from 'dayjs';
 import pkg from '../../package.json';
 import semver from 'semver';
 import copyDirSync from '../tools/copydirSync'
+import Log from './Log';
+import Dashboard from './Dashboard';
+import Monit from './Monit';
 
 export default function (CLI) {
   /**
@@ -84,8 +87,6 @@ export default function (CLI) {
    */
   CLI.prototype.report = function () {
     var that = this;
-
-    var Log = require('./Log');
 
     that.Client.executeRemote('getReport', {}, function (err, report) {
       console.log()
@@ -670,8 +671,6 @@ export default function (CLI) {
   CLI.prototype.dashboard = function (cb) {
     var that = this;
 
-    var Dashboard = require('./Dashboard');
-
     if (cb)
       return cb(new Error('Dashboard cant be called programmatically'));
 
@@ -713,8 +712,6 @@ export default function (CLI) {
 
   CLI.prototype.monit = function (cb) {
     var that = this;
-
-    var Monit = require('./Monit.js');
 
     if (cb) return cb(new Error('Monit cant be called programmatically'));
 

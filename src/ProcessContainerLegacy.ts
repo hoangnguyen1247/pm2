@@ -8,7 +8,7 @@
  * - rename process
  * - pid
  */
-
+import fs from 'fs';
 import p from 'path';
 import cst from '../constants';
 import Utility from './Utility';
@@ -29,7 +29,6 @@ delete process.env.pm2_env;
  * Main entrance to wrap the desired code
  */
 (function ProcessContainer() {
-  var fs = require('fs');
 
   ProcessUtils.injectModules()
 

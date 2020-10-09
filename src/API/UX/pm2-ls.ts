@@ -439,7 +439,7 @@ function miniMonitBar(sys_infos) {
  * @param {Object} list
  * @param {Object} system informations (via pm2 sysmonit/pm2 sysinfos)
  */
-module.exports = function(list, sys_infos) {
+export default function(list, sys_infos) {
   var pm2_conf = Configuration.getSync('pm2')
 
   if (!list)

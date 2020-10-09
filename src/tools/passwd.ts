@@ -25,7 +25,7 @@ var getUsers = function() {
     }, {})
 }
 
-var getGroups = function(cb) {
+var getGroups = function(cb?) {
   var groups
 
   try {

@@ -15,6 +15,12 @@ import fs from 'fs';
 import path from 'path';
 import pkg from '../package.json';
 import which from './tools/which';
+import cst from '../constants';
+import Daemon from './Daemon';
+import mkdirp from 'mkdirp';
+import vCheck from './VersionCheck'
+import os from 'os';
+import { spawn } from 'child_process';
 
 const debug = debugLogger('pm2:client');
 
@@ -24,7 +30,7 @@ var Client = function (opts) {
   if (!opts) opts = {};
 
   if (!opts.conf)
-    this.conf = require('../constants.js');
+    this.conf = cst;
   else {
     this.conf = opts.conf;
   }
@@ -67,8 +73,6 @@ Client.prototype.start = function (cb) {
      * No Daemon mode
      */
     if (that.daemon_mode === false) {
-      var Daemon = require('./Daemon.js');
-
       var daemon = new Daemon({
         pub_socket_file: that.conf.DAEMON_PUB_PORT,
         rpc_socket_file: that.conf.DAEMON_RPC_PORT,
@@ -133,7 +137,7 @@ Client.prototype.start = function (cb) {
 Client.prototype.initFileStructure = function (opts) {
   if (!fs.existsSync(opts.DEFAULT_LOG_PATH)) {
     try {
-      require('mkdirp').sync(opts.DEFAULT_LOG_PATH);
+      mkdirp.sync(opts.DEFAULT_LOG_PATH);
     } catch (e) {
       console.error(e.stack || e);
     }
@@ -141,7 +145,7 @@ Client.prototype.initFileStructure = function (opts) {
 
   if (!fs.existsSync(opts.DEFAULT_PID_PATH)) {
     try {
-      require('mkdirp').sync(opts.DEFAULT_PID_PATH);
+      mkdirp.sync(opts.DEFAULT_PID_PATH);
     } catch (e) {
       console.error(e.stack || e);
     }
@@ -157,7 +161,7 @@ Client.prototype.initFileStructure = function (opts) {
 
   if (!fs.existsSync(opts.DEFAULT_MODULE_PATH)) {
     try {
-      require('mkdirp').sync(opts.DEFAULT_MODULE_PATH);
+      mkdirp.sync(opts.DEFAULT_MODULE_PATH);
     } catch (e) {
       console.error(e.stack || e);
     }
@@ -172,9 +176,6 @@ Client.prototype.initFileStructure = function (opts) {
   }
 
   if (!process.env.PM2_PROGRAMMATIC && !fs.existsSync(path.join(opts.PM2_HOME, 'touch'))) {
-
-    var vCheck = require('./VersionCheck.js')
-
     vCheck({
       state: 'install',
       version: pkg.version
@@ -233,7 +234,6 @@ Client.prototype.launchDaemon = function (opts, cb) {
   //}
 
   if (this.conf.LOW_MEMORY_ENVIRONMENT) {
-    var os = require('os');
     node_args.push('--gc-global'); // Does full GC (smaller memory footprint)
     node_args.push('--max-old-space-size=' + Math.floor(os.totalmem() / 1024 / 1024));
   }
@@ -256,13 +256,15 @@ Client.prototype.launchDaemon = function (opts, cb) {
   if (which('node') == null)
     interpreter = process.execPath;
 
-  var child = require('child_process').spawn(interpreter, node_args, {
+  let spawnEnv: any = {
+    'SILENT': that.conf.DEBUG ? !that.conf.DEBUG : true,
+    'PM2_HOME': that.pm2_home
+  }
+  util.inherits(spawnEnv, process.env)
+  var child = spawn(interpreter, node_args, {
     detached: true,
     cwd: that.conf.cwd || process.cwd(),
-    env: util.inherits({
-      'SILENT': that.conf.DEBUG ? !that.conf.DEBUG : true,
-      'PM2_HOME': that.pm2_home
-    }, process.env),
+    env: spawnEnv,
     stdio: ['ipc', out, err]
   });
 

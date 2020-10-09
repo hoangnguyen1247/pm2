@@ -3,14 +3,14 @@
 //     https://github.com/notatestuser/treeify.js
 
 // do the universal module definition dance
-(function (root, factory) {
+export default (function (root, factory) {
 
   if (typeof exports === 'object') {
     module.exports = factory();
   } else if (typeof global.define === 'function' && global.define["amd"]) {
     global.define(factory);
   } else {
-    root.treeify = factory();
+    (root as any).treeify = factory();
   }
 
 }(this, function() {

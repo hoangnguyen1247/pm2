@@ -411,8 +411,6 @@ Dashboard.log = function(type, data) {
   return this;
 }
 
-module.exports = Dashboard;
-
 function timeSince(date) {
 
   var seconds = Math.floor(moment().unix() - moment(date).unix());
@@ -460,3 +458,5 @@ function gradient(p, rgb_beginning, rgb_end) {
 
     return "#" + ((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2]).toString(16).slice(1);
 }
+
+export default Dashboard;
