@@ -23,6 +23,9 @@ import extItps from './API/interpreter.json';
 import Config from './tools/Config';
 import pkg from '../package.json';
 import which from './tools/which';
+import yamljs from 'yamljs';
+import vm from 'vm';
+import { CronJob } from 'cron';
 
 const Common: any = {};
 
@@ -292,9 +295,6 @@ Common.isConfigFile = function (filename) {
  * @return {Object} config object
  */
 Common.parseConfig = function (confObj, filename) {
-  var yamljs = require('yamljs');
-  var vm = require('vm');
-
   if (!filename ||
     filename == 'pipe' ||
     filename == 'none' ||
@@ -302,7 +302,13 @@ Common.parseConfig = function (confObj, filename) {
     var code = '(' + confObj + ')';
     var sandbox = {};
 
-    return vm.runInThisContext(code, sandbox, {
+    // TODO: Please check this
+    // return vm.runInThisContext(code, sandbox, {
+    //   filename: path.resolve(filename),
+    //   displayErrors: false,
+    //   timeout: 1000
+    // });
+    return vm.runInThisContext(code, {
       filename: path.resolve(filename),
       displayErrors: false,
       timeout: 1000
@@ -330,12 +336,11 @@ Common.retErr = function (e) {
 Common.sink = {};
 
 Common.sink.determineCron = function (app) {
-  var cronJob = require('cron').CronJob;
 
   if (app.cron_restart) {
     try {
       Common.printOut(cst.PREFIX_MSG + 'cron restart at ' + app.cron_restart);
-      new cronJob(app.cron_restart, function () {
+      new CronJob(app.cron_restart, function () {
         Common.printOut(cst.PREFIX_MSG + 'cron pattern for auto restart detected and valid');
       });
     } catch (ex) {
@@ -492,7 +497,7 @@ Common.printError = function (msg) {
   if (process.env.PM2_SILENT || process.env.PM2_PROGRAMMATIC === 'true') return false;
   if (msg instanceof Error)
     return console.error(msg.message);
-  return console.error.apply(console, arguments);
+  return console.error.apply(console, arguments as any);
 };
 
 Common.log = function (msg) {
@@ -517,7 +522,7 @@ Common.logMod = function (msg) {
 
 Common.printOut = function () {
   if (process.env.PM2_SILENT === 'true' || process.env.PM2_PROGRAMMATIC === 'true') return false;
-  return console.log.apply(console, arguments);
+  return console.log.apply(console, arguments as any);
 };
 
 

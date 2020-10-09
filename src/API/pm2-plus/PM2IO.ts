@@ -1,6 +1,6 @@
 'use strict'
 
-import cst from '../../../constants.js';
+import cst from '../../../constants';
 import chalk from 'chalk';
 import path from 'path';
 import fs  from 'fs';
@@ -17,8 +17,12 @@ const OAUTH_CLIENT_ID_CLI = '0943857435';
 
 export default class PM2ioHandler {
 
+  static pm2: any;
+  static _strategy: any;
+  static io: any;
+
   static usePM2Client (instance) {
-    this.pm2 = instance
+    this.pm2 = instance;
   }
 
   static strategy () {
@@ -338,7 +342,7 @@ export default class PM2ioHandler {
     })
   }
 
-  static open (target, appName, callback) {
+  static open (target, appName?, callback?) {
     let opener
     const escape = function (s) {
       return s.replace(/"/g, '\\"')

@@ -245,11 +245,11 @@ http.createServer(function (request, response) {
 
   serveFile(request.url, request, response);
 
-}).listen(options.port, options.host, function (err) {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
+}).listen(options.port, options.host, function () {
+  // if (err) {
+    // console.error(err);
+    // process.exit(1);
+  // }
   console.log('Exposing %s directory on %s:%d', options.path, options.host, options.port);
 });
 
@@ -271,7 +271,7 @@ function serveFile(uri, request, response) {
 
   var contentType = contentTypes[filePath.split('.').pop().toLowerCase()] || 'text/plain';
 
-  fs.readFile(filePath, function (error, content) {
+  fs.readFile(filePath, function (error, content: any) {
     if (error) {
       if ((!options.spa || request.wantHomepage)) {
         console.error('[%s] Error while serving %s with content-type %s : %s',
@@ -286,7 +286,7 @@ function serveFile(uri, request, response) {
         } else if (options.spa && file !== options.homepage) {
           return serveFile(options.homepage, request, response);
         }
-        fs.readFile(options.path + '/404.html', function (err, content) {
+        fs.readFile(options.path + '/404.html', function (err, content: any) {
           content = err ? '404 Not Found' : content;
           response.writeHead(404, { 'Content-Type': 'text/html' });
           return response.end(content, 'utf-8');

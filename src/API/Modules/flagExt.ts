@@ -39,4 +39,6 @@ const make_available_extension = function make_available_extension(opts, ret) {
   }
 }
 
-export default make_available_extension;
+export default {
+   make_available_extension
+};

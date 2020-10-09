@@ -14,7 +14,7 @@ const debug = debugLogger('pm2:monit');
 // Total memory
 const totalMem = os.totalmem();
 
-var Dashboard = {};
+var Dashboard: any = {};
 
 var DEFAULT_PADDING = {
   top : 0,
@@ -396,7 +396,7 @@ Dashboard.log = function(type, data) {
       for(var process_id in this.logLines){
         count += this.logLines[process_id].length;
         if( this.logLines[process_id].length > max_count){
-          leading_process_id = process_id;
+          leading_process_id = +process_id;
           max_count = this.logLines[process_id].length;
         }
       }
@@ -453,9 +453,9 @@ function gradient(p, rgb_beginning, rgb_end) {
     var w1 = (w + 1) / 2.0;
     var w2 = 1 - w1;
 
-    var rgb = [parseInt(rgb_beginning[0] * w1 + rgb_end[0] * w2),
-        parseInt(rgb_beginning[1] * w1 + rgb_end[1] * w2),
-            parseInt(rgb_beginning[2] * w1 + rgb_end[2] * w2)];
+    var rgb = [parseInt((rgb_beginning[0] * w1 + rgb_end[0] * w2) + ""),
+        parseInt((rgb_beginning[1] * w1 + rgb_end[1] * w2) + ""),
+            parseInt((rgb_beginning[2] * w1 + rgb_end[2] * w2) + "")];
 
     return "#" + ((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2]).toString(16).slice(1);
 }

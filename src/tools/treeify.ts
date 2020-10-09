@@ -7,8 +7,8 @@
 
   if (typeof exports === 'object') {
     module.exports = factory();
-  } else if (typeof define === 'function' && define.amd) {
-    define(factory);
+  } else if (typeof global.define === 'function' && global.define.amd) {
+    global.define(factory);
   } else {
     root.treeify = factory();
   }
@@ -82,7 +82,7 @@
 
   // --------------------
 
-  var Treeify = {};
+  var Treeify: any = {};
 
   // Treeify.asLines
   // --------------------

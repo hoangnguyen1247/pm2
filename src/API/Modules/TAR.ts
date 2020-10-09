@@ -99,7 +99,7 @@ function installLocal(PM2, module_filepath, opts, cb) {
 
 function deleteModulePath(module_name) {
   var sanitized = module_name.replace(/\./g, '')
-  execSync(`rm -r ${path.join(cst.DEFAULT_MODULE_PATH, module_name)}`, { silent: true })
+  execSync(`rm -r ${path.join(cst.DEFAULT_MODULE_PATH, module_name)}`, { silent: true } as any)
 }
 
 function runInstall(PM2, target_path, module_name, opts, cb) {
@@ -252,7 +252,7 @@ function getModuleName(module_filepath, cb) {
 
   install_instance.on('close', function(code) {
     try {
-      var pkg = JSON.parse(fs.readFileSync(path.join(tmp_folder, `package.json`)))
+      var pkg = JSON.parse(fs.readFileSync(path.join(tmp_folder, `package.json`), "utf8"))
       return cb(null, pkg.name)
     } catch(e) {
       return cb(e)
@@ -260,7 +260,7 @@ function getModuleName(module_filepath, cb) {
   });
 }
 
-function package(module_path, target_path, cb) {
+function package1(module_path, target_path, cb) {
   var base_folder = path.dirname(module_path)
   var module_folder_name = path.basename(module_path)
   var pkg = require(path.join(module_path, 'package.json'))
@@ -306,7 +306,7 @@ function publish(PM2, folder, cb) {
 
   Common.logMod(`Starting publishing procedure for ${module_name}@${pkg.version}`)
 
-  package(current_path, target_path, (err, res) => {
+  package1(current_path, target_path, (err, res) => {
     if (err) {
       Common.errMod('Can\'t package, exiting')
       process.exit(1)
@@ -356,5 +356,5 @@ export default {
   uninstall,
   start,
   publish,
-  package
+  package1
 }

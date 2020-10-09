@@ -40,6 +40,8 @@ const SERVICES_ASSOCIATION = {
 // }
 
 class ServicesDetection {
+  pm2: any;
+
   constructor() {
     this.pm2 = new PM2()
   }
@@ -78,7 +80,7 @@ class ServicesDetection {
         var supported_systems = Object.keys(SERVICES_ASSOCIATION)
         var required_modules = {}
 
-        processes.forEach((proc) => {
+        processes.forEach((proc: any) => {
           supported_systems.forEach(sup_sys => {
             var proc_names = sup_sys.split(',')
             proc_names.forEach(proc_name => {
@@ -103,7 +105,7 @@ if (require.main === module) {
   var serviceDetection = new ServicesDetection()
 
   var process = (done) => {
-    serviceDetection.startDetection((err, procs) => {
+    serviceDetection.startDetection(() => {
       done()
     })
   }

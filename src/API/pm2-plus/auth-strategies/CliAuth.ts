@@ -16,10 +16,16 @@ import cst  from'../../../../constants.js'
 import promptly  from'promptly'
 
 export default class CliStrategy extends AuthStrategy {
-  authenticated: false;
-  callback: () => {};
+  authenticated: boolean;
+  callback: (err, result) => {};
   km: any;
   BASE_URI: string;
+
+  client_id: string;
+
+  constructor(opts?) {
+    super()
+  }
 
   // the client will try to call this but we handle this part ourselves
   retrieveTokens (km, cb) {
@@ -35,7 +41,7 @@ export default class CliStrategy extends AuthStrategy {
       if (this.authenticated) return resolve(true)
 
       let tokensPath = cst.PM2_IO_ACCESS_TOKEN
-      fs.readFile(tokensPath, (err, tokens) => {
+      fs.readFile(tokensPath, "utf8", (err, tokens: any) => {
         if (err && err.code === 'ENOENT') return resolve(false)
         if (err) return reject(err)
 
@@ -78,7 +84,7 @@ export default class CliStrategy extends AuthStrategy {
       },
       // try to find it in the file system
       (next) => {
-        fs.readFile(cst.PM2_IO_ACCESS_TOKEN, (err, tokens) => {
+        fs.readFile(cst.PM2_IO_ACCESS_TOKEN, "utf8", (err, tokens: any) => {
           if (err) return next(err)
           // verify that the token is valid
           tokens = JSON.parse(tokens || '{}')

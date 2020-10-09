@@ -1,7 +1,7 @@
 
 'use strict'
 
-import cst from'../../../../constants.js';
+import cst from'../../../../constants';
 
 import AuthStrategy from'@pm2/js-api/src/auth_strategies/strategy'
 import http from'http'
@@ -11,6 +11,18 @@ import { exec } from'child_process'
 import async from'async'
 
 export default class WebStrategy extends AuthStrategy {
+
+  authenticated: boolean;
+  callback: (err, result) => void;
+  km: any;
+
+  client_id: string;
+  oauth_endpoint: string;
+  oauth_query: string;
+
+  constructor(opts?) {
+    super();
+  }
 
   // the client will try to call this but we handle this part ourselves
   retrieveTokens (km, cb) {
@@ -25,13 +37,13 @@ export default class WebStrategy extends AuthStrategy {
       if (this.authenticated) return resolve(true)
 
       let tokensPath = cst.PM2_IO_ACCESS_TOKEN
-      fs.readFile(tokensPath, (err, tokens) => {
+      fs.readFile(tokensPath, (err, tokens: any) => {
         if (err && err.code === 'ENOENT') return resolve(false)
         if (err) return reject(err)
 
         // verify that the token is valid
         try {
-          tokens = JSON.parse(tokens || '{}')
+          tokens = JSON.parse(tokens.toString() || '{}')
         } catch (err) {
           fs.unlinkSync(tokensPath)
           return resolve(false)
@@ -67,7 +79,7 @@ export default class WebStrategy extends AuthStrategy {
       },
       // try to find it in the file system
       (next) => {
-        fs.readFile(cst.PM2_IO_ACCESS_TOKEN, (err, tokens) => {
+        fs.readFile(cst.PM2_IO_ACCESS_TOKEN, "utf8", (err, tokens: any) => {
           if (err) return next(err)
           // verify that the token is valid
           tokens = JSON.parse(tokens || '{}')
@@ -154,7 +166,7 @@ export default class WebStrategy extends AuthStrategy {
     })
   }
 
-  open (target, appName, callback) {
+  open (target, appName?, callback?) {
     let opener
     const escape = function (s) {
       return s.replace(/"/g, '\\"')

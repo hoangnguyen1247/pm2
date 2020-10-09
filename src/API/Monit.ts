@@ -8,34 +8,34 @@
 // by Strzelewicz Alexandre
 
 import multimeter from 'pm2-multimeter';
-import os         from 'os';
-import p          from 'path';
-import chalk      from 'chalk';
+import os from 'os';
+import p from 'path';
+import chalk from 'chalk';
 
-import UX      from './UX';
+import UX from './UX';
 
 import debugLogger from 'debug';
 
 const debug = debugLogger('pm2:monit');
 
 // Cst for light programs
-const RATIO_T1   = Math.floor(os.totalmem() / 500);
+const RATIO_T1 = Math.floor(os.totalmem() / 500);
 // Cst for medium programs
-const RATIO_T2   = Math.floor(os.totalmem() / 50);
+const RATIO_T2 = Math.floor(os.totalmem() / 50);
 // Cst for heavy programs
-const RATIO_T3   = Math.floor(os.totalmem() / 5);
+const RATIO_T3 = Math.floor(os.totalmem() / 5);
 // Cst for heavy programs
-const RATIO_T4   = Math.floor(os.totalmem());
+const RATIO_T4 = Math.floor(os.totalmem());
 
 var Monit: any = {};
 
 //helper to get bars.length (num bars printed)
-Object.size = function(obj) {
-    var size = 0, key;
-    for (key in obj) {
-        if (obj.hasOwnProperty(key)) size++;
-    }
-    return size;
+Object.size = function (obj) {
+  var size = 0, key;
+  for (key in obj) {
+    if (obj.hasOwnProperty(key)) size++;
+  }
+  return size;
 };
 
 /**
@@ -43,13 +43,13 @@ Object.size = function(obj) {
  * @param  String msg optional message to show
  * @return Monit
  */
-Monit.reset = function(msg) {
+Monit.reset = function (msg) {
 
   this.multi.charm.reset();
 
   this.multi.write('\x1B[32m⌬ PM2 \x1B[39mmonitoring\x1B[96m (To go further check out https://app.pm2.io) \x1B[39m\n\n');
 
-  if(msg) {
+  if (msg) {
     this.multi.write(msg);
   }
 
@@ -63,7 +63,7 @@ Monit.reset = function(msg) {
  * @method init
  * @return Monit
  */
-Monit.init = function() {
+Monit.init = function () {
 
   this.multi = multimeter(process);
 
@@ -78,7 +78,7 @@ Monit.init = function() {
  * Stops monitor
  * @method stop
  */
-Monit.stop = function() {
+Monit.stop = function () {
   this.multi.charm.destroy();
   process.exit(0);
 }
@@ -90,34 +90,34 @@ Monit.stop = function() {
  * @param {} processes
  * @return this
  */
-Monit.refresh = function(processes) {
+Monit.refresh = function (processes) {
   debug('Monit refresh');
 
-  if(!processes) {
+  if (!processes) {
     processes = [];
   }
 
   var num = processes.length;
   this.num_bars = Object.size(this.bars);
 
-  if(num !== this.num_bars) {
+  if (num !== this.num_bars) {
     debug('Monit addProcesses - actual: %s, new: %s', this.num_bars, num);
     return this.addProcesses(processes);
   } else {
 
-    if(num === 0) {
+    if (num === 0) {
       return;
     }
 
     debug('Monit refresh');
     var proc;
 
-    for(var i = 0; i < num; i++) {
+    for (var i = 0; i < num; i++) {
       proc = processes[i];
 
       //this is to avoid a print issue when the process is restarted for example
       //we might also check for the pid but restarted|restarting will be rendered bad
-      if(this.bars[proc.pm_id] && proc.pm2_env.status !== this.bars[proc.pm_id].status) {
+      if (this.bars[proc.pm_id] && proc.pm2_env.status !== this.bars[proc.pm_id].status) {
         debug('bars for %s does not exist', proc.pm_id);
         this.addProcesses(processes);
         break;
@@ -131,9 +131,9 @@ Monit.refresh = function(processes) {
   return this;
 }
 
-Monit.addProcess = function(proc, i) {
-  if(proc.pm_id in this.bars) {
-    return ;
+Monit.addProcess = function (proc, i) {
+  if (proc.pm_id in this.bars) {
+    return;
   }
 
   if (proc.monit.error)
@@ -183,9 +183,9 @@ Monit.addProcess = function(proc, i) {
   return this;
 }
 
-Monit.addProcesses = function(processes) {
+Monit.addProcesses = function (processes) {
 
-  if(!processes) {
+  if (!processes) {
     processes = [];
   }
 
@@ -193,8 +193,8 @@ Monit.addProcesses = function(processes) {
 
   var num = processes.length;
 
-  if(num > 0) {
-    for(var i = 0; i < num; i++) {
+  if (num > 0) {
+    for (var i = 0; i < num; i++) {
       this.addProcess(processes[i], i);
     }
   } else {
@@ -211,7 +211,7 @@ Monit.addProcesses = function(processes) {
  * @param {} memory
  * @return
  */
-Monit.drawRatio = function(bar_memory, memory) {
+Monit.drawRatio = function (bar_memory, memory) {
   var scale = 0;
 
   if (memory < RATIO_T1) scale = RATIO_T1;
@@ -220,8 +220,8 @@ Monit.drawRatio = function(bar_memory, memory) {
   else scale = RATIO_T4;
 
   bar_memory.ratio(memory,
-		   scale,
-		   UX.helpers.bytesToSize(memory, 3));
+    scale,
+    UX.helpers.bytesToSize(memory, 3));
 };
 
 /**
@@ -229,7 +229,7 @@ Monit.drawRatio = function(bar_memory, memory) {
  * @param  {} proc       proc object
  * @return  this
  */
-Monit.updateBars = function(proc) {
+Monit.updateBars = function (proc) {
   if (this.bars[proc.pm_id]) {
     if (proc.pm2_env.status !== 'online' || proc.pm2_env.status !== this.bars[proc.pm_id].status) {
       this.bars[proc.pm_id].cpu.percent(0, chalk.red(proc.pm2_env.status));

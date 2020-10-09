@@ -15,14 +15,14 @@ import util from 'util';
 import chalk from 'chalk';
 import fclone from 'fclone';
 
-import DockerMgmt from './API/ExtraMgmt/Docker.js';
-import conf from '../constants.js';
+import DockerMgmt from './API/ExtraMgmt/Docker';
+import cst from '../constants';
 import Client from './Client';
 import Common from './Common';
 import KMDaemon from '@pm2/agent/src/InteractorClient';
 import Config from './tools/Config';
 import Modularizer from './API/Modules/Modularizer';
-import path_structure from '../paths.js';
+import path_structure from '../paths';
 import UX from './API/UX';
 import pkg from '../package.json';
 import hf from './API/Modules/flagExt';
@@ -32,6 +32,8 @@ import sexec from './tools/sexec';
 
 var debug = debugLogger('pm2:cli');
 var IMMUTABLE_MSG = chalk.bold.blue('Use --update-env to update environment variables');
+
+var conf = cst
 
 /**
  * Main Function to be imported
@@ -55,7 +57,33 @@ var IMMUTABLE_MSG = chalk.bold.blue('Use --update-env to update environment vari
  */
 class API {
 
-  constructor (opts) {
+  daemon_mode: boolean;
+  pm2_home: string;
+  public_key: string;
+  secret_key: string;
+  machine_name: string;
+
+  cwd: string;
+
+  _conf: any;
+
+  Client: any;
+  pm2_configuration: any;
+  gl_interact_infos: any;
+  gl_is_km_linked: boolean;
+
+  gl_retry: number;
+
+    start_timer: Date;
+  killAgent: (cb) => void;
+  launchAll: (data, cb) => void;
+  getVersion: (err, res?) => void;
+  dump: (err) => void;
+  resurrect: (err) => void;
+
+  streamLogs: (a, b, c, d, e) => void;
+
+  constructor (opts?) {
     if (!opts) opts = {};
     var that = this;
 
@@ -82,7 +110,7 @@ class API {
     if (opts.pm2_home) {
       // Override default conf file
       this.pm2_home = opts.pm2_home;
-      conf = util._extend(conf, path_structure(this.pm2_home));
+      conf = util.inherits(conf, path_structure(this.pm2_home));
     }
     else if (opts.independent == true && conf.IS_WINDOWS === false) {
       // Create an unique pm2 instance
@@ -94,7 +122,7 @@ class API {
       // It will go as in proc
       if (typeof(opts.daemon_mode) == 'undefined')
         this.daemon_mode = false;
-      conf = util._extend(conf, path_structure(this.pm2_home));
+      conf = util.inherits(conf, path_structure(this.pm2_home));
     }
 
     this._conf = conf;
@@ -102,8 +130,9 @@ class API {
     if (conf.IS_WINDOWS) {
       // Weird fix, may need to be dropped
       // @todo windows connoisseur double check
-      if (process.stdout._handle && process.stdout._handle.setBlocking)
-        process.stdout._handle.setBlocking(true);
+      // TODO: please check this
+      // if (process.stdout._handle && process.stdout._handle.setBlocking)
+      //   process.stdout._handle.setBlocking(true);
     }
 
     this.Client = new Client({
@@ -121,7 +150,7 @@ class API {
     this.gl_is_km_linked = false;
 
     try {
-      var pid = fs.readFileSync(conf.INTERACTOR_PID_PATH);
+      var pid: any = fs.readFileSync(conf.INTERACTOR_PID_PATH);
       pid = parseInt(pid.toString().trim());
       process.kill(pid, 0);
       that.gl_is_km_linked = true;
@@ -210,7 +239,7 @@ class API {
       if (that.pm2_home.indexOf('.pm2') > -1)
         return cb(new Error('Destroy is not a allowed method on .pm2'));
 
-      fs.access(test_path, fs.R_OK, function(err) {
+      fs.access(test_path, fs.constants.R_OK, function(err) {
         if (err) return cb(err);
         debug('Deleting temporary folder %s', that.pm2_home);
         sexec(cmd, cb);
@@ -230,7 +259,7 @@ class API {
     if (!cb) cb = function() {};
 
     this.Client.close(function(err, data) {
-      debug('The session lasted %ds', (new Date() - that.start_timer) / 1000);
+      // debug('The session lasted %ds', (new Date() - that.start_timer) / 1000);
       return cb(err, data);
     });
   };
@@ -281,7 +310,7 @@ class API {
         // exits process when stdout (1) and sdterr(2) are both drained.
         function tryToExit() {
           if ((fds & 1) && (fds & 2)) {
-            debug('This command took %ds to execute', (new Date() - that.start_timer) / 1000);
+            // debug('This command took %ds to execute', (new Date() - that.start_timer) / 1000);
             process.exit(code);
           }
         }
@@ -686,7 +715,7 @@ class API {
     /**
      * Commander.js tricks
      */
-    var app_conf = Config.filterOptions(opts);
+    var app_conf: any = Config.filterOptions(opts);
     var appConf = {};
 
     if (typeof app_conf.name == 'function')
@@ -879,7 +908,7 @@ class API {
         resolved_paths.env['PM2_HOME'] = that.pm2_home;
 
         var additional_env = Modularizer.getAdditionalConf(resolved_paths.name);
-        util._extend(resolved_paths.env, additional_env);
+        util.inherits(resolved_paths.env, additional_env);
 
         // Is KM linked?
         resolved_paths.km_link = that.gl_is_km_linked;
@@ -905,9 +934,9 @@ class API {
    *
    * @private
    */
-  _startJson (file, opts, action, pipe, cb) {
-    var config     = {};
-    var appConf    = {};
+  _startJson (file, opts, action, pipe, cb?) {
+    var config: any     = {};
+    var appConf: any[]    = [];
     var staticConf = [];
     var deployConf = {};
     var apps_info  = [];
@@ -966,7 +995,7 @@ class API {
     if ((appConf = Common.verifyConfs(appConf)) instanceof Error)
       return cb ? cb(appConf) : that.exitCli(conf.ERROR_EXIT);
 
-    process.env.PM2_JSON_PROCESSING = true;
+    process.env.PM2_JSON_PROCESSING = "true";
 
     // Get App list
     var apps_name = [];
@@ -1075,7 +1104,7 @@ class API {
         // Notice: if people use the same name in different apps,
         //         duplicated envs will be overrode by the last one
         var env = envs.reduce(function(e1, e2){
-          return util._extend(e1, e2);
+          return util.inherits(e1, e2);
         });
 
         // When we are processing JSON, allow to keep the new env by default
@@ -1150,7 +1179,7 @@ class API {
         resolved_paths.env['PM2_HOME'] = that.pm2_home;
 
         var additional_env = Modularizer.getAdditionalConf(resolved_paths.name);
-        util._extend(resolved_paths.env, additional_env);
+        util.inherits(resolved_paths.env, additional_env);
 
         resolved_paths.env = Common.mergeEnvironmentVariables(resolved_paths, opts.env, deployConf);
 
@@ -1196,7 +1225,7 @@ class API {
    * @param {Function}
    */
   actionFromJson (action, file, opts, jsonVia, cb) {
-    var appConf = {};
+    var appConf: any = {};
     var ret_processes = [];
     var that = this;
 
@@ -1309,7 +1338,7 @@ class API {
    * @param {String} process_name can be 'all', a id integer or process name
    * @param {Object} envs         object with CLI options / environment
    */
-  _operate (action_name, process_name, envs, cb) {
+  _operate (action_name, process_name, envs, cb?) {
     var that = this;
     var update_env = false;
     var ret = [];
@@ -1365,13 +1394,13 @@ class API {
         if (action_name == 'restartProcessId' ||
           action_name == 'reloadProcessId' ||
           action_name == 'softReloadProcessId') {
-          var new_env = {};
+          var new_env: any = {};
 
           if (update_env === true) {
             if (conf.PM2_PROGRAMMATIC == true)
               new_env = Common.safeExtend({}, process.env);
             else
-              new_env = util._extend({}, process.env);
+              new_env = util.inherits({}, process.env);
 
             Object.keys(envs).forEach(function(k) {
               new_env[k] = envs[k];
@@ -1513,7 +1542,7 @@ class API {
          * if yes load configuration variables and merge with the current environment
          */
           var additional_env = Modularizer.getAdditionalConf(process_name);
-          util._extend(envs, additional_env);
+          util.inherits(envs, additional_env);
           return processIds(ids, cb);
         }
 
@@ -1532,7 +1561,7 @@ class API {
            * if yes load configuration variables and merge with the current environment
            */
           var ns_additional_env = Modularizer.getAdditionalConf(process_name);
-          util._extend(envs, ns_additional_env);
+          util.inherits(envs, ns_additional_env);
           return processIds(ns_process_ids, cb);
         });
       });
@@ -1594,7 +1623,7 @@ class API {
    * (nodeArgs -> node_args)
    */
   _handleAttributeUpdate (opts) {
-    var conf = Config.filterOptions(opts);
+    var conf: any = Config.filterOptions(opts);
     var that = this;
 
     if (typeof(conf.name) != 'string')
@@ -1711,7 +1740,7 @@ class API {
    * @method speedList
    * @return
    */
-  speedList (code, apps_acted) {
+  speedList (code?, apps_acted?) {
     var that = this;
     var systemdata = null
     var acted = []
@@ -1770,7 +1799,7 @@ class API {
       if (that.Client.daemon_mode == false) {
         Common.printOut('[--no-daemon] Continue to stream logs');
         Common.printOut('[--no-daemon] Exit on target PM2 exit pid=' + fs.readFileSync(conf.PM2_PID_FILE_PATH).toString());
-        global._auto_exit = true;
+        global["_auto_exit"] = true;
         return that.streamLogs('all', 0, false, 'HH:mm:ss', false);
       }
       // if (process.stdout.isTTY) if looking for start logs
@@ -1905,7 +1934,7 @@ class API {
 
     Common.printOut(conf.PREFIX_MSG + 'Updating PM2...');
 
-    var child = sexec("npm i -g pm2@latest; pm2 update");
+    var child: any = sexec("npm i -g pm2@latest; pm2 update");
 
     child.stdout.on('end', function() {
       Common.printOut(conf.PREFIX_MSG + 'PM2 successfully updated');

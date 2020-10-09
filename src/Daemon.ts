@@ -4,21 +4,23 @@
  * can be found in the LICENSE file.
  */
 
-var debug        = require('debug')('pm2:daemon');
-var pkg          = require('../package.json');
-var cst          = require('../constants.js');
-var rpc          = require('pm2-axon-rpc');
-var axon         = require('pm2-axon');
-var domain       = require('domain');
-var Utility      = require('./Utility.js');
-var util         = require('util');
-var fs           = require('fs');
-var God          = require('./God');
-var eachLimit    = require('async/eachLimit');
-var fmt          = require('./tools/fmt.js');
-var semver       = require('semver');
+import debugLogger from 'debug';
+import pkg from '../package.json';
+import cst from '../constants.js';
+import rpc from 'pm2-axon-rpc';
+import axon from 'pm2-axon';
+import domain from 'domain';
+import Utility from './Utility.js';
+import util from 'util';
+import fs from 'fs';
+import God from './God';
+import eachLimit from 'async/eachLimit';
+import * as fmt from './tools/fmt';
+import semver from 'semver';
 
-var Daemon = module.exports = function(opts) {
+const debug = debugLogger('pm2:daemon');
+
+var Daemon = function (opts?) {
   if (!opts) opts = {};
 
   this.ignore_signals = opts.ignore_signals || false;
@@ -28,14 +30,14 @@ var Daemon = module.exports = function(opts) {
   this.pub_socket_file = opts.pub_socket_file || cst.DAEMON_PUB_PORT;
   this.rpc_socket_file = opts.rpc_socket_file || cst.DAEMON_RPC_PORT;
 
-  this.pid_path        = opts.pid_file || cst.PM2_PID_FILE_PATH;
+  this.pid_path = opts.pid_file || cst.PM2_PID_FILE_PATH;
 };
 
-Daemon.prototype.start = function() {
+Daemon.prototype.start = function () {
   var that = this;
   var d = domain.create();
 
-  d.once('error', function(err) {
+  d.once('error', function (err) {
     fmt.sep();
     fmt.title('PM2 global error caught');
     fmt.field('Time', new Date());
@@ -45,28 +47,28 @@ Daemon.prototype.start = function() {
 
     console.error('[PM2] Resurrecting PM2');
 
-		var path = cst.IS_WINDOWS ? __dirname + '/../bin/pm2' : process.env['_'];
+    var path = cst.IS_WINDOWS ? __dirname + '/../bin/pm2' : process.env['_'];
     var fork_new_pm2 = require('child_process').spawn('node', [path, 'update'], {
       detached: true,
       stdio: 'inherit'
     });
 
-    fork_new_pm2.on('close', function() {
+    fork_new_pm2.on('close', function () {
       console.log('PM2 successfully forked');
       process.exit(0);
     })
 
   });
 
-  d.run(function() {
+  d.run(function () {
     that.innerStart();
   });
 }
 
-Daemon.prototype.innerStart = function(cb) {
+Daemon.prototype.innerStart = function (cb) {
   var that = this;
 
-  if (!cb) cb = function() {
+  if (!cb) cb = function () {
     fmt.sep();
     fmt.title('New PM2 Daemon started');
     fmt.field('Time', new Date());
@@ -98,22 +100,22 @@ Daemon.prototype.innerStart = function(cb) {
   /**
    * Pub system for real time notifications
    */
-  this.pub    = axon.socket('pub-emitter');
+  this.pub = axon.socket('pub-emitter');
 
   this.pub_socket = this.pub.bind(this.pub_socket_file);
 
-  this.pub_socket.once('bind', function() {
-    fs.chmod(that.pub_socket_file, '775', function(e) {
+  this.pub_socket.once('bind', function () {
+    fs.chmod(that.pub_socket_file, '775', function (e) {
       if (e) console.error(e);
 
       try {
         if (process.env.PM2_SOCKET_USER && process.env.PM2_SOCKET_GROUP)
           fs.chown(that.pub_socket_file,
-                   parseInt(process.env.PM2_SOCKET_USER),
-                   parseInt(process.env.PM2_SOCKET_GROUP), function(e) {
-                     if (e) console.error(e);
-                   });
-      } catch(e) {
+            parseInt(process.env.PM2_SOCKET_USER),
+            parseInt(process.env.PM2_SOCKET_GROUP), function (e) {
+              if (e) console.error(e);
+            });
+      } catch (e) {
         console.error(e);
       }
     });
@@ -125,24 +127,24 @@ Daemon.prototype.innerStart = function(cb) {
   /**
    * Rep/Req - RPC system to interact with God
    */
-  this.rep    = axon.socket('rep');
+  this.rep = axon.socket('rep');
 
   var server = new rpc.Server(this.rep);
 
   this.rpc_socket = this.rep.bind(this.rpc_socket_file);
 
-  this.rpc_socket.once('bind', function() {
-    fs.chmod(that.rpc_socket_file, '775', function(e) {
+  this.rpc_socket.once('bind', function () {
+    fs.chmod(that.rpc_socket_file, '775', function (e) {
       if (e) console.error(e);
 
       try {
         if (process.env.PM2_SOCKET_USER && process.env.PM2_SOCKET_GROUP)
           fs.chown(that.rpc_socket_file,
-                   parseInt(process.env.PM2_SOCKET_USER),
-                   parseInt(process.env.PM2_SOCKET_GROUP), function(e) {
-                     if (e) console.error(e);
-                   });
-      } catch(e) {
+            parseInt(process.env.PM2_SOCKET_USER),
+            parseInt(process.env.PM2_SOCKET_GROUP), function (e) {
+              if (e) console.error(e);
+            });
+      } catch (e) {
         console.error(e);
       }
     });
@@ -203,7 +205,7 @@ Daemon.prototype.innerStart = function(cb) {
 
             fs.writeFile(msg.pwd, JSON.stringify(profile), (err) => {
               if (err) return cb(null, { error: err.message || err })
-              return cb(null, { file : msg.pwd })
+              return cb(null, { file: msg.pwd })
             })
           })
         }, timeout)
@@ -212,53 +214,53 @@ Daemon.prototype.innerStart = function(cb) {
   }
 
   server.expose({
-    killMe                  : that.close.bind(this),
-    profileCPU              : profile.bind(this, 'cpu'),
-    profileMEM              : profile.bind(this, 'mem'),
-    prepare                 : God.prepare,
-    launchSysMonitoring     : God.launchSysMonitoring,
-    getMonitorData          : God.getMonitorData,
-    getSystemData           : God.getSystemData,
+    killMe: that.close.bind(this),
+    profileCPU: profile.bind(this, 'cpu'),
+    profileMEM: profile.bind(this, 'mem'),
+    prepare: God.prepare,
+    launchSysMonitoring: God.launchSysMonitoring,
+    getMonitorData: God.getMonitorData,
+    getSystemData: God.getSystemData,
 
-    startProcessId          : God.startProcessId,
-    stopProcessId           : God.stopProcessId,
-    restartProcessId        : God.restartProcessId,
-    deleteProcessId         : God.deleteProcessId,
+    startProcessId: God.startProcessId,
+    stopProcessId: God.stopProcessId,
+    restartProcessId: God.restartProcessId,
+    deleteProcessId: God.deleteProcessId,
 
-    sendLineToStdin         : God.sendLineToStdin,
-    softReloadProcessId     : God.softReloadProcessId,
-    reloadProcessId         : God.reloadProcessId,
-    duplicateProcessId      : God.duplicateProcessId,
-    resetMetaProcessId      : God.resetMetaProcessId,
-    stopWatch               : God.stopWatch,
-    startWatch              : God.startWatch,
-    toggleWatch             : God.toggleWatch,
-    notifyByProcessId       : God.notifyByProcessId,
+    sendLineToStdin: God.sendLineToStdin,
+    softReloadProcessId: God.softReloadProcessId,
+    reloadProcessId: God.reloadProcessId,
+    duplicateProcessId: God.duplicateProcessId,
+    resetMetaProcessId: God.resetMetaProcessId,
+    stopWatch: God.stopWatch,
+    startWatch: God.startWatch,
+    toggleWatch: God.toggleWatch,
+    notifyByProcessId: God.notifyByProcessId,
 
-    notifyKillPM2           : God.notifyKillPM2,
-    monitor                 : God.monitor,
-    unmonitor               : God.unmonitor,
+    notifyKillPM2: God.notifyKillPM2,
+    monitor: God.monitor,
+    unmonitor: God.unmonitor,
 
-    msgProcess              : God.msgProcess,
-    sendDataToProcessId     : God.sendDataToProcessId,
-    sendSignalToProcessId   : God.sendSignalToProcessId,
-    sendSignalToProcessName : God.sendSignalToProcessName,
+    msgProcess: God.msgProcess,
+    sendDataToProcessId: God.sendDataToProcessId,
+    sendSignalToProcessId: God.sendSignalToProcessId,
+    sendSignalToProcessName: God.sendSignalToProcessName,
 
-    ping                    : God.ping,
-    getVersion              : God.getVersion,
-    getReport               : God.getReport,
-    reloadLogs              : God.reloadLogs
+    ping: God.ping,
+    getVersion: God.getVersion,
+    getReport: God.getReport,
+    reloadLogs: God.reloadLogs
   });
 
   this.startLogic();
 }
 
-Daemon.prototype.close = function(opts, cb) {
+Daemon.prototype.close = function (opts, cb) {
   var that = this;
 
   God.bus.emit('pm2:kill', {
-    status : 'killed',
-    msg    : 'pm2 has been killed via CLI'
+    status: 'killed',
+    msg: 'pm2 has been killed via CLI'
   });
 
   if (God.system_infos_proc !== null)
@@ -267,62 +269,62 @@ Daemon.prototype.close = function(opts, cb) {
   /**
    * Cleanly kill pm2
    */
-  that.rpc_socket.close(function() {
-    that.pub_socket.close(function() {
+  that.rpc_socket.close(function () {
+    that.pub_socket.close(function () {
 
       // notify cli that the daemon is shuting down (only under unix since windows doesnt handle signals)
       if (cst.IS_WINDOWS === false) {
         try {
           process.kill(parseInt(opts.pid), 'SIGQUIT');
-        } catch(e) {
+        } catch (e) {
           console.error('Could not send SIGQUIT to CLI');
         }
       }
 
       try {
         fs.unlinkSync(that.pid_path);
-      } catch(e) {}
+      } catch (e) { }
 
       console.log('PM2 successfully stopped');
-      setTimeout(function() {
+      setTimeout(function () {
         process.exit(cst.SUCCESS_EXIT);
       }, 2);
     });
   });
 }
 
-Daemon.prototype.handleSignals = function() {
+Daemon.prototype.handleSignals = function () {
   var that = this;
 
   process.on('SIGTERM', that.gracefullExit.bind(this));
   process.on('SIGINT', that.gracefullExit.bind(this));
-  process.on('SIGHUP', function() {});
+  process.on('SIGHUP', function () { });
   process.on('SIGQUIT', that.gracefullExit.bind(this));
-  process.on('SIGUSR2', function() {
-    God.reloadLogs({}, function() {});
+  process.on('SIGUSR2', function () {
+    God.reloadLogs({}, function () { });
   });
 }
 
-Daemon.prototype.sendReady = function(cb) {
+Daemon.prototype.sendReady = function (cb) {
   // Send ready message to Client
   if (this.rpc_socket_ready == true && this.pub_socket_ready == true) {
     cb(null, {
-      pid         : process.pid,
-      pm2_version : pkg.version
+      pid: process.pid,
+      pm2_version: pkg.version
     });
-    if (typeof(process.send) != 'function')
+    if (typeof (process.send) != 'function')
       return false;
 
     process.send({
-      online      : true,
-      success     : true,
-      pid         : process.pid,
-      pm2_version : pkg.version
+      online: true,
+      success: true,
+      pid: process.pid,
+      pm2_version: pkg.version
     });
   };
 }
 
-Daemon.prototype.gracefullExit = function() {
+Daemon.prototype.gracefullExit = function () {
   var that = this;
 
   // never execute multiple gracefullExit simultaneously
@@ -332,8 +334,8 @@ Daemon.prototype.gracefullExit = function() {
   this.isExiting = true
 
   God.bus.emit('pm2:kill', {
-    status : 'killed',
-    msg    : 'pm2 has been killed by SIGNAL'
+    status: 'killed',
+    msg: 'pm2 has been killed by SIGNAL'
   });
 
   console.log('pm2 has been killed by signal, dumping process list before exit...');
@@ -341,20 +343,20 @@ Daemon.prototype.gracefullExit = function() {
   if (God.system_infos_proc !== null)
     God.system_infos_proc.kill()
 
-  God.dumpProcessList(function() {
+  God.dumpProcessList(function () {
 
     var processes = God.getFormatedProcesses();
 
-    eachLimit(processes, 1, function(proc, next) {
+    eachLimit(processes, 1, function (proc, next) {
       console.log('Deleting process %s', proc.pm2_env.pm_id);
-      God.deleteProcessId(proc.pm2_env.pm_id, function() {
+      God.deleteProcessId(proc.pm2_env.pm_id, function () {
         return next();
       });
-    }, function(err) {
+    }, function (err) {
       try {
         fs.unlinkSync(that.pid_path);
-      } catch(e) {}
-      setTimeout(function() {
+      } catch (e) { }
+      setTimeout(function () {
         that.isExiting = false
         console.log('Exited peacefully');
         process.exit(cst.SUCCESS_EXIT);
@@ -363,7 +365,7 @@ Daemon.prototype.gracefullExit = function() {
   });
 }
 
-Daemon.prototype.startLogic = function() {
+Daemon.prototype.startLogic = function () {
   var that = this;
 
   /**
@@ -372,7 +374,7 @@ Daemon.prototype.startLogic = function() {
    */
   God.bus.on('axm:action', function axmActions(msg) {
     var pm2_env = msg.process;
-    var exists  = false;
+    var exists = false;
     var axm_action = msg.data;
 
     if (!pm2_env || !God.clusters_db[pm2_env.pm_id])
@@ -381,7 +383,7 @@ Daemon.prototype.startLogic = function() {
     if (!God.clusters_db[pm2_env.pm_id].pm2_env.axm_actions)
       God.clusters_db[pm2_env.pm_id].pm2_env.axm_actions = [];
 
-    God.clusters_db[pm2_env.pm_id].pm2_env.axm_actions.forEach(function(actions) {
+    God.clusters_db[pm2_env.pm_id].pm2_env.axm_actions.forEach(function (actions) {
       if (actions.action_name == axm_action.action_name)
         exists = true;
     });
@@ -408,10 +410,10 @@ Daemon.prototype.startLogic = function() {
       if (msg.data.name)
         God.clusters_db[msg.process.pm_id].pm2_env.name = msg.data.name;
 
-      Object.keys(msg.data).forEach(function(conf_key) {
+      Object.keys(msg.data).forEach(function (conf_key) {
         God.clusters_db[msg.process.pm_id].pm2_env.axm_options[conf_key] = Utility.clone(msg.data[conf_key]);
       });
-    } catch(e) {
+    } catch (e) {
       console.error(e.stack || e);
     }
     msg = null;
@@ -427,18 +429,18 @@ Daemon.prototype.startLogic = function() {
     if (!msg.process || !God.clusters_db[msg.process.pm_id])
       return console.error('AXM MONITOR Unknown id %s', msg.process.pm_id);
 
-    util._extend(God.clusters_db[msg.process.pm_id].pm2_env.axm_monitor, Utility.clone(msg.data));
+    util.inherits(God.clusters_db[msg.process.pm_id].pm2_env.axm_monitor, Utility.clone(msg.data));
     msg = null;
   });
 
   /**
    * Broadcast messages
    */
-  God.bus.onAny(function(event, data_v) {
+  God.bus.onAny(function (event, data_v) {
     if (['axm:action',
-         'axm:monitor',
-         'axm:option:setPID',
-         'axm:option:configuration'].indexOf(event) > -1) {
+      'axm:monitor',
+      'axm:option:setPID',
+      'axm:option:configuration'].indexOf(event) > -1) {
       data_v = null;
       return false;
     }
@@ -454,3 +456,5 @@ if (require.main === module) {
 
   daemon.start();
 }
+
+export default Daemon;

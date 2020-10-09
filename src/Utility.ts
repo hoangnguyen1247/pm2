@@ -118,7 +118,7 @@ var Utility = {
                 rev        : null
               },
               at  : Utility.getDate(),
-              data : util.format.apply(this, arguments) + '\n'
+              data : util.format.apply(this, arguments as any) + '\n'
             });
           }
           // do not destroy variable insertion

@@ -1,5 +1,6 @@
 import chalk from 'chalk';
-const Helpers = {}
+import moment from 'moment';
+const Helpers: any = {}
 
 /**
  * Converts Byte to Human readable size
@@ -89,7 +90,8 @@ Helpers.safe_push = function() {
  * @return BinaryExpression
  */
 Helpers.timeSince = function(date) {
-  var seconds = Math.floor((new Date() - date) / 1000)
+  // TODO: please check this
+  var seconds = Math.floor(moment().subtract(date, "days").unix() / 1000)
 
   var interval = Math.floor(seconds / 31536000)
 
@@ -207,4 +209,4 @@ Helpers.dispKeys = function(kv, target_module) {
   })
 }
 
-module.exports = Helpers
+export default Helpers

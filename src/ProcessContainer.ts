@@ -9,10 +9,12 @@
  * - pid
  */
 
+import fs from 'fs';
 import p from 'path';
 import cst from '../constants';
 import Utility from './Utility';
 import ProcessUtils from './ProcessUtils';
+import dayjs from 'dayjs';
 
 // Load all env-vars from master.
 var pm2_env = JSON.parse(process.env.pm2_env);
@@ -29,7 +31,6 @@ delete process.env.pm2_env;
  * Main entrance to wrap the desired code
  */
 (function ProcessContainer() {
-  var fs = require('fs');
 
   ProcessUtils.injectModules()
 
@@ -46,9 +47,9 @@ delete process.env.pm2_env;
     require('source-map-support').install();
   }
 
-  process.send = function () {
+  process.send = function (message) {
     if (process.connected)
-      original_send.apply(this, arguments);
+      return original_send.apply(this, arguments as any);
   };
 
   //send node version
@@ -155,7 +156,6 @@ function exec(script, stds) {
   var dayjs = null;
 
   if (pm2_env.log_date_format)
-    dayjs = require('dayjs');
 
   Utility.startLogging(stds, function (err) {
     if (err) {
@@ -171,7 +171,7 @@ function exec(script, stds) {
     }
 
     process.stderr.write = (function (write) {
-      return function (string, encoding, cb) {
+      return function (string, cb) {
         var log_data = null;
 
         // Disable logs if specified
@@ -204,13 +204,15 @@ function exec(script, stds) {
           (!pm2_env.pm_log_path || Utility.checkPathIsNull(pm2_env.pm_log_path)))
           return cb ? cb() : false;
 
+        // TODO: please check this
+        const encoding = "";
         stds.std && stds.std.write && stds.std.write(log_data, encoding);
         stds.err && stds.err.write && stds.err.write(log_data, encoding, cb);
       };
     })(process.stderr.write);
 
     process.stdout.write = (function (write) {
-      return function (string, encoding, cb) {
+      return function (string, cb) {
         var log_data = null;
 
         // Disable logs if specified
@@ -242,6 +244,8 @@ function exec(script, stds) {
           (!pm2_env.pm_log_path || Utility.checkPathIsNull(pm2_env.pm_log_path)))
           return cb ? cb() : null;
 
+        // TODO: please check this
+        const encoding = "";
         stds.std && stds.std.write && stds.std.write(log_data, encoding);
         stds.out && stds.out.write && stds.out.write(log_data, encoding, cb);
       };

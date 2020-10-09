@@ -112,7 +112,7 @@ class SystemInfo {
       detached: false,
       windowsHide: true,
       stdio: ['inherit', 'inherit', 'inherit', 'ipc']
-    })
+    } as any)
 
     this.process.on('exit', (code) => {
       console.log(`systeminfos collection process offline with code ${code}`)
@@ -313,7 +313,7 @@ class SystemInfo {
   }
 
   dockerSummary(cb = () => { }) {
-    sysinfo.dockerContainers('all')
+    sysinfo.dockerContainers(true)
       .then(containers => {
         var non_exited_containers = containers.filter(container => container.state != 'exited')
         var new_containers = []
@@ -371,11 +371,11 @@ class SystemInfo {
     psList()
       .then(processes => {
         this.infos.processes.cpu_sorted = processes
-          .filter(a => !(a.cmd.includes('SystemInfo') && a.cmd.includes('PM2')))
-          .sort((a, b) => b.cpu - a.cpu).slice(0, 5)
+          .filter((a: any) => !(a.cmd.includes('SystemInfo') && a.cmd.includes('PM2')))
+          .sort((a: any, b: any) => b.cpu - a.cpu).slice(0, 5)
         this.infos.processes.mem_sorted = processes
-          .filter(a => !(a.cmd.includes('SystemInfo') && a.cmd.includes('PM2')))
-          .sort((a, b) => b.memory - a.memory).slice(0, 5)
+          .filter((a: any) => !(a.cmd.includes('SystemInfo') && a.cmd.includes('PM2')))
+          .sort((a: any, b: any) => b.memory - a.memory).slice(0, 5)
         return cb()
       })
       .catch(e => {
@@ -458,7 +458,7 @@ class SystemInfo {
         .then(conns => {
           this.infos.connections = conns
             .filter(conn => conn.localport != '443' && conn.peerport != '443')
-            .map(conn => `${conn.localaddress}:${conn.localport}-${conn.peeraddress}:${conn.peerport}-${conn.proc ? conn.proc : 'unknown'}`)
+            .map((conn: any) => `${conn.localaddress}:${conn.localport}-${conn.peeraddress}:${conn.peerport}-${conn.proc ? conn.proc : 'unknown'}`)
           setTimeout(retrieveConn.bind(this), 10 * 1000)
         })
         .catch(e => {

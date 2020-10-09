@@ -52,7 +52,7 @@ var getGroups = function(cb) {
     }, {})
 }
 
-export {
+export default {
   getUsers,
   getGroups
 }

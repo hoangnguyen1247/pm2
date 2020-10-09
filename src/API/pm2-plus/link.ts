@@ -85,14 +85,14 @@ module.exports = function(CLI) {
     if (opts && opts.axon === true && infos) {
       infos.agent_transport_axon = true
       infos.agent_transport_websocket = false
-      process.env.AGENT_TRANSPORT_AXON = true
-      process.env.AGENT_TRANSPORT_WEBSOCKET = false
+      process.env.AGENT_TRANSPORT_AXON = "true"
+      process.env.AGENT_TRANSPORT_WEBSOCKET = "false"
     }
     else if (infos) {
       infos.agent_transport_axon = false
       infos.agent_transport_websocket = true
-      process.env.AGENT_TRANSPORT_AXON = false
-      process.env.AGENT_TRANSPORT_WEBSOCKET = true
+      process.env.AGENT_TRANSPORT_AXON = "false"
+      process.env.AGENT_TRANSPORT_WEBSOCKET = "true"
     }
 
     that.link(infos, cb)

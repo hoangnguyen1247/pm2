@@ -5,7 +5,7 @@
  *
  **************************/
 
-import cst         from '../../constants.js';
+import cst         from '../../constants';
 import Common      from '../Common';
 import UX          from './UX';
 import chalk       from 'chalk';
@@ -265,7 +265,7 @@ export default function(CLI) {
     fs.readdir(path.join(__dirname, '../templates/sample-apps'), (err, items) => {
       require('async').forEach(items, (app, next) => {
         var fp = path.join(__dirname, '../templates/sample-apps', app)
-        fs.readFile(path.join(fp, 'package.json'), (err, dt) => {
+        fs.readFile(path.join(fp, 'package.json'), "utf8", (err, dt) => {
           var meta = JSON.parse(dt)
           meta.fullpath = fp
           meta.folder_name = app
@@ -725,7 +725,7 @@ export default function(CLI) {
       that.Client.executeRemote('getMonitorData', {}, function(err, list) {
         if (err) {
           console.error('Error retrieving process list: ' + err);
-          that.exitCli(conf.ERROR_EXIT);
+          that.exitCli(cst.ERROR_EXIT);
         }
 
         Monit.refresh(list);

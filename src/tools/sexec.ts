@@ -5,7 +5,7 @@ import child from 'child_process';
 
 var DEFAULT_MAXBUFFER_SIZE = 20 * 1024 * 1024;
 
-function _exec(command, options, callback?) {
+function _exec(command, options?, callback?) {
   options = options || {};
 
   if (typeof options === 'function') {

@@ -48,7 +48,7 @@ delete process.env.pm2_env;
 
   process.send = function () {
     if (process.connected)
-      original_send.apply(this, arguments);
+      return original_send.apply(this, arguments as any);
   };
 
   //send node version
@@ -75,7 +75,7 @@ delete process.env.pm2_env;
     process.argv = process.argv.concat(pm2_env.args);
 
   // stdio, including: out, err and entire (both out and err if necessary).
-  var stds = {
+  var stds: any = {
     out: outFile,
     err: errFile
   };
@@ -169,7 +169,7 @@ function exec(script, stds) {
     }
 
     process.stderr.write = (function (write) {
-      return function (string, encoding, cb) {
+      return function (string, cb) {
         var log_data = null;
 
         // Disable logs if specified
@@ -202,13 +202,15 @@ function exec(script, stds) {
           (!pm2_env.pm_log_path || Utility.checkPathIsNull(pm2_env.pm_log_path)))
           return cb ? cb() : false;
 
+          // TODO: please check this
+          const encoding = "";
         stds.std && stds.std.write && stds.std.write(log_data, encoding);
         stds.err && stds.err.write && stds.err.write(log_data, encoding, cb);
       };
     })(process.stderr.write);
 
     process.stdout.write = (function (write) {
-      return function (string, encoding, cb) {
+      return function (string, cb) {
         var log_data = null;
 
         // Disable logs if specified
@@ -240,6 +242,8 @@ function exec(script, stds) {
           (!pm2_env.pm_log_path || Utility.checkPathIsNull(pm2_env.pm_log_path)))
           return cb ? cb() : null;
 
+          // TODO: please check this
+          const encoding = "";
         stds.std && stds.std.write && stds.std.write(log_data, encoding);
         stds.out && stds.out.write && stds.out.write(log_data, encoding, cb);
       };

@@ -240,7 +240,7 @@ const Config = {
     if (possible) {
       var args = Array.prototype.slice.call(arguments);
       args.splice(0, 2, this._errMsgs[type]);
-      this._errors && this._errors.push(util.format.apply(null, args));
+      this._errors && this._errors.push(util.format.apply(null, args as any));
     }
     return possible;
   },

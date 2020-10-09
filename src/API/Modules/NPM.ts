@@ -120,8 +120,8 @@ function publish(opts, cb) {
       return cb();
 
 
-    fs.writeFile(package_file, JSON.stringify(package_json, null, 2), function (err, data) {
-      if (err) return cb(err);
+    fs.writeFile(package_file, JSON.stringify(package_json, null, 2), function () {
+      // if (err) return cb(err);
 
       Common.printOut(cst.PREFIX_MSG_MOD + 'Publishing module - %s@%s',
         package_json.name,

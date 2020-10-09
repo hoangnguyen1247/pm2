@@ -11,7 +11,7 @@ var XP_DEFAULT_PATHEXT = '.com;.exe;.bat;.cmd;.vbs;.vbe;.js;.jse;.wsf;.wsh';
 var FILE_EXECUTABLE_MODE = 1;
 
 function statFollowLinks(pathName) {
-  return fs.statSync.apply(fs, arguments);
+  return fs.statSync.apply(fs, arguments as any);
 }
 
 function isWindowsPlatform() {

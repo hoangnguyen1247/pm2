@@ -46,8 +46,8 @@ const main = async (options: any = {}) => {
 	// Filter out inconsistencies as there might be race
 	// issues due to differences in `ps` between the spawns
 	return Object.entries(ret)
-		.filter(([, value]) => value.comm && value.args && value.ppid && value.uid && value['%cpu'] && value['%mem'])
-		.map(([key, value]) => ({
+		.filter(([, value]: any) => value.comm && value.args && value.ppid && value.uid && value['%cpu'] && value['%mem'])
+		.map(([key, value]: any) => ({
 			pid: Number.parseInt(key, 10),
 			name: path.basename(value.comm),
 			cmd: value.args,
@@ -58,6 +58,4 @@ const main = async (options: any = {}) => {
 		}));
 };
 
-module.exports = process.platform === 'win32' ? windows : main;
-// TODO: remove this in the next major version
-module.exports.default = module.exports;
+export default process.platform === 'win32' ? windows : main;

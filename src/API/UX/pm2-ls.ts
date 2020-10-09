@@ -2,10 +2,10 @@
 import cst from '../../../constants';
 import Common from '../../Common';
 import Configuration from '../../Configuration';
-import UxHelpers from './helpers.js';
+import UxHelpers from './helpers';
 import chalk from 'chalk';
 import Table from 'cli-tableau';
-import Passwd from '../../tools/passwd.js';
+import Passwd from '../../tools/passwd';
 
 const List = {}
 
@@ -44,7 +44,7 @@ function listModulesAndAppsManaged(list) {
   if (list && list.length > 0)
     name_col_size = (list.reduce((p, c) => (p.name.length > c.name.length) ? p : c)).name.length + 5
 
-  var app_head = {
+  var app_head: any = {
     id: 5,
     name: name_col_size,
     namespace: 13,
@@ -60,7 +60,7 @@ function listModulesAndAppsManaged(list) {
     watching: 10
   }
 
-  var mod_head = {
+  var mod_head: any = {
     id: 4,
     module: 39,
     version: 20,
@@ -288,7 +288,7 @@ function listModulesAndAppsManaged(list) {
 function containersListing(sys_infos) {
   var stacked_docker = (process.stdout.columns || 100) < 140
 
-  var docker_head = {
+  var docker_head: any = {
     id: 4,
     image: 50,
     status: 10,
@@ -424,7 +424,7 @@ function miniMonitBar(sys_infos) {
     sys_infos.storage.filesystems.forEach(fs => {
       disk_nb++
       var perc_used = ((fs.used / fs.size) * 100).toFixed()
-      if (perc_used > 60)
+      if (+perc_used > 60)
         sys_summary_line += `${chalk.grey(fs.fs)} ${UxHelpers.colorizedMetric(perc_used, 80, 90, '%')} `
     })
   }

@@ -14,31 +14,36 @@
  *
  ******************************/
 
-var cluster       = require('cluster');
-var numCPUs       = require('os').cpus() ? require('os').cpus().length : 1;
-var path          = require('path');
-var EventEmitter2 = require('eventemitter2').EventEmitter2;
-var fs            = require('fs');
-var vizion        = require('vizion');
-var debug         = require('debug')('pm2:god');
-var Utility       = require('./Utility');
-var cst           = require('../constants.js');
-var timesLimit    = require('async/timesLimit');
-var Configuration = require('./Configuration.js');
-var semver        = require('semver');
+import cluster       from 'cluster';
+import os       from 'os';
+import path          from 'path';
+import { EventEmitter2 } from 'eventemitter2';
+import fs            from 'fs';
+import vizion        from 'vizion';
+import debugLogger         from 'debug';
+import Utility       from './Utility';
+import cst           from '../constants.js';
+import timesLimit    from 'async/timesLimit';
+import Configuration from './Configuration';
+import semver        from 'semver';
+
+const numCPUs = os.cpus() ? os.cpus().length : 1;
+const debug = debugLogger('pm2:god');
 
 /**
  * Override cluster module configuration
  */
 if (semver.lt(process.version, '10.0.0')) {
   cluster.setupMaster({
-    windowsHide: true,
+    // TODO: please check this
+    // windowsHide: true,
     exec : path.resolve(path.dirname(module.filename), 'ProcessContainerLegacy.js')
   });
 }
 else {
   cluster.setupMaster({
-    windowsHide: true,
+    // TODO: please check this
+    // windowsHide: true,
     exec : path.resolve(path.dirname(module.filename), 'ProcessContainer.js')
   });
 }
@@ -46,7 +51,7 @@ else {
 /**
  * Expose God
  */
-var God = module.exports = {
+var God: any = {
   next_id : 0,
   clusters_db : {},
   configuration: {},
@@ -610,3 +615,5 @@ God.launchSysMonitoring = function(env, cb) {
 }
 
 God.init()
+
+export default God;

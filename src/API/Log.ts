@@ -34,12 +34,13 @@ Log.tail = function(apps_list, lines, raw, callback) {
     var chunk = '';
     var size = Math.max(0, fs.statSync(filename).size - (lines * 200));
 
+    let chunkArr;
     var fd = fs.createReadStream(filename, {start : size});
     fd.on('data', function(data) { chunk += data.toString(); });
     fd.on('end', function() {
-      chunk = chunk.split('\n').slice(-(lines+1));
-      chunk.pop();
-      callback(chunk);
+      chunkArr = chunk.split('\n').slice(-(lines+1));
+      chunkArr.pop();
+      callback(chunkArr);
     });
   };
 
@@ -87,7 +88,7 @@ Log.stream = function(Client, id, raw, timestamp, exclusive, highlight) {
   Client.launchBus(function(err, bus, socket) {
 
     socket.on('reconnect attempt', function() {
-      if (global._auto_exit === true) {
+      if ((global as any)._auto_exit === true) {
         if (timestamp)
           process.stdout.write(chalk['dim'](chalk.grey(dayjs().format(timestamp) + ' ')));
         process.stdout.write(chalk.blue(pad(DEFAULT_PADDING, 'PM2') + ' | ') + '[[[ Target PM2 killed. ]]]');
@@ -301,7 +302,7 @@ Log.formatStream = function(Client, id, raw, timestamp, exclusive, highlight) {
   });
 };
 
-function pad(pad, str, padLeft) {
+function pad(pad, str, padLeft?) {
   if (typeof str === 'undefined')
     return pad;
   if (padLeft) {
