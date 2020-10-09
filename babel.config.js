@@ -1,4 +1,4 @@
-module.exports = {    
+module.exports = {
     "ignore": [
         "node_modules",
         "build"
@@ -22,7 +22,8 @@ module.exports = {
                 "src": ["./src/"],
                 "server": ["./server/"]
             }
-        }]
+        }],
+        "@babel/plugin-transform-runtime"
     ],
     "sourceMaps": "inline"
 }

@@ -1,7 +1,7 @@
 {
   "name": "pm2t",
   "preferGlobal": true,
-  "version": "4.5.4",
+  "version": "4.5.5",
   "engines": {
     "node": ">=8.10.0"
   },
@@ -207,6 +207,7 @@
   "devDependencies": {
     "@babel/cli": "^7.11.6",
     "@babel/core": "^7.11.6",
+    "@babel/plugin-transform-runtime": "^7.11.5",
     "@babel/preset-env": "^7.11.5",
     "@babel/preset-typescript": "^7.10.4",
     "@types/node": "^14.11.8",
