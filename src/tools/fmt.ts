@@ -13,49 +13,49 @@ import util from 'util';
 
 // --------------------------------------------------------------------------------------------------------------------
 
-var sep  = '===============================================================================';
-var line = '-------------------------------------------------------------------------------';
-var field = '                    ';
+var sepC  = '===============================================================================';
+var lineC = '-------------------------------------------------------------------------------';
+var fieldC = '                    ';
 
 // --------------------------------------------------------------------------------------------------------------------
 
 // separator
-module.exports.separator = function() {
-    console.log(sep);
+export const separator = function() {
+    console.log(sepC);
 };
 
 // alias the above
-module.exports.sep = module.exports.separator;
+export const sep = separator;
 
 // line
-module.exports.line = function() {
-    console.log(line);
+export const line = function() {
+    console.log(lineC);
 };
 
 // title
-module.exports.title = function(title) {
+export const title = function(title) {
     var out = '--- ' + title + ' ';
-    out += line.substr(out.length);
+    out += lineC.substr(out.length);
     console.log(out);
 };
 
 // field
-module.exports.field = function(key, value) {
-    console.log('' + key + field.substr(key.length) + ' : ' + value);
+export const field = function(key, value) {
+    console.log('' + key + fieldC.substr(key.length) + ' : ' + value);
 };
 
 // subfield
-module.exports.subfield = function(key, value) {
-    console.log('- ' + key + field.substr(key.length + 2) + ' : ' + value);
+export const subfield = function(key, value) {
+    console.log('- ' + key + fieldC.substr(key.length + 2) + ' : ' + value);
 };
 
 // list item
-module.exports.li = function(msg) {
+export const li = function(msg) {
     console.log('* ' + msg);
 };
 
 // dump
-module.exports.dump = function(data, name) {
+export const dump = function(data, name) {
     if ( name ) {
         console.log(name + ' :', util.inspect(data, false, null, true));
     }
@@ -65,7 +65,7 @@ module.exports.dump = function(data, name) {
 };
 
 // msg
-module.exports.msg = function(msg) {
+export const msg = function(msg) {
     console.log(msg);
 };
 

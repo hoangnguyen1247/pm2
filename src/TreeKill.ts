@@ -105,7 +105,7 @@ function buildProcessTree (parentPid, tree, pidsToProcess, spawnChildProcessesLi
       return cb();
 
     pids.forEach(function (pid) {
-      pid = parseInt(pid, 10);
+      pid = parseInt(pid, 10) + "";
       tree[parentPid].push(pid);
       tree[pid] = [];
       pidsToProcess[pid] = 1;

@@ -24,7 +24,7 @@ import Config from './tools/Config';
 import pkg from '../package.json';
 import which from './tools/which';
 
-var Common = module.exports;
+const Common: any = {};
 
 function homedir() {
   var env = process.env;
@@ -69,7 +69,7 @@ Common.determineSilentCLI = function () {
         console[key] = function () { };
       }
     }
-    process.env.PM2_DISCRETE_MODE = true;
+    process.env.PM2_DISCRETE_MODE = "true";
   }
 }
 
@@ -168,7 +168,7 @@ Common.prepareAppConf = function (opts, app) {
    */
   if (app.disable_source_map_support != true) {
     try {
-      fs.accessSync(app.pm_exec_path + '.map', fs.R_OK);
+      fs.accessSync(app.pm_exec_path + '.map', fs.constants.R_OK);
       app.source_map_support = true;
     } catch (e) { }
     delete app.disable_source_map_support;
@@ -209,7 +209,7 @@ Common.prepareAppConf = function (opts, app) {
   app.env = [
     {}, (app.filter_env && app.filter_env.length > 0) ? filterEnv(process.env) : env, app.env || {}
   ].reduce(function (e1, e2) {
-    return util._extend(e1, e2);
+    return util.inherits(e1, e2);
   });
 
   app.pm_cwd = cwd;
@@ -589,19 +589,19 @@ Common.mergeEnvironmentVariables = function (app_env, env_name, deploy_conf) {
   /**
    * Extra configuration update
    */
-  util._extend(new_conf, app)
+  util.inherits(new_conf, app)
 
   if (env_name) {
     // First merge variables from deploy.production.env object as least priority.
     if (deploy_conf && deploy_conf[env_name] && deploy_conf[env_name]['env']) {
-      util._extend(new_conf.env, deploy_conf[env_name]['env']);
+      util.inherits(new_conf.env, deploy_conf[env_name]['env']);
     }
 
-    util._extend(new_conf.env, app.env);
+    util.inherits(new_conf.env, app.env);
 
     // Then, last and highest priority, merge the app.env_production object.
     if ('env_' + env_name in app) {
-      util._extend(new_conf.env, app['env_' + env_name]);
+      util.inherits(new_conf.env, app['env_' + env_name]);
     }
     else {
       Common.printOut(cst.PREFIX_MSG_WARNING + chalk.bold('Environment [%s] is not defined in process file'), env_name);
@@ -610,12 +610,12 @@ Common.mergeEnvironmentVariables = function (app_env, env_name, deploy_conf) {
 
   delete new_conf.exec_mode
 
-  var res = {
+  var res: any = {
     current_conf: {}
   }
 
-  util._extend(res, new_conf.env)
-  util._extend(res.current_conf, new_conf)
+  util.inherits(res, new_conf.env)
+  util.inherits(res.current_conf, new_conf)
 
   // #2541 force resolution of node interpreter
   if (app.exec_interpreter &&
@@ -826,7 +826,7 @@ Common.verifyConfs = function (appConfs) {
     /**
      * Now validation configuration
      */
-    var ret = Config.validateJSON(app);
+    var ret: any = Config.validateJSON(app);
     if (ret.errors && ret.errors.length > 0) {
       ret.errors.forEach(function (err) { warn(err) });
       return new Error(ret.errors);
@@ -884,3 +884,5 @@ Common.renderApplicationName = function (conf) {
 function warn(warning) {
   Common.printOut(cst.PREFIX_MSG_WARNING + warning);
 }
+
+export default Common;

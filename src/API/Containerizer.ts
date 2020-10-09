@@ -3,7 +3,7 @@ import { spawn } from 'child_process';
 import { exec }    from 'child_process';
 import chalk   from 'chalk';
 import util    from 'util';
-import fmt     from '../tools/fmt.js';
+import * as fmt     from '../tools/fmt.js';
 import fs      from 'fs';
 import path    from 'path';
 import cst     from '../../constants.js';

@@ -4,33 +4,35 @@
  * can be found in the LICENSE file.
  */
 
-var debug          = require('debug')('pm2:client');
-var Common         = require('./Common.js');
-var KMDaemon       = require('@pm2/agent/src/InteractorClient');
-var rpc            = require('pm2-axon-rpc');
-var forEach        = require('async/forEach');
-var axon           = require('pm2-axon');
-var util           = require('util');
-var fs             = require('fs');
-var path           = require('path');
-var pkg            = require('../package.json');
-var which          = require('./tools/which.js');
+import debugLogger from 'debug';
+import Common from './Common.js';
+import KMDaemon from '@pm2/agent/src/InteractorClient';
+import rpc from 'pm2-axon-rpc';
+import forEach from 'async/forEach';
+import axon from 'pm2-axon';
+import util from 'util';
+import fs from 'fs';
+import path from 'path';
+import pkg from '../package.json';
+import which from './tools/which';
 
-function noop() {}
+const debug = debugLogger('pm2:client');
 
-var Client = module.exports = function(opts) {
+function noop() { }
+
+var Client = module.exports = function (opts) {
   if (!opts) opts = {};
 
   if (!opts.conf)
     this.conf = require('../constants.js');
   else {
-    this.conf     = opts.conf;
+    this.conf = opts.conf;
   }
 
-  this.daemon_mode = typeof(opts.daemon_mode) === 'undefined' ? true : opts.daemon_mode;
-  this.pm2_home    = this.conf.PM2_ROOT_PATH;
-  this.secret_key   = opts.secret_key;
-  this.public_key   = opts.public_key;
+  this.daemon_mode = typeof (opts.daemon_mode) === 'undefined' ? true : opts.daemon_mode;
+  this.pm2_home = this.conf.PM2_ROOT_PATH;
+  this.secret_key = opts.secret_key;
+  this.public_key = opts.public_key;
   this.machine_name = opts.machine_name;
 
   // Create all folders and files needed
@@ -45,18 +47,18 @@ var Client = module.exports = function(opts) {
 
 // @breaking change (noDaemonMode has been drop)
 // @todo ret err
-Client.prototype.start = function(cb) {
+Client.prototype.start = function (cb) {
   var that = this;
 
-  this.pingDaemon(function(daemonAlive) {
+  this.pingDaemon(function (daemonAlive) {
     if (daemonAlive === true)
-      return that.launchRPC(function(err, meta) {
+      return that.launchRPC(function (err, meta) {
         return cb(null, {
-          daemon_mode      : that.conf.daemon_mode,
-          new_pm2_instance : false,
-          rpc_socket_file  : that.rpc_socket_file,
-          pub_socket_file  : that.pub_socket_file,
-          pm2_home         : that.pm2_home
+          daemon_mode: that.conf.daemon_mode,
+          new_pm2_instance: false,
+          rpc_socket_file: that.rpc_socket_file,
+          pub_socket_file: that.pub_socket_file,
+          pm2_home: that.pm2_home
         });
       });
 
@@ -64,34 +66,34 @@ Client.prototype.start = function(cb) {
      * No Daemon mode
      */
     if (that.daemon_mode === false) {
-      var Daemon         = require('./Daemon.js');
+      var Daemon = require('./Daemon.js');
 
       var daemon = new Daemon({
-        pub_socket_file : that.conf.DAEMON_PUB_PORT,
-        rpc_socket_file : that.conf.DAEMON_RPC_PORT,
-        pid_file        : that.conf.PM2_PID_FILE_PATH,
-        ignore_signals  : true
+        pub_socket_file: that.conf.DAEMON_PUB_PORT,
+        rpc_socket_file: that.conf.DAEMON_RPC_PORT,
+        pid_file: that.conf.PM2_PID_FILE_PATH,
+        ignore_signals: true
       });
 
       console.log('Launching in no daemon mode');
 
-      daemon.innerStart(function() {
+      daemon.innerStart(function () {
         KMDaemon.launchAndInteract(that.conf, {
-          machine_name : that.machine_name,
-          public_key   : that.public_key,
-          secret_key   : that.secret_key,
-          pm2_version  : pkg.version
-        }, function(err, data, interactor_proc) {
+          machine_name: that.machine_name,
+          public_key: that.public_key,
+          secret_key: that.secret_key,
+          pm2_version: pkg.version
+        }, function (err, data, interactor_proc) {
           that.interactor_process = interactor_proc;
         });
 
-        that.launchRPC(function(err, meta) {
+        that.launchRPC(function (err, meta) {
           return cb(null, {
-            daemon_mode      : that.conf.daemon_mode,
-            new_pm2_instance : true,
-            rpc_socket_file  : that.rpc_socket_file,
-            pub_socket_file  : that.pub_socket_file,
-            pm2_home         : that.pm2_home
+            daemon_mode: that.conf.daemon_mode,
+            new_pm2_instance: true,
+            rpc_socket_file: that.rpc_socket_file,
+            pub_socket_file: that.pub_socket_file,
+            pm2_home: that.pm2_home
           });
         });
       });
@@ -101,7 +103,7 @@ Client.prototype.start = function(cb) {
     /**
      * Daemon mode
      */
-    that.launchDaemon(function(err, child) {
+    that.launchDaemon(function (err, child) {
       if (err) {
         Common.printError(err);
         return cb ? cb(err) : process.exit(that.conf.ERROR_EXIT);
@@ -110,13 +112,13 @@ Client.prototype.start = function(cb) {
       if (!process.env.PM2_DISCRETE_MODE)
         Common.printOut(that.conf.PREFIX_MSG + 'PM2 Successfully daemonized');
 
-      that.launchRPC(function(err, meta) {
+      that.launchRPC(function (err, meta) {
         return cb(null, {
-          daemon_mode      : that.conf.daemon_mode,
-          new_pm2_instance : true,
-          rpc_socket_file  : that.rpc_socket_file,
-          pub_socket_file  : that.pub_socket_file,
-          pm2_home         : that.pm2_home
+          daemon_mode: that.conf.daemon_mode,
+          new_pm2_instance: true,
+          rpc_socket_file: that.rpc_socket_file,
+          pub_socket_file: that.pub_socket_file,
+          pm2_home: that.pm2_home
         });
       });
     });
@@ -163,7 +165,7 @@ Client.prototype.initFileStructure = function (opts) {
   if (process.env.PM2_DISCRETE_MODE) {
     try {
       fs.writeFileSync(path.join(opts.PM2_HOME, 'touch'), Date.now().toString());
-    } catch(e) {
+    } catch (e) {
       debug(e.stack || e);
     }
   }
@@ -181,19 +183,19 @@ Client.prototype.initFileStructure = function (opts) {
     console.log(dt.toString());
     try {
       fs.writeFileSync(path.join(opts.PM2_HOME, 'touch'), Date.now().toString());
-    } catch(e) {
+    } catch (e) {
       debug(e.stack || e);
     }
   }
 };
 
-Client.prototype.close = function(cb) {
+Client.prototype.close = function (cb) {
   var that = this;
 
   forEach([
     that.disconnectRPC.bind(that),
     that.disconnectBus.bind(that)
-  ], function(fn, next) {
+  ], function (fn, next) {
     fn(next)
   }, cb);
 };
@@ -206,11 +208,11 @@ Client.prototype.close = function(cb) {
  * @param {Object} opts
  * @param {Object} [opts.interactor=true] allow to disable interaction on launch
  */
-Client.prototype.launchDaemon = function(opts, cb) {
-  if (typeof(opts) == 'function') {
+Client.prototype.launchDaemon = function (opts, cb) {
+  if (typeof (opts) == 'function') {
     cb = opts;
     opts = {
-      interactor : true
+      interactor: true
     };
   }
 
@@ -226,7 +228,7 @@ Client.prototype.launchDaemon = function(opts, cb) {
   // }
   // else {
   out = fs.openSync(that.conf.PM2_LOG_FILE_PATH, 'a'),
-  err = fs.openSync(that.conf.PM2_LOG_FILE_PATH, 'a');
+    err = fs.openSync(that.conf.PM2_LOG_FILE_PATH, 'a');
   //}
 
   if (this.conf.LOW_MEMORY_ENVIRONMENT) {
@@ -254,13 +256,13 @@ Client.prototype.launchDaemon = function(opts, cb) {
     interpreter = process.execPath;
 
   var child = require('child_process').spawn(interpreter, node_args, {
-    detached   : true,
-    cwd        : that.conf.cwd || process.cwd(),
-    env        : util._extend({
-      'SILENT'      : that.conf.DEBUG ? !that.conf.DEBUG : true,
-      'PM2_HOME'   : that.pm2_home
+    detached: true,
+    cwd: that.conf.cwd || process.cwd(),
+    env: util.inherits({
+      'SILENT': that.conf.DEBUG ? !that.conf.DEBUG : true,
+      'PM2_HOME': that.pm2_home
     }, process.env),
-    stdio      : ['ipc', out, err]
+    stdio: ['ipc', out, err]
   });
 
   function onError(e) {
@@ -272,7 +274,7 @@ Client.prototype.launchDaemon = function(opts, cb) {
 
   child.unref();
 
-  child.once('message', function(msg) {
+  child.once('message', function (msg) {
     debug('PM2 daemon launched with return message: ', msg);
     child.removeListener('error', onError);
     child.disconnect();
@@ -288,11 +290,11 @@ Client.prototype.launchDaemon = function(opts, cb) {
      * it has been already configured before (via pm2 link)
      */
     KMDaemon.launchAndInteract(that.conf, {
-      machine_name : that.machine_name,
-      public_key   : that.public_key,
-      secret_key   : that.secret_key,
-      pm2_version  : pkg.version
-    }, function(err, data, interactor_proc) {
+      machine_name: that.machine_name,
+      public_key: that.public_key,
+      secret_key: that.secret_key,
+      pm2_version: pkg.version
+    }, function (err, data, interactor_proc) {
       that.interactor_process = interactor_proc;
       return cb(null, child);
     });
@@ -307,26 +309,26 @@ Client.prototype.launchDaemon = function(opts, cb) {
  * @return
  */
 Client.prototype.pingDaemon = function pingDaemon(cb) {
-  var req    = axon.socket('req');
+  var req = axon.socket('req', null);
   var client = new rpc.Client(req);
   var that = this;
 
   debug('[PING PM2] Trying to connect to server');
 
-  client.sock.once('reconnect attempt', function() {
+  client.sock.once('reconnect attempt', function () {
     client.sock.close();
     debug('Daemon not launched');
-    process.nextTick(function() {
+    process.nextTick(function () {
       return cb(false);
     });
   });
 
-  client.sock.once('error', function(e) {
+  client.sock.once('error', function (e) {
     if (e.code === 'EACCES') {
-      fs.stat(that.conf.DAEMON_RPC_PORT, function(e, stats) {
+      fs.stat(that.conf.DAEMON_RPC_PORT, function (e, stats) {
         if (stats.uid === 0) {
           console.error(that.conf.PREFIX_MSG_ERR + 'Permission denied, to give access to current user:');
-          console.log('$ sudo chown ' + process.env.USER + ':' + process.env.USER + ' ' + that.conf.DAEMON_RPC_PORT +  ' ' + that.conf.DAEMON_PUB_PORT);
+          console.log('$ sudo chown ' + process.env.USER + ':' + process.env.USER + ' ' + that.conf.DAEMON_RPC_PORT + ' ' + that.conf.DAEMON_PUB_PORT);
         }
         else
           console.error(that.conf.PREFIX_MSG_ERR + 'Permission denied, check permissions on ' + that.conf.DAEMON_RPC_PORT);
@@ -338,8 +340,8 @@ Client.prototype.pingDaemon = function pingDaemon(cb) {
       console.error(e.message || e);
   });
 
-  client.sock.once('connect', function() {
-    client.sock.once('close', function() {
+  client.sock.once('connect', function () {
+    client.sock.once('close', function () {
       return cb(true);
     });
     client.sock.close();
@@ -360,20 +362,20 @@ Client.prototype.pingDaemon = function pingDaemon(cb) {
 Client.prototype.launchRPC = function launchRPC(cb) {
   var self = this;
   debug('Launching RPC client on socket file %s', this.rpc_socket_file);
-  var req      = axon.socket('req');
-  this.client  = new rpc.Client(req);
+  var req = axon.socket('req', null);
+  this.client = new rpc.Client(req);
 
-  var connectHandler = function() {
+  var connectHandler = function () {
     self.client.sock.removeListener('error', errorHandler);
     debug('RPC Connected to Daemon');
     if (cb) {
-      setTimeout(function() {
+      setTimeout(function () {
         cb(null);
       }, 4);
     }
   };
 
-  var errorHandler = function(e) {
+  var errorHandler = function (e) {
     self.client.sock.removeListener('connect', connectHandler);
     if (cb) {
       return cb(e);
@@ -395,15 +397,15 @@ Client.prototype.disconnectRPC = function disconnectRPC(cb) {
 
   if (!this.client_sock || !this.client_sock.close) {
     this.client = null;
-    return process.nextTick(function() {
+    return process.nextTick(function () {
       cb(new Error('SUB connection to PM2 is not launched'));
     });
   }
 
   if (this.client_sock.connected === false ||
-      this.client_sock.closing === true) {
+    this.client_sock.closing === true) {
     this.client = null;
-    return process.nextTick(function() {
+    return process.nextTick(function () {
       cb(new Error('RPC already being closed'));
     });
   }
@@ -411,22 +413,22 @@ Client.prototype.disconnectRPC = function disconnectRPC(cb) {
   try {
     var timer;
 
-    that.client_sock.once('close', function() {
+    that.client_sock.once('close', function () {
       clearTimeout(timer);
       that.client = null;
       debug('PM2 RPC cleanly closed');
-      return cb(null, { msg : 'RPC Successfully closed' });
+      return cb(null, { msg: 'RPC Successfully closed' });
     });
 
-    timer = setTimeout(function() {
+    timer = setTimeout(function () {
       if (that.client_sock.destroy)
         that.client_sock.destroy();
       that.client = null;
-      return cb(null, { msg : 'RPC Successfully closed via timeout' });
+      return cb(null, { msg: 'RPC Successfully closed via timeout' });
     }, 200);
 
     that.client_sock.close();
-  } catch(e) {
+  } catch (e) {
     debug('Error while disconnecting RPC PM2', e.stack || e);
     return cb(e);
   }
@@ -435,10 +437,10 @@ Client.prototype.disconnectRPC = function disconnectRPC(cb) {
 
 Client.prototype.launchBus = function launchEventSystem(cb) {
   var self = this;
-  this.sub = axon.socket('sub-emitter');
+  this.sub = axon.socket('sub-emitter', null);
   this.sub_sock = this.sub.connect(this.pub_socket_file);
 
-  this.sub_sock.once('connect', function() {
+  this.sub_sock.once('connect', function () {
     return cb(null, self.sub, self.sub_sock);
   });
 };
@@ -450,15 +452,15 @@ Client.prototype.disconnectBus = function disconnectBus(cb) {
 
   if (!this.sub_sock || !this.sub_sock.close) {
     that.sub = null;
-    return process.nextTick(function() {
-      cb(null, { msg : 'bus was not connected'});
+    return process.nextTick(function () {
+      cb(null, { msg: 'bus was not connected' });
     });
   }
 
   if (this.sub_sock.connected === false ||
-      this.sub_sock.closing === true) {
+    this.sub_sock.closing === true) {
     that.sub = null;
-    return process.nextTick(function() {
+    return process.nextTick(function () {
       cb(new Error('SUB connection is already being closed'));
     });
   }
@@ -466,21 +468,21 @@ Client.prototype.disconnectBus = function disconnectBus(cb) {
   try {
     var timer;
 
-    that.sub_sock.once('close', function() {
+    that.sub_sock.once('close', function () {
       that.sub = null;
       clearTimeout(timer);
       debug('PM2 PUB cleanly closed');
       return cb();
     });
 
-    timer = setTimeout(function() {
+    timer = setTimeout(function () {
       if (Client.sub_sock.destroy)
         that.sub_sock.destroy();
       return cb();
     }, 200);
 
     this.sub_sock.close();
-  } catch(e) {
+  } catch (e) {
     return cb(e);
   }
 };
@@ -524,7 +526,7 @@ Client.prototype.executeRemote = function executeRemote(method, app_conf, fn) {
   }
 
   if (!this.client || !this.client.call) {
-    this.start(function(error) {
+    this.start(function (error) {
       if (error) {
         if (fn)
           return fn(error);
@@ -542,12 +544,12 @@ Client.prototype.executeRemote = function executeRemote(method, app_conf, fn) {
   return this.client.call(method, app_conf, fn);
 };
 
-Client.prototype.notifyGod = function(action_name, id, cb) {
+Client.prototype.notifyGod = function (action_name, id, cb) {
   this.executeRemote('notifyByProcessId', {
-    id : id,
-    action_name : action_name,
-    manually : true
-  }, function() {
+    id: id,
+    action_name: action_name,
+    manually: true
+  }, function () {
     debug('God notified');
     return cb ? cb() : false;
   });
@@ -558,14 +560,14 @@ Client.prototype.killDaemon = function killDaemon(fn) {
   var that = this;
 
   function quit() {
-    that.close(function() {
-      return fn ? fn(null, {success:true}) : false;
+    that.close(function () {
+      return fn ? fn(null, { success: true }) : false;
     });
   }
 
   // under unix, we listen for signal (that is send by daemon to notify us that its shuting down)
-  if (process.platform !== 'win32' && process.platform !== 'win64') {
-    process.once('SIGQUIT', function() {
+  if (process.platform !== 'win32') {
+    process.once('SIGQUIT', function () {
       debug('Received SIGQUIT from pm2 daemon');
       clearTimeout(timeout);
       quit();
@@ -573,8 +575,8 @@ Client.prototype.killDaemon = function killDaemon(fn) {
   }
   else {
     // if under windows, try to ping the daemon to see if it still here
-    setTimeout(function() {
-      that.pingDaemon(function(alive) {
+    setTimeout(function () {
+      that.pingDaemon(function (alive) {
         if (!alive) {
           clearTimeout(timeout);
           return quit();
@@ -583,12 +585,12 @@ Client.prototype.killDaemon = function killDaemon(fn) {
     }, 250)
   }
 
-  timeout = setTimeout(function() {
+  timeout = setTimeout(function () {
     quit();
   }, 3000);
 
   // Kill daemon
-  this.executeRemote('killMe', {pid : process.pid});
+  this.executeRemote('killMe', { pid: process.pid });
 };
 
 
@@ -601,7 +603,7 @@ Client.prototype.killDaemon = function killDaemon(fn) {
  */
 Client.prototype.toggleWatch = function toggleWatch(method, env, fn) {
   debug('Calling toggleWatch');
-  this.client.call('toggleWatch', method, env, function() {
+  this.client.call('toggleWatch', method, env, function () {
     return fn ? fn() : false;
   });
 };
@@ -615,7 +617,7 @@ Client.prototype.toggleWatch = function toggleWatch(method, env, fn) {
  */
 Client.prototype.startWatch = function restartWatch(method, env, fn) {
   debug('Calling startWatch');
-  this.client.call('startWatch', method, env, function() {
+  this.client.call('startWatch', method, env, function () {
     return fn ? fn() : false;
   });
 };
@@ -629,15 +631,15 @@ Client.prototype.startWatch = function restartWatch(method, env, fn) {
  */
 Client.prototype.stopWatch = function stopWatch(method, env, fn) {
   debug('Calling stopWatch');
-  this.client.call('stopWatch', method, env, function() {
+  this.client.call('stopWatch', method, env, function () {
     return fn ? fn() : false;
   });
 };
 
-Client.prototype.getAllProcess = function(cb) {
+Client.prototype.getAllProcess = function (cb) {
   var found_proc = [];
 
-  this.executeRemote('getMonitorData', {}, function(err, procs) {
+  this.executeRemote('getMonitorData', {}, function (err, procs) {
     if (err) {
       Common.printError('Error retrieving process list: ' + err);
       return cb(err);
@@ -647,10 +649,10 @@ Client.prototype.getAllProcess = function(cb) {
   });
 };
 
-Client.prototype.getAllProcessId = function(cb) {
+Client.prototype.getAllProcessId = function (cb) {
   var found_proc = [];
 
-  this.executeRemote('getMonitorData', {}, function(err, procs) {
+  this.executeRemote('getMonitorData', {}, function (err, procs) {
     if (err) {
       Common.printError('Error retrieving process list: ' + err);
       return cb(err);
@@ -660,42 +662,42 @@ Client.prototype.getAllProcessId = function(cb) {
   });
 };
 
-Client.prototype.getAllProcessIdWithoutModules = function(cb) {
+Client.prototype.getAllProcessIdWithoutModules = function (cb) {
   var found_proc = [];
 
-  this.executeRemote('getMonitorData', {}, function(err, procs) {
+  this.executeRemote('getMonitorData', {}, function (err, procs) {
     if (err) {
       Common.printError('Error retrieving process list: ' + err);
       return cb(err);
     }
 
     var proc_ids = procs
-        .filter(proc => !proc.pm2_env.pmx_module)
-        .map(proc => proc.pm_id)
+      .filter(proc => !proc.pm2_env.pmx_module)
+      .map(proc => proc.pm_id)
 
     return cb(null, proc_ids);
   });
 };
 
-Client.prototype.getProcessIdByName = function(name, force_all, cb) {
-  var found_proc   = [];
+Client.prototype.getProcessIdByName = function (name, force_all, cb) {
+  var found_proc = [];
   var full_details = {};
 
-  if (typeof(cb) === 'undefined') {
+  if (typeof (cb) === 'undefined') {
     cb = force_all;
     force_all = false;
   }
 
-  if (typeof(name) == 'number')
+  if (typeof (name) == 'number')
     name = name.toString();
 
-  this.executeRemote('getMonitorData', {}, function(err, list) {
+  this.executeRemote('getMonitorData', {}, function (err, list) {
     if (err) {
       Common.printError('Error retrieving process list: ' + err);
       return cb(err);
     }
 
-    list.forEach(function(proc) {
+    list.forEach(function (proc) {
       if (proc.pm2_env.name == name || proc.pm2_env.pm_exec_path == path.resolve(name)) {
         found_proc.push(proc.pm_id);
         full_details[proc.pm_id] = proc;
@@ -706,25 +708,25 @@ Client.prototype.getProcessIdByName = function(name, force_all, cb) {
   });
 };
 
-Client.prototype.getProcessIdsByNamespace = function(namespace, force_all, cb) {
-  var found_proc   = [];
+Client.prototype.getProcessIdsByNamespace = function (namespace, force_all, cb) {
+  var found_proc = [];
   var full_details = {};
 
-  if (typeof(cb) === 'undefined') {
+  if (typeof (cb) === 'undefined') {
     cb = force_all;
     force_all = false;
   }
 
-  if (typeof(namespace) == 'number')
+  if (typeof (namespace) == 'number')
     namespace = namespace.toString();
 
-  this.executeRemote('getMonitorData', {}, function(err, list) {
+  this.executeRemote('getMonitorData', {}, function (err, list) {
     if (err) {
       Common.printError('Error retrieving process list: ' + err);
       return cb(err);
     }
 
-    list.forEach(function(proc) {
+    list.forEach(function (proc) {
       if (proc.pm2_env.namespace == namespace) {
         found_proc.push(proc.pm_id);
         full_details[proc.pm_id] = proc;
@@ -735,18 +737,18 @@ Client.prototype.getProcessIdsByNamespace = function(namespace, force_all, cb) {
   });
 };
 
-Client.prototype.getProcessByName = function(name, cb) {
+Client.prototype.getProcessByName = function (name, cb) {
   var found_proc = [];
 
-  this.executeRemote('getMonitorData', {}, function(err, list) {
+  this.executeRemote('getMonitorData', {}, function (err, list) {
     if (err) {
       Common.printError('Error retrieving process list: ' + err);
       return cb(err);
     }
 
-    list.forEach(function(proc) {
+    list.forEach(function (proc) {
       if (proc.pm2_env.name == name ||
-          proc.pm2_env.pm_exec_path == path.resolve(name)) {
+        proc.pm2_env.pm_exec_path == path.resolve(name)) {
         found_proc.push(proc);
       }
     });

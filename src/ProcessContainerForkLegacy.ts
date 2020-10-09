@@ -32,6 +32,6 @@ else
 
 // Change some values to make node think that the user's application
 // was started directly such as `node app.js`
-process.mainModule = process.mainModule || {};
+process.mainModule = process.mainModule || {} as any;
 process.mainModule.loaded = false;
 require.main = process.mainModule;

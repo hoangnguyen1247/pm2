@@ -9,14 +9,14 @@
  * - pid
  */
 
-import p       from 'path';
-import cst     from '../constants';
-import Utility from './Utility.js';
+import p from 'path';
+import cst from '../constants';
+import Utility from './Utility';
 import ProcessUtils from './ProcessUtils';
 
 // Load all env-vars from master.
 var pm2_env = JSON.parse(process.env.pm2_env);
-for(var k in pm2_env) {
+for (var k in pm2_env) {
   process.env[k] = pm2_env[k];
 }
 
@@ -29,24 +29,24 @@ delete process.env.pm2_env;
  * Main entrance to wrap the desired code
  */
 (function ProcessContainer() {
-  var fs          = require('fs');
+  var fs = require('fs');
 
   ProcessUtils.injectModules()
 
-  var stdFile     = pm2_env.pm_log_path;
-  var outFile     = pm2_env.pm_out_log_path;
-  var errFile     = pm2_env.pm_err_log_path;
-  var pidFile     = pm2_env.pm_pid_path;
-  var script      = pm2_env.pm_exec_path;
+  var stdFile = pm2_env.pm_log_path;
+  var outFile = pm2_env.pm_out_log_path;
+  var errFile = pm2_env.pm_err_log_path;
+  var pidFile = pm2_env.pm_pid_path;
+  var script = pm2_env.pm_exec_path;
 
   var original_send = process.send;
 
-  if (typeof(process.env.source_map_support) != 'undefined' &&
-      process.env.source_map_support !== 'false') {
+  if (typeof (process.env.source_map_support) != 'undefined' &&
+    process.env.source_map_support !== 'false') {
     require('source-map-support').install();
   }
 
-  process.send = function() {
+  process.send = function () {
     if (process.connected)
       original_send.apply(this, arguments);
   };
@@ -88,8 +88,8 @@ delete process.env.pm2_env;
         process.setuid(pm2_env.uid);
       if (process.env.gid)
         process.setgid(pm2_env.gid);
-    } catch(e) {
-      setTimeout(function() {
+    } catch (e) {
+      setTimeout(function () {
         console.error('%s on call %s', e.message, e.syscall);
         console.error('%s is not accessible', pm2_env.uid);
         return process.exit(1);
@@ -134,8 +134,8 @@ function exec(script, stds) {
 
   process.on('message', function (msg) {
     if (msg.type === 'log:reload') {
-      for (var k in stds){
-        if (typeof stds[k] == 'object' && !isNaN(stds[k].fd)){
+      for (var k in stds) {
+        if (typeof stds[k] == 'object' && !isNaN(stds[k].fd)) {
           if (stds[k].destroy) stds[k].destroy();
           else if (stds[k].end) stds[k].end();
           else if (stds[k].close) stds[k].close();
@@ -158,8 +158,8 @@ function exec(script, stds) {
   Utility.startLogging(stds, function (err) {
     if (err) {
       process.send({
-        type    : 'process:exception',
-        data    : {
+        type: 'process:exception',
+        data: {
           message: err.message,
           syscall: 'ProcessContainer.startLogging'
         }
@@ -168,8 +168,8 @@ function exec(script, stds) {
       return;
     }
 
-    process.stderr.write = (function(write) {
-      return function(string, encoding, cb) {
+    process.stderr.write = (function (write) {
+      return function (string, encoding, cb) {
         var log_data = null;
 
         // Disable logs if specified
@@ -179,12 +179,12 @@ function exec(script, stds) {
 
         if (pm2_env.log_type && pm2_env.log_type === 'json') {
           log_data = JSON.stringify({
-            message : string.toString(),
-            timestamp : pm2_env.log_date_format && dayjs ?
+            message: string.toString(),
+            timestamp: pm2_env.log_date_format && dayjs ?
               dayjs().format(pm2_env.log_date_format) : new Date().toISOString(),
-            type : 'err',
-            process_id : pm2_env.pm_id,
-            app_name : pm2_env.name
+            type: 'err',
+            process_id: pm2_env.pm_id,
+            app_name: pm2_env.name
           }) + '\n';
         }
         else if (pm2_env.log_date_format && dayjs)
@@ -193,9 +193,9 @@ function exec(script, stds) {
           log_data = string.toString();
 
         process.send({
-          type : 'log:err',
-          topic : 'log:err',
-          data : log_data
+          type: 'log:err',
+          topic: 'log:err',
+          data: log_data
         });
 
         if (Utility.checkPathIsNull(pm2_env.pm_err_log_path) &&
@@ -207,8 +207,8 @@ function exec(script, stds) {
       };
     })(process.stderr.write);
 
-    process.stdout.write = (function(write) {
-      return function(string, encoding, cb) {
+    process.stdout.write = (function (write) {
+      return function (string, encoding, cb) {
         var log_data = null;
 
         // Disable logs if specified
@@ -218,12 +218,12 @@ function exec(script, stds) {
 
         if (pm2_env.log_type && pm2_env.log_type === 'json') {
           log_data = JSON.stringify({
-            message : string.toString(),
-            timestamp : pm2_env.log_date_format && dayjs ?
+            message: string.toString(),
+            timestamp: pm2_env.log_date_format && dayjs ?
               dayjs().format(pm2_env.log_date_format) : new Date().toISOString(),
-            type : 'out',
-            process_id : pm2_env.pm_id,
-            app_name : pm2_env.name
+            type: 'out',
+            process_id: pm2_env.pm_id,
+            app_name: pm2_env.name
           }) + '\n';
         }
         else if (pm2_env.log_date_format && dayjs)
@@ -232,8 +232,8 @@ function exec(script, stds) {
           log_data = string.toString();
 
         process.send({
-          type : 'log:out',
-          data : log_data
+          type: 'log:out',
+          data: log_data
         });
 
         if (Utility.checkPathIsNull(pm2_env.pm_out_log_path) &&
@@ -260,26 +260,26 @@ function exec(script, stds) {
           if (err) {
             var errObj = {};
 
-            Object.getOwnPropertyNames(err).forEach(function(key) {
+            Object.getOwnPropertyNames(err).forEach(function (key) {
               errObj[key] = err[key];
             });
           }
 
           process.send({
-            type : 'log:err',
-            topic : 'log:err',
-            data : '\n' + error + '\n'
+            type: 'log:err',
+            topic: 'log:err',
+            data: '\n' + error + '\n'
           });
           process.send({
-            type    : 'process:exception',
-            data    : errObj !== undefined ? errObj : {message: 'No error but ' + listener + ' was caught!'}
+            type: 'process:exception',
+            data: errObj !== undefined ? errObj : { message: 'No error but ' + listener + ' was caught!' }
           });
-        } catch(e) {
+        } catch (e) {
           logError(['std', 'err'], 'Channel is already closed can\'t broadcast error:\n' + e.stack);
         }
 
         if (!process.listeners(listener).filter(function (listener) {
-            return listener !== uncaughtListener;
+          return listener !== uncaughtListener;
         }).length) {
           if (listener == 'uncaughtException') {
             process.emit('disconnect');
@@ -297,13 +297,12 @@ function exec(script, stds) {
 
     require('module')._load(script, null, true);
 
-    function logError(types, error){
+    function logError(types, error) {
       try {
-        types.forEach(function(type){
+        types.forEach(function (type) {
           stds[type] && typeof stds[type].write == 'function' && stds[type].write(error + '\n');
         });
-      } catch(e) { }
+      } catch (e) { }
     }
   });
-
 }

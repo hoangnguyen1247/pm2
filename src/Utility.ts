@@ -14,7 +14,7 @@ import waterfall from 'async/waterfall';
 import util from 'util';
 import url from 'url';
 import dayjs from 'dayjs';
-import cst from '../constants.js';
+import cst from '../constants';
 import findPackageJson from './tools/find-package-json';
 
 var Utility = {
@@ -155,11 +155,11 @@ var Utility = {
     });
 
     // Create write streams.
-    (function createWS(io){
-      if(io.length != 1){
+    (function createWS(pio){
+      if(pio.length != 1){
         return false;
       }
-      io = io[0];
+      let io = pio[0];
 
       // If `std` is a Stream type, try next `std`.
       // compatible with `pm2 reloadLogs`

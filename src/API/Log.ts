@@ -9,7 +9,7 @@ import    chalk  from 'chalk';
 import    forEachLimit  from 'async/forEachLimit';
 import    dayjs from 'dayjs';
 
-var Log = module.exports = {};
+var Log: any = {};
 
 var DEFAULT_PADDING = '          ';
 
@@ -310,3 +310,5 @@ function pad(pad, str, padLeft) {
     return (str + pad).substring(0, pad.length);
   }
 }
+
+export default Log;

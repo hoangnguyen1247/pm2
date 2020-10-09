@@ -1,6 +1,6 @@
 
-import cst          from '../../../constants.js';
-import Common       from '../../Common.js';
+import cst          from '../../../constants';
+import Common       from '../../Common';
 import chalk       from 'chalk';
 import fs           from 'fs';
 import KMDaemon     from '@pm2/agent/src/InteractorClient';

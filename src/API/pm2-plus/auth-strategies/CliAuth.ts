@@ -1,21 +1,26 @@
 'use strict'
 
-const AuthStrategy = require('@pm2/js-api/src/auth_strategies/strategy')
-const querystring = require('querystring');
+import AuthStrategy  from'@pm2/js-api/src/auth_strategies/strategy'
+import querystring  from'querystring';
 
-const http = require('http')
-const fs = require('fs')
-const url = require('url')
-const exec = require('child_process').exec
-const tryEach = require('async/tryEach')
-const path = require('path')
-const os = require('os')
-const needle = require('needle')
-const chalk = require('chalk')
-const cst = require('../../../../constants.js')
-const promptly = require('promptly')
+import http  from'http'
+import fs  from'fs'
+import url  from'url'
+import exec  from'child_process'
+import tryEach  from'async/tryEach'
+import path  from'path'
+import os  from'os'
+import needle  from'needle'
+import chalk  from'chalk'
+import cst  from'../../../../constants.js'
+import promptly  from'promptly'
 
-module.exports = class CliStrategy extends AuthStrategy {
+export default class CliStrategy extends AuthStrategy {
+  authenticated: false;
+  callback: () => {};
+  km: any;
+  BASE_URI: string;
+
   // the client will try to call this but we handle this part ourselves
   retrieveTokens (km, cb) {
     this.authenticated = false

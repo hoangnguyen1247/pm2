@@ -3,22 +3,21 @@
  * Use of this source code is governed by a license that
  * can be found in the LICENSE file.
  */
+import fs from 'fs';
 
-var Configuration = module.exports = {};
+import Common from './Common';
+import eachSeries from 'async/eachSeries';
+import cst from '../constants.js';
 
-var fs            = require('fs');
-
-var Common        = require('./Common');
-var eachSeries    = require('async/eachSeries');
-var cst           = require('../constants.js');
+var Configuration: any = {};
 
 function splitKey(key) {
   var values = [key];
 
   if (key.indexOf('.') > -1)
-    values = key.match(/(?:[^."]+|"[^"]*")+/g).map(function(dt) { return dt.replace(/"/g, '') });
+    values = key.match(/(?:[^."]+|"[^"]*")+/g).map(function (dt) { return dt.replace(/"/g, '') });
   else if (key.indexOf(':') > -1)
-    values = key.match(/(?:[^:"]+|"[^"]*")+/g).map(function(dt) { return dt.replace(/"/g, '') });
+    values = key.match(/(?:[^:"]+|"[^"]*")+/g).map(function (dt) { return dt.replace(/"/g, '') });
 
   return values;
 }
@@ -27,8 +26,8 @@ function serializeConfiguration(json_conf) {
   return JSON.stringify(json_conf, null, 4)
 }
 
-Configuration.set = function(key, value, cb) {
-  fs.readFile(cst.PM2_MODULE_CONF_FILE, function(err, data) {
+Configuration.set = function (key, value, cb) {
+  fs.readFile(cst.PM2_MODULE_CONF_FILE, "utf8", function (err, data) {
     if (err) return cb(err);
 
     var json_conf = JSON.parse(data);
@@ -40,15 +39,15 @@ Configuration.set = function(key, value, cb) {
 
       var tmp = json_conf;
 
-      levels.forEach(function(key, index) {
-        if (index == levels.length -1)
+      levels.forEach(function (key, index) {
+        if (index == levels.length - 1)
           tmp[key] = value;
         else if (!tmp[key]) {
           tmp[key] = {};
           tmp = tmp[key];
         }
         else {
-          if (typeof(tmp[key]) != 'object')
+          if (typeof (tmp[key]) != 'object')
             tmp[key] = {};
           tmp = tmp[key];
         }
@@ -56,13 +55,13 @@ Configuration.set = function(key, value, cb) {
 
     }
     else {
-      if (json_conf[key] && typeof(json_conf[key]) === 'string')
+      if (json_conf[key] && typeof (json_conf[key]) === 'string')
         Common.printOut(cst.PREFIX_MSG + 'Replacing current value key %s by %s', key, value);
 
       json_conf[key] = value;
     }
 
-    fs.writeFile(cst.PM2_MODULE_CONF_FILE, serializeConfiguration(json_conf), function(err, data) {
+    fs.writeFile(cst.PM2_MODULE_CONF_FILE, serializeConfiguration(json_conf), function (err) {
       if (err) return cb(err);
 
       return cb(null, json_conf);
@@ -71,8 +70,8 @@ Configuration.set = function(key, value, cb) {
   });
 };
 
-Configuration.unset = function(key, cb) {
-  fs.readFile(cst.PM2_MODULE_CONF_FILE, function(err, data) {
+Configuration.unset = function (key, cb) {
+  fs.readFile(cst.PM2_MODULE_CONF_FILE, "utf8", function (err, data) {
     if (err) return cb(err);
 
     var json_conf = JSON.parse(data);
@@ -84,15 +83,15 @@ Configuration.unset = function(key, cb) {
 
       var tmp = json_conf;
 
-      levels.forEach(function(key, index) {
-        if (index == levels.length -1)
+      levels.forEach(function (key, index) {
+        if (index == levels.length - 1)
           delete tmp[key];
         else if (!tmp[key]) {
           tmp[key] = {};
           tmp = tmp[key];
         }
         else {
-          if (typeof(tmp[key]) != 'object')
+          if (typeof (tmp[key]) != 'object')
             tmp[key] = {};
           tmp = tmp[key];
         }
@@ -107,7 +106,7 @@ Configuration.unset = function(key, cb) {
     if (key === 'all')
       json_conf = {};
 
-    fs.writeFile(cst.PM2_MODULE_CONF_FILE, serializeConfiguration(json_conf), function(err, data) {
+    fs.writeFile(cst.PM2_MODULE_CONF_FILE, serializeConfiguration(json_conf), function (err) {
       if (err) return cb(err);
 
       return cb(null, json_conf);
@@ -116,10 +115,10 @@ Configuration.unset = function(key, cb) {
   });
 }
 
-Configuration.setSyncIfNotExist = function(key, value) {
+Configuration.setSyncIfNotExist = function (key, value) {
   try {
-    var conf = JSON.parse(fs.readFileSync(cst.PM2_MODULE_CONF_FILE));
-  } catch(e) {
+    var conf = JSON.parse(fs.readFileSync(cst.PM2_MODULE_CONF_FILE, "utf8"));
+  } catch (e) {
     return null;
   }
 
@@ -127,7 +126,7 @@ Configuration.setSyncIfNotExist = function(key, value) {
   var exists = false;
 
   if (values.length > 1 && conf && conf[values[0]]) {
-    exists = Object.keys(conf[values[0]]).some(function(key) {
+    exists = Object.keys(conf[values[0]]).some(function (key) {
       if (key == values[1])
         return true;
       return false;
@@ -140,10 +139,10 @@ Configuration.setSyncIfNotExist = function(key, value) {
   return null;
 };
 
-Configuration.setSync = function(key, value) {
+Configuration.setSync = function (key, value) {
   try {
-    var data = fs.readFileSync(cst.PM2_MODULE_CONF_FILE);
-  } catch(e) {
+    var data = fs.readFileSync(cst.PM2_MODULE_CONF_FILE, "utf8");
+  } catch (e) {
     return null;
   }
 
@@ -156,15 +155,15 @@ Configuration.setSync = function(key, value) {
 
     var tmp = json_conf;
 
-    levels.forEach(function(key, index) {
-      if (index == levels.length -1)
+    levels.forEach(function (key, index) {
+      if (index == levels.length - 1)
         tmp[key] = value;
       else if (!tmp[key]) {
         tmp[key] = {};
         tmp = tmp[key];
       }
       else {
-        if (typeof(tmp[key]) != 'object')
+        if (typeof (tmp[key]) != 'object')
           tmp[key] = {};
         tmp = tmp[key];
       }
@@ -172,7 +171,7 @@ Configuration.setSync = function(key, value) {
 
   }
   else {
-    if (json_conf[key] && typeof(json_conf[key]) === 'string')
+    if (json_conf[key] && typeof (json_conf[key]) === 'string')
       Common.printOut(cst.PREFIX_MSG + 'Replacing current value key %s by %s', key, value);
 
     json_conf[key] = value;
@@ -184,16 +183,16 @@ Configuration.setSync = function(key, value) {
   try {
     fs.writeFileSync(cst.PM2_MODULE_CONF_FILE, serializeConfiguration(json_conf));
     return json_conf;
-  } catch(e) {
+  } catch (e) {
     console.error(e.message);
     return null;
   }
 };
 
-Configuration.unsetSync = function(key) {
+Configuration.unsetSync = function (key) {
   try {
-    var data = fs.readFileSync(cst.PM2_MODULE_CONF_FILE);
-  } catch(e) {
+    var data = fs.readFileSync(cst.PM2_MODULE_CONF_FILE, "utf8");
+  } catch (e) {
     return null;
   }
 
@@ -206,15 +205,15 @@ Configuration.unsetSync = function(key) {
 
     var tmp = json_conf;
 
-    levels.forEach(function(key, index) {
-      if (index == levels.length -1)
+    levels.forEach(function (key, index) {
+      if (index == levels.length - 1)
         delete tmp[key];
       else if (!tmp[key]) {
         tmp[key] = {};
         tmp = tmp[key];
       }
       else {
-        if (typeof(tmp[key]) != 'object')
+        if (typeof (tmp[key]) != 'object')
           tmp[key] = {};
         tmp = tmp[key];
       }
@@ -229,29 +228,29 @@ Configuration.unsetSync = function(key) {
 
   try {
     fs.writeFileSync(cst.PM2_MODULE_CONF_FILE, serializeConfiguration(json_conf));
-  } catch(e) {
+  } catch (e) {
     console.error(e.message);
     return null;
   }
 };
 
-Configuration.multiset = function(serial, cb) {
+Configuration.multiset = function (serial, cb) {
   var arrays = [];
   serial = serial.match(/(?:[^ "]+|"[^"]*")+/g);
 
   while (serial.length > 0)
     arrays.push(serial.splice(0, 2));
 
-  eachSeries(arrays, function(el, next) {
+  eachSeries(arrays, function (el, next) {
     Configuration.set(el[0], el[1], next);
   }, cb);
 };
 
-Configuration.get = function(key, cb) {
-  Configuration.getAll(function(err, data) {
+Configuration.get = function (key, cb) {
+  Configuration.getAll(function (err, data) {
     var climb = splitKey(key);
 
-    climb.some(function(val) {
+    climb.some(function (val) {
       if (!data[val]) {
         data = null;
         return true;
@@ -260,21 +259,21 @@ Configuration.get = function(key, cb) {
       return false;
     });
 
-    if (!data) return cb({err : 'Unknown key'}, null);
+    if (!data) return cb({ err: 'Unknown key' }, null);
     return cb(null, data);
   });
 };
 
-Configuration.getSync = function(key) {
+Configuration.getSync = function (key) {
   try {
     var data = Configuration.getAllSync();
-  } catch(e) {
+  } catch (e) {
     return null;
   }
 
   var climb = splitKey(key);
 
-  climb.some(function(val) {
+  climb.some(function (val) {
     if (!data[val]) {
       data = null;
       return true;
@@ -287,18 +286,20 @@ Configuration.getSync = function(key) {
   return data;
 };
 
-Configuration.getAll = function(cb) {
-  fs.readFile(cst.PM2_MODULE_CONF_FILE, function(err, data) {
+Configuration.getAll = function (cb) {
+  fs.readFile(cst.PM2_MODULE_CONF_FILE, "utf8", function (err, data) {
     if (err) return cb(err);
     return cb(null, JSON.parse(data));
   });
 };
 
-Configuration.getAllSync = function() {
+Configuration.getAllSync = function () {
   try {
-    return JSON.parse(fs.readFileSync(cst.PM2_MODULE_CONF_FILE));
-  } catch(e) {
+    return JSON.parse(fs.readFileSync(cst.PM2_MODULE_CONF_FILE, "utf8"));
+  } catch (e) {
     console.error(e.stack || e);
     return {};
   }
 };
+
+export default Configuration;

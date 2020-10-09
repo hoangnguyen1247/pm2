@@ -80,7 +80,7 @@ const Config = {
    */
   validateJSON: function(json){
     // clone config
-    var conf = util._extend({}, json),
+    var conf: any = util.inherits({}, json),
         res = {};
     this._errors = [];
 

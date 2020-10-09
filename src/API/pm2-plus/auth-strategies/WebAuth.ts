@@ -1,16 +1,17 @@
 
 'use strict'
 
-const cst = require('../../../../constants.js');
+import cst from'../../../../constants.js';
 
-const AuthStrategy = require('@pm2/js-api/src/auth_strategies/strategy')
-const http = require('http')
-const fs = require('fs')
-const url = require('url')
-const exec = require('child_process').exec
-const async = require('async')
+import AuthStrategy from'@pm2/js-api/src/auth_strategies/strategy'
+import http from'http'
+import fs from'fs'
+import url from'url'
+import { exec } from'child_process'
+import async from'async'
 
-module.exports = class WebStrategy extends AuthStrategy {
+export default class WebStrategy extends AuthStrategy {
+
   // the client will try to call this but we handle this part ourselves
   retrieveTokens (km, cb) {
     this.authenticated = false

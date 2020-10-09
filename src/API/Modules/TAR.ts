@@ -1,24 +1,16 @@
 
-var Configuration = require('../../Configuration.js');
-var cst = require('../../../constants.js');
-var Common = require('../../Common');
-var forEachLimit  = require('async/forEachLimit');
-const sexec = require('../../tools/sexec.js')
+import Configuration from '../../Configuration';
+import cst from '../../../constants';
+import Common from '../../Common';
+import forEachLimit  from 'async/forEachLimit';
+import sexec from '../../tools/sexec'
 
-var path = require('path');
-var fs = require('fs');
-var os = require('os');
-var spawn = require('child_process').spawn;
-var exec = require('child_process').exec;
-var execSync = require('child_process').execSync;
-
-module.exports = {
-  install,
-  uninstall,
-  start,
-  publish,
-  package
-}
+import path from 'path';
+import fs from 'fs';
+import os from 'os';
+import { spawn } from 'child_process';
+import { exec } from 'child_process';
+import { execSync } from 'child_process';
 
 /**
  * Module management to manage tarball packages
@@ -177,7 +169,7 @@ function start(PM2, module_name, cb) {
     return cb()
   }
 
-  var opts = {};
+  var opts:any = {};
 
   opts.started_as_module = true
   opts.cwd = module_path
@@ -357,4 +349,12 @@ function needPrefix(conf) {
       (conf.apps.length == 1 && conf.name != conf.apps[0].name))
     return true
   return false
+}
+
+export default {
+  install,
+  uninstall,
+  start,
+  publish,
+  package
 }

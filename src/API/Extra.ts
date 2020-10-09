@@ -11,7 +11,7 @@ import UX          from './UX';
 import chalk       from 'chalk';
 import path        from 'path';
 import fs          from 'fs';
-import fmt         from '../tools/fmt';
+import * as fmt         from '../tools/fmt';
 import dayjs      from 'dayjs';
 import pkg         from '../../package.json';
 import semver    from 'semver';

@@ -10,7 +10,7 @@ var XP_DEFAULT_PATHEXT = '.com;.exe;.bat;.cmd;.vbs;.vbe;.js;.jse;.wsf;.wsh';
 // For earlier versions of NodeJS that doesn't have a list of constants (< v6)
 var FILE_EXECUTABLE_MODE = 1;
 
-function statFollowLinks() {
+function statFollowLinks(pathName) {
   return fs.statSync.apply(fs, arguments);
 }
 
@@ -56,7 +56,7 @@ function checkPath(pathName) {
 function _which(cmd) {
   if (!cmd) console.error('must specify command');
 
-  var options = {}
+  var options: any = {}
 
   var isWindows = isWindowsPlatform();
   var pathArray = splitPath(process.env.PATH);
@@ -117,4 +117,4 @@ function _which(cmd) {
   return options.all ? [] : null;
 }
 
-module.exports = _which;
+export default _which;

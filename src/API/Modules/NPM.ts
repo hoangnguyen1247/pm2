@@ -1,29 +1,19 @@
-const path          = require('path');
-const fs            = require('fs');
-const os            = require('os');
-const spawn         = require('child_process').spawn;
-const chalk         = require('chalk');
+import path from 'path';
+import fs from 'fs';
+import os from 'os';
+import { spawn } from 'child_process';
+import chalk from 'chalk';
 
-const readline = require('readline')
-const which = require('../../tools/which.js')
-const sexec = require('../../tools/sexec.js')
-const copydirSync = require('../../tools/copydirSync.js')
-const deleteFolderRecursive = require('../../tools/deleteFolderRecursive.js')
+import readline from 'readline'
+import which from '../../tools/which'
+import sexec from '../../tools/sexec'
+import copydirSync from '../../tools/copydirSync'
+import deleteFolderRecursive from '../../tools/deleteFolderRecursive'
 
-var Configuration = require('../../Configuration.js');
-var cst           = require('../../../constants.js');
-var Common        = require('../../Common');
-var Utility       = require('../../Utility.js');
-
-module.exports = {
-  install,
-  uninstall,
-  start,
-  publish,
-  generateSample,
-  localStart,
-  getModuleConf
-}
+import Configuration from '../../Configuration';
+import cst from '../../../constants';
+import Common from '../../Common';
+import Utility from '../../Utility';
 
 /**
  * PM2 Module System.
@@ -39,8 +29,8 @@ module.exports = {
 
 function localStart(PM2, opts, cb) {
   var proc_path = '',
-      cmd  = '',
-      conf = {};
+    cmd = '',
+    conf = {};
 
   Common.printOut(cst.PREFIX_MSG_MOD + 'Installing local module in DEVELOPMENT MODE with WATCH auto restart');
   proc_path = process.cwd();
@@ -48,12 +38,12 @@ function localStart(PM2, opts, cb) {
   cmd = path.join(proc_path, cst.DEFAULT_MODULE_JSON);
 
   Common.extend(opts, {
-    cmd : cmd,
-    development_mode : true,
-    proc_path : proc_path
+    cmd: cmd,
+    development_mode: true,
+    proc_path: proc_path
   });
 
-  return StartModule(PM2, opts, function(err, dt) {
+  return StartModule(PM2, opts, function (err, dt) {
     if (err) return cb(err);
     Common.printOut(cst.PREFIX_MSG_MOD + 'Module successfully installed and launched');
     return cb(null, dt);
@@ -68,16 +58,16 @@ function generateSample(app_name, cb) {
 
   function samplize(module_name) {
     var cmd1 = 'git clone https://github.com/pm2-hive/sample-module.git ' + module_name + '; cd ' + module_name + '; rm -rf .git';
-    var cmd2 = 'cd ' + module_name + ' ; sed -i "s:sample-module:'+ module_name  +':g" package.json';
+    var cmd2 = 'cd ' + module_name + ' ; sed -i "s:sample-module:' + module_name + ':g" package.json';
     var cmd3 = 'cd ' + module_name + ' ; npm install';
 
     Common.printOut(cst.PREFIX_MSG_MOD + 'Getting sample app');
 
-    sexec(cmd1, function(err) {
+    sexec(cmd1, function (err) {
       if (err) Common.printError(cst.PREFIX_MSG_MOD_ERR + err.message);
-      sexec(cmd2, function(err) {
+      sexec(cmd2, function (err) {
         console.log('');
-        sexec(cmd3, function(err) {
+        sexec(cmd3, function (err) {
           console.log('');
           Common.printOut(cst.PREFIX_MSG_MOD + 'Module sample created in folder: ', path.join(process.cwd(), module_name));
           console.log('');
@@ -94,7 +84,7 @@ function generateSample(app_name, cb) {
           console.log('');
           Common.printOut('Force restart: ');
           Common.printOut('$ pm2 restart ' + module_name);
-          return cb ?  cb() : false;
+          return cb ? cb() : false;
         });
       });
     });
@@ -102,7 +92,7 @@ function generateSample(app_name, cb) {
 
   if (app_name) return samplize(app_name);
 
-  rl.question(cst.PREFIX_MSG_MOD + "Module name: ", function(module_name) {
+  rl.question(cst.PREFIX_MSG_MOD + "Module name: ", function (module_name) {
     samplize(module_name);
   });
 }
@@ -121,29 +111,29 @@ function publish(opts, cb) {
 
   package_json.version = semver.inc(package_json.version, 'minor');
   Common.printOut(cst.PREFIX_MSG_MOD + 'Incrementing module to: %s@%s',
-                  package_json.name,
-                  package_json.version);
+    package_json.name,
+    package_json.version);
 
 
-  rl.question("Write & Publish? [Y/N]", function(answer) {
+  rl.question("Write & Publish? [Y/N]", function (answer) {
     if (answer != "Y")
       return cb();
 
 
-    fs.writeFile(package_file, JSON.stringify(package_json, null, 2), function(err, data) {
+    fs.writeFile(package_file, JSON.stringify(package_json, null, 2), function (err, data) {
       if (err) return cb(err);
 
       Common.printOut(cst.PREFIX_MSG_MOD + 'Publishing module - %s@%s',
-                      package_json.name,
-                      package_json.version);
+        package_json.name,
+        package_json.version);
 
-      sexec('npm publish', function(code) {
+      sexec('npm publish', function (code) {
         Common.printOut(cst.PREFIX_MSG_MOD + 'Module - %s@%s successfully published',
-                        package_json.name,
-                        package_json.version);
+          package_json.name,
+          package_json.version);
 
         Common.printOut(cst.PREFIX_MSG_MOD + 'Pushing module on Git');
-        sexec('git add . ; git commit -m "' + package_json.version + '"; git push origin master', function(code) {
+        sexec('git add . ; git commit -m "' + package_json.version + '"; git push origin master', function (code) {
 
           Common.printOut(cst.PREFIX_MSG_MOD + 'Installable with pm2 install %s', package_json.name);
           return cb(null, package_json);
@@ -180,17 +170,17 @@ function install(CLI, module_name, opts, cb) {
 // Builtin Node Switch
 function getNPMCommandLine(module_name, install_path) {
   if (which('npm')) {
-    return spawn.bind(this, cst.IS_WINDOWS ? 'npm.cmd' : 'npm', ['install', module_name, '--loglevel=error', '--prefix', `"${install_path}"` ], {
-      stdio : 'inherit',
+    return spawn.bind(this, cst.IS_WINDOWS ? 'npm.cmd' : 'npm', ['install', module_name, '--loglevel=error', '--prefix', `"${install_path}"`], {
+      stdio: 'inherit',
       env: process.env,
-		  shell : true
+      shell: true
     })
   }
   else {
     return spawn.bind(this, cst.BUILTIN_NODE_PATH, [cst.BUILTIN_NPM_PATH, 'install', module_name, '--loglevel=error', '--prefix', `"${install_path}"`], {
-      stdio : 'inherit',
+      stdio: 'inherit',
       env: process.env,
-		  shell : true
+      shell: true
     })
   }
 }
@@ -202,7 +192,7 @@ function continueInstall(CLI, module_name, opts, cb) {
   var install_path = path.join(cst.DEFAULT_MODULE_PATH, canonic_module_name);
 
   require('mkdirp')(install_path)
-    .then(function() {
+    .then(function () {
       process.chdir(os.homedir());
 
       var install_instance = getNPMCommandLine(module_name, install_path)();
@@ -217,7 +207,7 @@ function continueInstall(CLI, module_name, opts, cb) {
   function finalizeInstall(code) {
     if (code != 0) {
       // If install has failed, revert to previous module version
-      return Rollback.revert(CLI, module_name, function() {
+      return Rollback.revert(CLI, module_name, function () {
         return cb(new Error('Installation failed via NPM, module has been restored to prev version'));
       });
     }
@@ -232,33 +222,33 @@ function continueInstall(CLI, module_name, opts, cb) {
       var conf = JSON.parse(fs.readFileSync(package_json_path).toString()).config;
 
       if (conf) {
-        Object.keys(conf).forEach(function(key) {
+        Object.keys(conf).forEach(function (key) {
           Configuration.setSyncIfNotExist(canonic_module_name + ':' + key, conf[key]);
         });
       }
-    } catch(e) {
+    } catch (e) {
       Common.printError(e);
     }
 
     opts = Common.extend(opts, {
-      cmd : package_json_path,
-      development_mode : false,
-      proc_path : proc_path
+      cmd: package_json_path,
+      development_mode: false,
+      proc_path: proc_path
     });
 
     Configuration.set(cst.MODULE_CONF_PREFIX + ':' + canonic_module_name, {
-      uid : opts.uid,
-      gid : opts.gid
-    }, function(err, data) {
+      uid: opts.uid,
+      gid: opts.gid
+    }, function (err, data) {
       if (err) return cb(err);
 
-      StartModule(CLI, opts, function(err, dt) {
+      StartModule(CLI, opts, function (err, dt) {
         if (err) return cb(err);
 
         if (process.env.PM2_PROGRAMMATIC === 'true')
           return cb(null, dt);
 
-        CLI.conf(canonic_module_name, function() {
+        CLI.conf(canonic_module_name, function () {
           Common.printOut(cst.PREFIX_MSG_MOD + 'Module successfully installed and launched');
           Common.printOut(cst.PREFIX_MSG_MOD + 'Checkout module options: `$ pm2 conf`');
           return cb(null, dt);
@@ -283,14 +273,14 @@ function start(PM2, modules, module_name, cb) {
   // Merge meta data to start module properly
   Common.extend(opts, {
     // package.json path
-    cmd : package_json_path,
+    cmd: package_json_path,
     // starting mode
-    development_mode : false,
+    development_mode: false,
     // process cwd
-    proc_path : proc_path
+    proc_path: proc_path
   });
 
-  StartModule(PM2, opts, function(err, dt) {
+  StartModule(PM2, opts, function (err, dt) {
     if (err) console.error(err);
     return cb();
   })
@@ -301,7 +291,7 @@ function uninstall(CLI, module_name, cb) {
   var proc_path = path.join(cst.DEFAULT_MODULE_PATH, module_name_only);
   Configuration.unsetSync(cst.MODULE_CONF_PREFIX + ':' + module_name_only);
 
-  CLI.deleteModule(module_name_only, function(err, data) {
+  CLI.deleteModule(module_name_only, function (err, data) {
     console.log('Deleting', proc_path)
     if (module_name != '.' && proc_path.includes('modules') === true) {
       deleteFolderRecursive(proc_path)
@@ -359,24 +349,24 @@ function StartModule(CLI, opts, cb) {
   }
 
   Common.extend(opts, {
-    cwd               : opts.proc_path,
-    watch             : opts.development_mode,
-    force_name        : package_json.name,
-    started_as_module : true
+    cwd: opts.proc_path,
+    watch: opts.development_mode,
+    force_name: package_json.name,
+    started_as_module: true
   });
 
   // Start the module
-  CLI.start(package_json, opts, function(err, data) {
+  CLI.start(package_json, opts, function (err, data) {
     if (err) return cb(err);
 
     if (opts.safe) {
       Common.printOut(cst.PREFIX_MSG_MOD + 'Monitoring module behavior for potential issue (5secs...)');
 
-      var time = typeof(opts.safe) == 'boolean' ? 3000 : parseInt(opts.safe);
-      return setTimeout(function() {
-        CLI.describe(package_json.name, function(err, apps) {
+      var time = typeof (opts.safe) == 'boolean' ? 3000 : parseInt(opts.safe);
+      return setTimeout(function () {
+        CLI.describe(package_json.name, function (err, apps) {
           if (err || apps[0].pm2_env.restart_time > 2) {
-            return Rollback.revert(CLI, package_json.name, function() {
+            return Rollback.revert(CLI, package_json.name, function () {
               return cb(new Error('New Module is instable, restored to previous version'));
             });
           }
@@ -392,21 +382,21 @@ function StartModule(CLI, opts, cb) {
 
 
 var Rollback = {
-  revert : function(CLI, module_name, cb) {
+  revert: function (CLI, module_name, cb) {
     var canonic_module_name = Utility.getCanonicModuleName(module_name);
     var backup_path = path.join(require('os').tmpdir(), canonic_module_name);
     var module_path = path.join(cst.DEFAULT_MODULE_PATH, canonic_module_name);
 
     try {
       fs.statSync(backup_path)
-    } catch(e) {
+    } catch (e) {
       return cb(new Error('no backup found'));
     }
 
     Common.printOut(cst.PREFIX_MSG_MOD + chalk.bold.red('[[[[[ Module installation failure! ]]]]]'));
     Common.printOut(cst.PREFIX_MSG_MOD + chalk.bold.red('[RESTORING TO PREVIOUS VERSION]'));
 
-    CLI.deleteModule(canonic_module_name, function() {
+    CLI.deleteModule(canonic_module_name, function () {
       // Delete failing module
 
       if (module_name.includes('modules') === true)
@@ -419,17 +409,27 @@ var Rollback = {
 
       // Start module
       StartModule(CLI, {
-        cmd : package_json_path,
-        development_mode : false,
-        proc_path : proc_path
+        cmd: package_json_path,
+        development_mode: false,
+        proc_path: proc_path
       }, cb);
     });
   },
-  backup : function(module_name) {
+  backup: function (module_name) {
     // Backup current module
     var tmpdir = require('os').tmpdir();
     var canonic_module_name = Utility.getCanonicModuleName(module_name);
     var module_path = path.join(cst.DEFAULT_MODULE_PATH, canonic_module_name);
     copydirSync(module_path, path.join(tmpdir, canonic_module_name));
   }
+}
+
+export default {
+  install,
+  uninstall,
+  start,
+  publish,
+  generateSample,
+  localStart,
+  getModuleConf
 }

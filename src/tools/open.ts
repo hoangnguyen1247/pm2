@@ -2,7 +2,7 @@ import { exec } from 'child_process'
 import path from 'path'
   ;
 
-function open(target, appName, callback) {
+function open(target, appName?, callback?) {
   var opener;
 
   if (typeof(appName) === 'function') {

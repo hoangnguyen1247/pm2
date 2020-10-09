@@ -200,7 +200,7 @@ function writeRc(content, cb) {
   var file = '.' + process.env.SHELL.match(/\/bin\/(\w+)/)[1] + 'rc',
   filepath = pth.join(process.env.HOME, file);
   fs.lstat(filepath, function (err, stats) {
-    if(err) return cb(new Error("No " + file + " file. You'll have to run instead: " + completer + " completion >> ~/" + file));
+    if(err) return cb(new Error("No " + file + " file. You'll have to run instead: " + content + " completion >> ~/" + file));
     fs.writeFile(filepath, content, cb);
   });
 }

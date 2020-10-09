@@ -27,7 +27,7 @@ const RATIO_T3   = Math.floor(os.totalmem() / 5);
 // Cst for heavy programs
 const RATIO_T4   = Math.floor(os.totalmem());
 
-var Monit = {};
+var Monit: any = {};
 
 //helper to get bars.length (num bars printed)
 Object.size = function(obj) {

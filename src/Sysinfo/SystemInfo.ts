@@ -1,8 +1,8 @@
 
 import sysinfo from 'systeminformation'
-import psList from './psList.js'
+import psList from './psList'
 import async from 'async'
-import MeanCalc from './MeanCalc.js'
+import MeanCalc from './MeanCalc'
 import { fork } from 'child_process'
 import os from 'os'
 import fs from 'fs'

@@ -20,7 +20,7 @@ export default function ClusterMode(God) {
 
   God.watch._watchers = {};
 
-  God.watch.enable = function(pm2_env) {
+  God.watch.enable = function (pm2_env) {
     if (God.watch._watchers[pm2_env.pm_id]) {
       God.watch._watchers[pm2_env.pm_id].close();
       God.watch._watchers[pm2_env.pm_id] = null;
@@ -31,20 +31,20 @@ export default function ClusterMode(God) {
 
     var watch = pm2_env.watch
 
-    if(typeof watch == 'boolean' || util.isArray(watch) && watch.length === 0)
+    if (typeof watch == 'boolean' || util.isArray(watch) && watch.length === 0)
       watch = pm2_env.pm_cwd;
 
     log('Watching %s', watch);
 
-    var watch_options = {
-      ignored       : pm2_env.ignore_watch || /[\/\\]\.|node_modules/,
-      persistent    : true,
-      ignoreInitial : true,
+    var watch_options: any = {
+      ignored: pm2_env.ignore_watch || /[\/\\]\.|node_modules/,
+      persistent: true,
+      ignoreInitial: true,
       cwd: pm2_env.pm_cwd
     };
 
     if (pm2_env.watch_options) {
-      watch_options = util._extend(watch_options, pm2_env.watch_options);
+      watch_options = util.inherits(watch_options, pm2_env.watch_options);
     }
 
     log('Watch opts', watch_options);
@@ -53,7 +53,7 @@ export default function ClusterMode(God) {
 
     console.log('[Watch] Start watching', pm2_env.name);
 
-    watcher.on('all', function(event, path) {
+    watcher.on('all', function (event, path) {
       var self = this;
 
       if (self.restarting === true) {
@@ -65,8 +65,8 @@ export default function ClusterMode(God) {
 
       console.log('Change detected on path %s for app %s - restarting', path, pm2_env.name);
 
-      setTimeout(function() {
-        God.restartProcessName(pm2_env.name, function(err, list) {
+      setTimeout(function () {
+        God.restartProcessName(pm2_env.name, function (err, list) {
           self.restarting = false;
 
           if (err) {
@@ -81,7 +81,7 @@ export default function ClusterMode(God) {
       return false;
     });
 
-    watcher.on('error', function(e) {
+    watcher.on('error', function (e) {
       console.error(e.stack || e);
     });
 
@@ -89,31 +89,31 @@ export default function ClusterMode(God) {
 
     //return God.watch._watchers[pm2_env.name];
   },
-  /**
-   * Description
-   * @method close
-   * @param {} id
-   * @return
-   */
-  God.watch.disableAll = function() {
-    var watchers = God.watch._watchers;
+    /**
+     * Description
+     * @method close
+     * @param {} id
+     * @return
+     */
+    God.watch.disableAll = function () {
+      var watchers = God.watch._watchers;
 
-    console.log('[Watch] PM2 is being killed. Watch is disabled to avoid conflicts');
-    for (var i in watchers) {
-      watchers[i].close && watchers[i].close();
-      watchers.splice(i, 1);
-    }
-  },
+      console.log('[Watch] PM2 is being killed. Watch is disabled to avoid conflicts');
+      for (var i in watchers) {
+        watchers[i].close && watchers[i].close();
+        watchers.splice(i, 1);
+      }
+    },
 
-  God.watch.disable = function(pm2_env) {
-    var watcher = God.watch._watchers[pm2_env.pm_id]
-    if (watcher) {
-      console.log('[Watch] Stop watching', pm2_env.name);
-      watcher.close();
-      delete God.watch._watchers[pm2_env.pm_id];
-      return true;
-    } else {
-      return false;
+    God.watch.disable = function (pm2_env) {
+      var watcher = God.watch._watchers[pm2_env.pm_id]
+      if (watcher) {
+        console.log('[Watch] Stop watching', pm2_env.name);
+        watcher.close();
+        delete God.watch._watchers[pm2_env.pm_id];
+        return true;
+      } else {
+        return false;
+      }
     }
-  }
 };

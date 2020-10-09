@@ -3,18 +3,18 @@
  * Use of this source code is governed by a license that
  * can be found in the LICENSE file.
  */
-var path          = require('path');
-var eachLimit     = require('async/eachLimit');
-var forEachLimit  = require('async/forEachLimit');
+import path          from 'path';
+import eachLimit     from 'async/eachLimit';
+import forEachLimit  from 'async/forEachLimit';
 
-var Configuration = require('../../Configuration.js');
-var cst = require('../../../constants.js');
-var Common = require('../../Common');
-var NPM = require('./NPM.js')
-var TAR = require('./TAR.js')
-var LOCAL = require('./LOCAL.js')
+import Configuration from '../../Configuration';
+import cst from '../../../constants';
+import Common from '../../Common';
+import NPM from './NPM';
+import TAR from './TAR';
+import LOCAL from './LOCAL';
 
-var Modularizer = module.exports = {};
+var Modularizer: any = {};
 
 /**
  * PM2 Module System.
@@ -146,3 +146,5 @@ Modularizer.publish = function(PM2, folder, opts, cb) {
 Modularizer.generateSample = function(app_name, cb) {
   NPM.generateSample(app_name, cb)
 };
+
+export default Modularizer;

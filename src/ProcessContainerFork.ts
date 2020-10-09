@@ -27,7 +27,7 @@ if (process.connected &&
 // Require the real application
 if (process.env.pm_exec_path) {
   if (ProcessUtils.isESModule(process.env.pm_exec_path) === true) {
-    import(url.pathToFileURL(process.env.pm_exec_path));
+    import(url.pathToFileURL(process.env.pm_exec_path).toString());
   }
   else
     require('module')._load(process.env.pm_exec_path, null, true);
@@ -37,6 +37,6 @@ else
 
 // Change some values to make node think that the user's application
 // was started directly such as `node app.js`
-process.mainModule = process.mainModule || {};
+process.mainModule = process.mainModule || {} as any;
 process.mainModule.loaded = false;
 require.main = process.mainModule;

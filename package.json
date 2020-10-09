@@ -1,5 +1,5 @@
 {
-  "name": "pm2",
+  "name": "pm2t",
   "preferGlobal": true,
   "version": "4.5.0",
   "engines": {
