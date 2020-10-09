@@ -20,7 +20,7 @@ const debug = debugLogger('pm2:client');
 
 function noop() { }
 
-var Client = module.exports = function (opts) {
+var Client = function (opts) {
   if (!opts) opts = {};
 
   if (!opts.conf)
@@ -778,3 +778,5 @@ Client.prototype.getProcessByNameOrId = function (nameOrId, cb) {
     return cb(null, foundProc);
   });
 };
+
+export default Client;

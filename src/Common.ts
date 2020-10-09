@@ -575,7 +575,7 @@ Common.safeExtend = function (origin, add) {
 Common.mergeEnvironmentVariables = function (app_env, env_name, deploy_conf) {
   var app = fclone(app_env);
 
-  var new_conf = {
+  var new_conf: any = {
     env: {}
   }
 

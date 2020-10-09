@@ -27,7 +27,7 @@ function find_extensions(folder, ext, ret) {
   }
 }
 
-export const make_available_extension = function make_available_extension(opts, ret) {
+const make_available_extension = function make_available_extension(opts, ret) {
   if (typeof opts == 'object' && typeof ret == 'object') {
     var mas = opts.ext.split(',');
     for (var i = 0; i < mas.length; i++)
@@ -38,3 +38,5 @@ export const make_available_extension = function make_available_extension(opts, 
     find_extensions(process.cwd(), res, ret);
   }
 }
+
+export default make_available_extension;

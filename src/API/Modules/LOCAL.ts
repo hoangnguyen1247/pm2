@@ -21,7 +21,7 @@ var INTERNAL_MODULES = {
   'coffeescript': { name: 'coffeescript', message: 'Coffeescript v2 support' }
 };
 
-function install(module, cb, verbose) {
+function install(module, cb, verbose?) {
   if (!module || !module.name || module.name.length === 0) {
     return cb(new Error('No module name !'));
   }
@@ -42,7 +42,7 @@ function install(module, cb, verbose) {
   });
 }
 
-function installMultipleModules(modules, cb, post_install) {
+function installMultipleModules(modules, cb, post_install?) {
   var functionList = [];
   for (var i = 0; i < modules.length; i++) {
     functionList.push((function (index) {

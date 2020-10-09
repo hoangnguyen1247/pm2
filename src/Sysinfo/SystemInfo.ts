@@ -14,6 +14,10 @@ const DEFAULT_CONVERSION = 1024 * 1024
 
 class SystemInfo {
   infos: any;
+  ping_timeout: NodeJS.Timeout;
+  restart: boolean;
+  process: any;
+
   constructor() {
     this.infos = {
       baseboard: {
@@ -130,7 +134,7 @@ class SystemInfo {
         if (this.process.connected == true) {
           try {
             this.process.send('pong')
-          } catch(e) {
+          } catch (e) {
             console.error('Cannot send message to Sysinfos')
           }
         }
@@ -142,7 +146,7 @@ class SystemInfo {
     if (this.process.connected == true) {
       try {
         this.process.send('query')
-      } catch(e) {
+      } catch (e) {
         return cb(new Error('not ready yet'), null)
       }
     }
@@ -212,8 +216,8 @@ class SystemInfo {
         process.exit()
       }
       try {
-        process.send(JSON.stringify({cmd: 'ping'}))
-      } catch(e) {
+        process.send(JSON.stringify({ cmd: 'ping' }))
+      } catch (e) {
         console.error('PM2 is dead while doing process.send')
         process.exit()
       }
@@ -308,7 +312,7 @@ class SystemInfo {
       })
   }
 
-  dockerSummary(cb = () => {}) {
+  dockerSummary(cb = () => { }) {
     sysinfo.dockerContainers('all')
       .then(containers => {
         var non_exited_containers = containers.filter(container => container.state != 'exited')
@@ -316,7 +320,7 @@ class SystemInfo {
 
         async.forEach(non_exited_containers, (container, next) => {
           sysinfo.dockerContainerStats(container.id)
-            .then(stats => {
+            .then((stats: any[]) => {
               var meta = container
 
               stats[0].cpu_percent = (stats[0].cpu_percent).toFixed(1)
@@ -394,7 +398,7 @@ class SystemInfo {
         })
     })()
 
-    function fetch () {
+    function fetch() {
       const startMeasure = computeUsage()
 
       setTimeout(_ => {
@@ -408,7 +412,7 @@ class SystemInfo {
       }, 100)
     }
 
-    function computeUsage () {
+    function computeUsage() {
       let totalIdle = 0
       let totalTick = 0
       const cpus = os.cpus()
@@ -422,8 +426,8 @@ class SystemInfo {
       }
 
       return {
-        idle: parseInt(totalIdle / cpus.length),
-        total: parseInt(totalTick / cpus.length)
+        idle: parseInt((totalIdle / cpus.length) + ""),
+        total: parseInt((totalTick / cpus.length) + "")
       }
     }
 
@@ -485,7 +489,7 @@ class SystemInfo {
 
     (ioCollection = () => {
       sysinfo.fsStats()
-        .then(fs_stats => {
+        .then((fs_stats: any) => {
           var new_rx = fs_stats.rx
           var new_wx = fs_stats.wx
 
@@ -591,9 +595,9 @@ class SystemInfo {
   }
 }
 
-module.exports = SystemInfo
-
 if (require.main === module) {
   var sys = new SystemInfo()
   sys.startCollection()
 }
+
+export default SystemInfo
