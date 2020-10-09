@@ -1,7 +1,7 @@
 {
   "name": "pm2t",
   "preferGlobal": true,
-  "version": "4.5.3",
+  "version": "4.5.4",
   "engines": {
     "node": ">=8.10.0"
   },
@@ -170,6 +170,7 @@
     "pm2t-runtime": "./bin/pm2t-runtime"
   },
   "dependencies": {
+    "@babel/runtime": "^7.11.2",
     "@pm2/agent": "~1.0.2",
     "@pm2/io": "~4.3.5",
     "@pm2/js-api": "~0.6.0",
