@@ -18,7 +18,7 @@ function processesAreAlreadyMonitored(CLI, cb) {
   })
 }
 
-module.exports = function(CLI) {
+export default function(CLI) {
   CLI.prototype.openDashboard = function() {
     if (!this.gl_interact_infos) {
       Common.printError(chalk.bold.white('Agent if offline, type `$ pm2 plus` to log in'));
@@ -34,6 +34,7 @@ module.exports = function(CLI) {
   };
 
   CLI.prototype.clearSetup = function (opts, cb) {
+    var self = this;
     const modules = ['event-loop-inspector']
     this.gl_is_km_linked = false
 
@@ -42,7 +43,7 @@ module.exports = function(CLI) {
     }
 
     forEach(modules, (_module, next) => {
-      Modules.uninstall(this, _module, () => {
+      self.uninstall(this, _module, () => {
         next()
       });
     }, (err) => {
@@ -73,7 +74,7 @@ module.exports = function(CLI) {
       }
 
       forEach(modules, (_module, next) => {
-        Modules.install(self, _module, {}, () => {
+        self.install(self, _module, {}, () => {
           next()
         });
       }, (err) => {

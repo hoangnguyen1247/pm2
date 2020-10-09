@@ -19,7 +19,7 @@ import dayjs from 'dayjs';
 import { execSync } from 'child_process';
 import isBinary from './tools/isbinaryfile';
 import cst from '../constants.js';
-import extItps from './API/interpreter.json';
+import extItps from './API/interpreter';
 import Config from './tools/Config';
 import pkg from '../package.json';
 import which from './tools/which';

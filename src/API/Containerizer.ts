@@ -1,25 +1,25 @@
 
 import { spawn } from 'child_process';
-import { exec }    from 'child_process';
-import chalk   from 'chalk';
-import util    from 'util';
-import * as fmt     from '../tools/fmt.js';
-import fs      from 'fs';
-import path    from 'path';
-import cst     from '../../constants.js';
+import { exec } from 'child_process';
+import chalk from 'chalk';
+import util from 'util';
+import * as fmt from '../tools/fmt.js';
+import fs from 'fs';
+import path from 'path';
+import cst from '../../constants.js';
 import Promise from '../tools/promise.min.js';
 
 function pspawn(cmd) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     var p_cmd = cmd.split(' ');
 
     var install_instance = spawn(p_cmd[0], p_cmd.splice(1, cmd.length), {
-      stdio : 'inherit',
-      env : process.env,
-      shell : true
+      stdio: 'inherit',
+      env: process.env,
+      shell: true
     });
 
-    install_instance.on('close', function(code) {
+    install_instance.on('close', function (code) {
       if (code != 0) {
         console.log(chalk.bold.red('Command failed'));
         return reject(new Error('Bad cmd return'));
@@ -34,8 +34,8 @@ function pspawn(cmd) {
 }
 
 function checkDockerSetup() {
-  return new Promise(function(resolve, reject) {
-    exec("docker version -f '{{.Client.Version}}'", function(err, stdout, stderr) {
+  return new Promise(function (resolve, reject) {
+    exec("docker version -f '{{.Client.Version}}'", function (err, stdout, stderr) {
       if (err) {
         console.error(chalk.red.bold('[Docker access] Error while trying to use docker command'));
         if (err.message && err.message.indexOf('Cannot connect to the Docker') > -1) {
@@ -67,7 +67,7 @@ function parseAndSwitch(file_content, main_file, opts) {
     var line = lines[i];
 
     if (['## DISTRIBUTION MODE', '## DEVELOPMENT MODE'].indexOf(line) > -1 ||
-        i == lines.length - 1) {
+      i == lines.length - 1) {
       lines.splice(i, lines.length);
       lines[i] = '## ' + mode.toUpperCase() + ' MODE';
       lines[i + 1] = 'ENV NODE_ENV=' + (mode == 'distribution' ? 'production' : mode);
@@ -93,19 +93,19 @@ function parseAndSwitch(file_content, main_file, opts) {
  * @param {String} mode            Mode to switch the Dockerfile
  */
 function switchDockerFile(docker_filepath, main_file, opts) {
-  return new Promise(function(resolve, reject) {
-    var data  = fs.readFileSync(docker_filepath, 'utf8').toString();
+  return new Promise(function (resolve, reject) {
+    var data = fs.readFileSync(docker_filepath, 'utf8').toString();
 
     if (['distribution', 'development'].indexOf(opts.mode) == -1)
       return reject(new Error('Unknown mode'));
 
     var lines = parseAndSwitch(data, main_file, opts)
-    fs.writeFile(docker_filepath, lines, function(err) {
+    fs.writeFile(docker_filepath, lines, function (err) {
       if (err) return reject(err);
       resolve({
-        Dockerfile_path : docker_filepath,
-        Dockerfile : lines,
-        CMD : ''
+        Dockerfile_path: docker_filepath,
+        Dockerfile: lines,
+        CMD: ''
       });
     })
   });
@@ -118,46 +118,46 @@ function switchDockerFile(docker_filepath, main_file, opts) {
  * @param {String} mode            Mode to switch the Dockerfile
  */
 function generateDockerfile(docker_filepath, main_file, opts) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     var tpl_file = path.join(cst.TEMPLATE_FOLDER, cst.DOCKERFILE_NODEJS);
-    var template = fs.readFileSync(tpl_file, {encoding: 'utf8'});
+    var template = fs.readFileSync(tpl_file, { encoding: 'utf8' });
     var CMD;
 
     template = parseAndSwitch(template, main_file, opts);
 
-    fs.writeFile(docker_filepath, template, function(err) {
+    fs.writeFile(docker_filepath, template, function (err) {
       if (err) return reject(err);
       resolve({
-        Dockerfile_path : docker_filepath,
-        Dockerfile : template,
-        CMD : CMD
+        Dockerfile_path: docker_filepath,
+        Dockerfile: template,
+        CMD: CMD
       });
     });
   });
 }
 
 function handleExit(CLI, opts, mode) {
-  process.on('SIGINT', function() {
+  process.on('SIGINT', function () {
     CLI.disconnect();
 
     if (mode != 'distribution')
       return false;
 
-    exec('docker ps -lq', function(err, stdout, stderr) {
+    exec('docker ps -lq', function (err, stdout, stderr) {
       if (err) {
         console.error(err);
       }
-      require('vizion').analyze({folder : process.cwd()}, function recur_path(err, meta){
+      require('vizion').analyze({ folder: process.cwd() }, function recur_path(err, meta) {
         if (!err && meta.revision) {
           var commit_id = util.format('#%s(%s) %s',
-                                      meta.branch,
-                                      meta.revision.slice(0, 5),
-                                      meta.comment);
+            meta.branch,
+            meta.revision.slice(0, 5),
+            meta.comment);
 
           console.log(chalk.bold.magenta('$ docker commit -m "%s" %s %s'),
-                      commit_id,
-                      stdout.replace('\n', ''),
-                      opts.imageName);
+            commit_id,
+            stdout.replace('\n', ''),
+            opts.imageName);
         }
         else
           console.log(chalk.bold.magenta('$ docker commit %s %s'), stdout.replace('\n', ''), opts.imageName);
@@ -168,17 +168,17 @@ function handleExit(CLI, opts, mode) {
   });
 }
 
-module.exports = function(CLI) {
-  CLI.prototype.generateDockerfile = function(script, opts) {
+export default function (CLI) {
+  CLI.prototype.generateDockerfile = function (script, opts) {
     var docker_filepath = path.join(process.cwd(), 'Dockerfile');
     var that = this;
 
-    fs.stat(docker_filepath, function(err, stat) {
+    fs.stat(docker_filepath, function (err, stat) {
       if (err || opts.force == true) {
         generateDockerfile(docker_filepath, script, {
-          mode : 'development'
+          mode: 'development'
         })
-          .then(function() {
+          .then(function () {
             console.log(chalk.bold('New Dockerfile generated in current folder'));
             console.log(chalk.bold('You can now run\n$ pm2 docker:dev <file|config>'));
             return that.exitCli(cst.SUCCESS_EXIT);
@@ -190,7 +190,7 @@ module.exports = function(CLI) {
     });
   };
 
-  CLI.prototype.dockerMode = function(script, opts, mode) {
+  CLI.prototype.dockerMode = function (script, opts, mode) {
     var promptly = require('promptly');
     var self = this;
     handleExit(self, opts, mode);
@@ -205,45 +205,45 @@ module.exports = function(CLI) {
     var image_name;
     var node_version = opts.nodeVersion ? opts.nodeVersion.split('.')[0] : 'latest';
 
-    image_name   = opts.imageName || require('crypto').randomBytes(6).toString('hex');
+    image_name = opts.imageName || require('crypto').randomBytes(6).toString('hex');
 
     if (script.indexOf('/') > -1) {
-      app_path  = path.join(process.cwd(), path.dirname(script));
+      app_path = path.join(process.cwd(), path.dirname(script));
       main_script = path.basename(script);
     }
     else {
-      app_path  = process.cwd();
+      app_path = process.cwd();
       main_script = script;
     }
 
     checkDockerSetup()
-      .then(function() {
+      .then(function () {
         /////////////////////////
         // Generate Dockerfile //
         /////////////////////////
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
           var docker_filepath = path.join(process.cwd(), 'Dockerfile');
 
-          fs.stat(docker_filepath, function(err, stat) {
+          fs.stat(docker_filepath, function (err, stat) {
             if (err) {
               // Dockerfile does not exist, generate one
               // console.log(chalk.blue.bold('Generating new Dockerfile'));
               if (opts.force == true) {
                 return resolve(generateDockerfile(docker_filepath, main_script, {
-                  node_version : node_version,
-                  mode : mode
+                  node_version: node_version,
+                  mode: mode
                 }));
               }
               if (opts.dockerdaemon)
                 return resolve(generateDockerfile(docker_filepath, main_script, {
-                    node_version : node_version,
-                    mode : mode
-                  }));
-              promptly.prompt('No Dockerfile in current directory, ok to generate a new one? (y/n)', function(err, value) {
+                  node_version: node_version,
+                  mode: mode
+                }));
+              promptly.prompt('No Dockerfile in current directory, ok to generate a new one? (y/n)', function (err, value) {
                 if (value == 'y')
                   return resolve(generateDockerfile(docker_filepath, main_script, {
-                    node_version : node_version,
-                    mode : mode
+                    node_version: node_version,
+                    mode: mode
                   }));
                 else
                   return self.exitCli(cst.SUCCESS_EXIT);
@@ -251,24 +251,24 @@ module.exports = function(CLI) {
               return false;
             }
             return resolve(switchDockerFile(docker_filepath, main_script, {
-              node_version : node_version,
-              mode : mode
+              node_version: node_version,
+              mode: mode
             }));
           });
         });
       })
-      .then(function(_template) {
+      .then(function (_template) {
         template = _template;
         return Promise.resolve();
       })
-      .then(function() {
+      .then(function () {
         //////////////////
         // Docker build //
         //////////////////
 
         var docker_build = util.format('docker build -t %s -f %s',
-                                       image_name,
-                                       template.Dockerfile_path);
+          image_name,
+          template.Dockerfile_path);
 
         if (opts.fresh == true)
           docker_build += ' --no-cache';
@@ -286,7 +286,7 @@ module.exports = function(CLI) {
 
         return pspawn(docker_build);
       })
-      .then(function() {
+      .then(function () {
         ////////////////
         // Docker run //
         ////////////////
@@ -315,12 +315,12 @@ module.exports = function(CLI) {
         fmt.sep();
         return pspawn(docker_run);
       })
-      .then(function() {
+      .then(function () {
         console.log(chalk.blue.bold('>>> Leaving Docker instance uuid=%s'), image_name);
         self.disconnect();
         return Promise.resolve();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log();
         console.log(chalk.grey('Raw error=', err.message));
         self.disconnect();
@@ -330,6 +330,8 @@ module.exports = function(CLI) {
 
 };
 
-module.exports.generateDockerfile = generateDockerfile;
-module.exports.parseAndSwitch     = parseAndSwitch;
-module.exports.switchDockerFile   = switchDockerFile;
+export {
+  generateDockerfile,
+  parseAndSwitch,
+  switchDockerFile,
+}

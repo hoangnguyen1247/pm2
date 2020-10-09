@@ -9,7 +9,7 @@ import pth from 'path';
 //  hacked from node-tabtab 0.0.4 https://github.com/mklabs/node-tabtab.git
 //  Itself based on npm completion by @isaac
 
-export const complete = function complete(name, completer, cb) {
+export const complete = function complete(name, completer, cb?) {
 
   // cb not there, assume callback is completer and
   // the completer is the executable itself
@@ -79,12 +79,12 @@ export const complete = function complete(name, completer, cb) {
 // simple helper function to know if the script is run
 // in the context of a completion command. Also mapping the
 // special `<pkgname> completion` cmd.
-exports.isComplete = function isComplete() {
+export const isComplete = function isComplete() {
   var env = parseEnv();
   return env.complete || (env.words && env.point && env.line);
 };
 
-exports.parseOut = function parseOut(str) {
+export const parseOut = function parseOut(str) {
   var shorts = str.match(/\s-\w+/g);
   var longs = str.match(/\s--\w+/g);
 
@@ -95,14 +95,14 @@ exports.parseOut = function parseOut(str) {
 };
 
 // specific to cake case
-exports.parseTasks = function(str, prefix, reg) {
+export const parseTasks = function(str, prefix, reg) {
   var tasks = str.match(reg || new RegExp('^' + prefix + '\\s[^#]+', 'gm')) || [];
   return tasks.map(trim).map(function(s) {
     return s.replace(prefix + ' ', '');
   });
 };
 
-exports.log = function log(arr, o, prefix) {
+export const log = function log(arr, o, prefix?) {
   prefix = prefix || '';
   arr = Array.isArray(arr) ? arr : [arr];
   arr.filter(abbrev(o)).forEach(function(v) {

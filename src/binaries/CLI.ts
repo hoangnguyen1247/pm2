@@ -2,24 +2,25 @@
 
 process.env.PM2_USAGE = 'CLI';
 
-var cst          = require('../../constants.js');
+import cst from '../../constants';
 
-var commander    = require('commander');
-var chalk        = require('chalk');
-var forEachLimit = require('async/forEachLimit');
+import commander from 'commander';
+import chalk from 'chalk';
+import forEachLimit from 'async/forEachLimit';
 
-var debug        = require('debug')('pm2:cli');
-var PM2          = require('../API.js');
-var pkg          = require('../../package.json');
-var tabtab       = require('../completion.js');
-var Common       = require('../Common.js');
-var PM2ioHandler = require('../API/pm2-plus/PM2IO');
+import debugLogger from 'debug';
+import PM2 from '../API';
+import pkg from '../../package.json';
+import * as tabtab from '../completion';
+import Common from '../Common';
+import PM2ioHandler from '../API/pm2-plus/PM2IO';
 
+const debug = debugLogger('pm2:cli');
 
 Common.determineSilentCLI();
 Common.printVersion();
 
-var pm2 = new PM2();
+var pm2: any = new PM2();
 
 PM2ioHandler.usePM2Client(pm2)
 
@@ -35,7 +36,7 @@ commander.version(pkg.version)
   .option('-o --output <path>', 'specify log file for stdout')
   .option('-e --error <path>', 'specify log file for stderr')
   .option('-l --log [path]', 'specify log file which gathers both stdout and stderr')
-  .option('--filter-env [envs]', 'filter out outgoing global values that contain provided strings', function(v, m) { m.push(v); return m;}, [])
+  .option('--filter-env [envs]', 'filter out outgoing global values that contain provided strings', function (v, m) { m.push(v); return m; }, [])
   .option('--log-type <type>', 'specify log output style (raw by default, json optional)')
   .option('--log-date-format <date format>', 'add custom prefix timestamp to logs')
   .option('--time', 'enable time logging')
@@ -70,7 +71,7 @@ commander.version(pkg.version)
   .option('--disable-source-map-support', 'force source map support')
   .option('--wait-ready', 'ask pm2 to wait for ready event from your app')
   .option('--merge-logs', 'merge logs from different instances but keep error and out separated')
-  .option('--watch [paths]', 'watch application folder for changes', function(v, m) { m.push(v); return m;}, [])
+  .option('--watch [paths]', 'watch application folder for changes', function (v, m) { m.push(v); return m; }, [])
   .option('--ignore-watch <folders|files>', 'List of paths to ignore (name or regex)')
   .option('--watch-delay <delay>', 'specify a restart delay after changing files (--watch-delay 4 (in sec) or 4000ms)')
   .option('--no-color', 'skip colors')
@@ -133,7 +134,7 @@ function displayExamples() {
 }
 
 function beginCommandProcessing() {
-  pm2.getVersion(function(err, remote_version) {
+  pm2.getVersion(function (err, remote_version) {
     if (!err && (pkg.version != remote_version)) {
       console.log('');
       console.log(chalk.red.bold('>>>> In-memory PM2 is out-of-date, do:\n>>>> $ pm2 update'));
@@ -145,21 +146,21 @@ function beginCommandProcessing() {
   commander.parse(process.argv);
 }
 
-function checkCompletion(){
-  return tabtab.complete('pm2', function(err, data) {
-    if(err || !data) return;
-    if(/^--\w?/.test(data.last)) return tabtab.log(commander.options.map(function (data) {
+function checkCompletion() {
+  return tabtab.complete('pm2', function (err, data) {
+    if (err || !data) return;
+    if (/^--\w?/.test(data.last)) return tabtab.log(commander.options.map(function (data) {
       return data.long;
     }), data);
-    if(/^-\w?/.test(data.last)) return tabtab.log(commander.options.map(function (data) {
+    if (/^-\w?/.test(data.last)) return tabtab.log(commander.options.map(function (data) {
       return data.short;
     }), data);
     // array containing commands after which process name should be listed
     var cmdProcess = ['stop', 'restart', 'scale', 'reload', 'delete', 'reset', 'pull', 'forward', 'backward', 'logs', 'describe', 'desc', 'show'];
 
     if (cmdProcess.indexOf(data.prev) > -1) {
-      pm2.list(function(err, list){
-        tabtab.log(list.map(function(el){ return el.name }), data);
+      pm2.list(function (err, list) {
+        tabtab.log(list.map(function (el) { return el.name }), data);
         pm2.disconnect();
       });
     }
@@ -190,29 +191,29 @@ if (_arr.indexOf('--no-daemon') > -1) {
   console.log('pm2 launched in no-daemon mode (you can add DEBUG="*" env variable to get more messages)');
 
   var pm2NoDaeamon = new PM2({
-    daemon_mode : false
+    daemon_mode: false
   });
 
-  pm2NoDaeamon.connect(function() {
+  pm2NoDaeamon.connect(function () {
     pm2 = pm2NoDaeamon;
     beginCommandProcessing();
   });
 
 }
 else if (_arr.indexOf('startup') > -1 || _arr.indexOf('unstartup') > -1) {
-  setTimeout(function() {
+  setTimeout(function () {
     commander.parse(process.argv);
   }, 100);
 }
 else {
   // HERE we instanciate the Client object
-  pm2.connect(function() {
+  pm2.connect(function () {
     debug('Now connected to daemon');
     if (process.argv.slice(2)[0] === 'completion') {
       checkCompletion();
       //Close client if completion related installation
       var third = process.argv.slice(3)[0];
-      if ( third == null || third === 'install' || third === 'uninstall')
+      if (third == null || third === 'install' || third === 'uninstall')
         pm2.disconnect();
     }
     else {
@@ -225,7 +226,7 @@ else {
 // Helper function to fail when unknown command arguments are passed
 //
 function failOnUnknown(fn) {
-  return function(arg) {
+  return function (arg) {
     if (arguments.length > 1) {
       console.log(cst.PREFIX_MSG + '\nUnknown command argument: ' + arg);
       commander.outputHelp();
@@ -263,7 +264,7 @@ commander.command('start [name|namespace|file|ecosystem|id...]')
   .option('--node-version [major]', 'with --container, set a specific major Node.js version')
   .option('--dockerdaemon', 'for debugging purpose')
   .description('start and daemonize an app')
-  .action(function(cmd, opts) {
+  .action(function (cmd, opts) {
     if (opts.container == true && opts.dist == true)
       return pm2.dockerMode(cmd, opts, 'distribution');
     else if (opts.container == true)
@@ -284,15 +285,15 @@ commander.command('start [name|namespace|file|ecosystem|id...]')
         cmd = [cst.APP_CONF_DEFAULT_FILE];
       }
       let acc = []
-      forEachLimit(cmd, 1, function(script, next) {
+      forEachLimit(cmd, 1, function (script, next) {
         pm2.start(script, commander, (err, apps) => {
           acc = acc.concat(apps)
           next(err)
         });
-      }, function(err, dt) {
+      }, function (err, dt) {
         if (err && err.message &&
-            (err.message.includes('Script not found') === true ||
-             err.message.includes('NOT AVAILABLE IN PATH') === true)) {
+          (err.message.includes('Script not found') === true ||
+            err.message.includes('NOT AVAILABLE IN PATH') === true)) {
           pm2.exitCli(1)
         }
         else
@@ -303,43 +304,43 @@ commander.command('start [name|namespace|file|ecosystem|id...]')
 
 commander.command('trigger <id|proc_name|namespace|all> <action_name> [params]')
   .description('trigger process action')
-  .action(function(pm_id, action_name, params) {
+  .action(function (pm_id, action_name, params) {
     pm2.trigger(pm_id, action_name, params);
   });
 
 commander.command('deploy <file|environment>')
   .description('deploy your json')
-  .action(function(cmd) {
+  .action(function (cmd) {
     pm2.deploy(cmd, commander);
   });
 
 commander.command('startOrRestart <json>')
   .description('start or restart JSON file')
-  .action(function(file) {
+  .action(function (file) {
     pm2._startJson(file, commander, 'restartProcessId');
   });
 
 commander.command('startOrReload <json>')
   .description('start or gracefully reload JSON file')
-  .action(function(file) {
+  .action(function (file) {
     pm2._startJson(file, commander, 'reloadProcessId');
   });
 
 commander.command('pid [app_name]')
   .description('return pid of [app_name] or all')
-  .action(function(app) {
+  .action(function (app) {
     pm2.getPID(app);
   });
 
 commander.command('create')
   .description('return pid of [app_name] or all')
-  .action(function() {
+  .action(function () {
     pm2.boilerplate()
   });
 
 commander.command('startOrGracefulReload <json>')
   .description('start or gracefully reload JSON file')
-  .action(function(file) {
+  .action(function (file) {
     pm2._startJson(file, commander, 'softReloadProcessId');
   });
 
@@ -349,10 +350,10 @@ commander.command('startOrGracefulReload <json>')
 commander.command('stop <id|name|namespace|all|json|stdin...>')
   .option('--watch', 'Stop watching folder for changes')
   .description('stop a process')
-  .action(function(param) {
-    forEachLimit(param, 1, function(script, next) {
+  .action(function (param) {
+    forEachLimit(param, 1, function (script, next) {
       pm2.stop(script, next);
-    }, function(err) {
+    }, function (err) {
       pm2.speedList(err ? 1 : 0);
     });
   });
@@ -363,16 +364,16 @@ commander.command('stop <id|name|namespace|all|json|stdin...>')
 commander.command('restart <id|name|namespace|all|json|stdin...>')
   .option('--watch', 'Toggle watching folder for changes')
   .description('restart a process')
-  .action(function(param) {
+  .action(function (param) {
     // Commander.js patch
     param = patchCommanderArg(param);
     let acc = []
-    forEachLimit(param, 1, function(script, next) {
+    forEachLimit(param, 1, function (script, next) {
       pm2.restart(script, commander, (err, apps) => {
         acc = acc.concat(apps)
         next(err)
       });
-    }, function(err) {
+    }, function (err) {
       pm2.speedList(err ? 1 : 0, acc);
     });
   });
@@ -382,7 +383,7 @@ commander.command('restart <id|name|namespace|all|json|stdin...>')
 //
 commander.command('scale <app_name> <number>')
   .description('scale up/down a process in cluster mode depending on total_number param')
-  .action(function(app_name, number) {
+  .action(function (app_name, number) {
     pm2.scale(app_name, number);
   });
 
@@ -391,7 +392,7 @@ commander.command('scale <app_name> <number>')
 //
 commander.command('profile:mem [time]')
   .description('Sample PM2 heap memory')
-  .action(function(time) {
+  .action(function (time) {
     pm2.profile('mem', time);
   });
 
@@ -400,7 +401,7 @@ commander.command('profile:mem [time]')
 //
 commander.command('profile:cpu [time]')
   .description('Profile PM2 cpu')
-  .action(function(time) {
+  .action(function (time) {
     pm2.profile('cpu', time);
   });
 
@@ -409,20 +410,20 @@ commander.command('profile:cpu [time]')
 //
 commander.command('reload <id|name|namespace|all>')
   .description('reload processes (note that its for app using HTTP/HTTPS)')
-  .action(function(pm2_id) {
+  .action(function (pm2_id) {
     pm2.reload(pm2_id, commander);
   });
 
 commander.command('id <name>')
   .description('get process id by name')
-  .action(function(name) {
+  .action(function (name) {
     pm2.getProcessIdByName(name);
   });
 
 // Inspect a process
 commander.command('inspect <name>')
   .description('inspect a process')
-  .action(function(cmd) {
+  .action(function (cmd) {
     pm2.inspect(cmd, commander);
   });
 
@@ -432,7 +433,7 @@ commander.command('inspect <name>')
 commander.command('delete <name|id|namespace|script|all|json|stdin...>')
   .alias('del')
   .description('stop and delete a process from pm2 process list')
-  .action(function(name) {
+  .action(function (name) {
     if (name == "-") {
       process.stdin.resume();
       process.stdin.setEncoding('utf8');
@@ -441,9 +442,9 @@ commander.command('delete <name|id|namespace|script|all|json|stdin...>')
         pm2.delete(param, 'pipe');
       });
     } else
-      forEachLimit(name, 1, function(script, next) {
-        pm2.delete(script,'', next);
-      }, function(err) {
+      forEachLimit(name, 1, function (script, next) {
+        pm2.delete(script, '', next);
+      }, function (err) {
         pm2.speedList(err ? 1 : 0);
       });
   });
@@ -453,7 +454,7 @@ commander.command('delete <name|id|namespace|script|all|json|stdin...>')
 //
 commander.command('sendSignal <signal> <pm2_id|name>')
   .description('send a system signal to the target process')
-  .action(function(signal, pm2_id) {
+  .action(function (signal, pm2_id) {
     if (isNaN(parseInt(pm2_id))) {
       console.log(cst.PREFIX_MSG + 'Sending signal to process name ' + pm2_id);
       pm2.sendSignalToProcessName(signal, pm2_id);
@@ -468,18 +469,18 @@ commander.command('sendSignal <signal> <pm2_id|name>')
 //
 commander.command('ping')
   .description('ping pm2 daemon - if not up it will launch it')
-  .action(function() {
+  .action(function () {
     pm2.ping();
   });
 
 commander.command('updatePM2')
   .description('update in-memory PM2 with local PM2')
-  .action(function() {
+  .action(function () {
     pm2.update();
   });
 commander.command('update')
   .description('(alias) update in-memory PM2 with local PM2')
-  .action(function() {
+  .action(function () {
     pm2.update();
   });
 
@@ -494,34 +495,34 @@ commander.command('install <module|git:// url>')
   .option('--v1', 'install module in v1 manner (do not use it)')
   .option('--safe [time]', 'keep module backup, if new module fail = restore with previous')
   .description('install or update a module and run it forever')
-  .action(function(plugin_name, opts) {
+  .action(function (plugin_name, opts) {
     require('util')._extend(commander, opts);
     pm2.install(plugin_name, commander);
   });
 
 commander.command('module:update <module|git:// url>')
   .description('update a module and run it forever')
-  .action(function(plugin_name) {
+  .action(function (plugin_name) {
     pm2.install(plugin_name);
   });
 
 
 commander.command('module:generate [app_name]')
   .description('Generate a sample module in current folder')
-  .action(function(app_name) {
+  .action(function (app_name) {
     pm2.generateModuleSample(app_name);
   });
 
 commander.command('uninstall <module>')
   .alias('module:uninstall')
   .description('stop and uninstall a module')
-  .action(function(plugin_name) {
+  .action(function (plugin_name) {
     pm2.uninstall(plugin_name);
   });
 
 commander.command('package [target]')
   .description('Check & Package TAR type module')
-  .action(function(target) {
+  .action(function (target) {
     pm2.package(target);
   });
 
@@ -529,49 +530,49 @@ commander.command('publish [folder]')
   .option('--npm', 'publish on npm')
   .alias('module:publish')
   .description('Publish the module you are currently on')
-  .action(function(folder, opts) {
+  .action(function (folder, opts) {
     pm2.publish(folder, opts);
   });
 
 commander.command('set [key] [value]')
   .description('sets the specified config <key> <value>')
-  .action(function(key, value) {
+  .action(function (key, value) {
     pm2.set(key, value);
   });
 
 commander.command('multiset <value>')
   .description('multiset eg "key1 val1 key2 val2')
-  .action(function(str) {
+  .action(function (str) {
     pm2.multiset(str);
   });
 
 commander.command('get [key]')
   .description('get value for <key>')
-  .action(function(key) {
+  .action(function (key) {
     pm2.get(key);
   });
 
 commander.command('conf [key] [value]')
   .description('get / set module config values')
-  .action(function(key, value) {
+  .action(function (key, value) {
     pm2.get()
   });
 
 commander.command('config <key> [value]')
   .description('get / set module config values')
-  .action(function(key, value) {
+  .action(function (key, value) {
     pm2.conf(key, value);
   });
 
 commander.command('unset <key>')
   .description('clears the specified config <key>')
-  .action(function(key) {
+  .action(function (key) {
     pm2.unset(key);
   });
 
 commander.command('report')
   .description('give a full pm2 report for https://github.com/Unitech/pm2/issues')
-  .action(function(key) {
+  .action(function (key) {
     pm2.report();
   });
 
@@ -587,13 +588,13 @@ commander.command('link [secret] [public] [name]')
 
 commander.command('unlink')
   .description('unlink with the pm2 monitoring dashboard')
-  .action(function() {
+  .action(function () {
     pm2.unlink();
   });
 
 commander.command('monitor [name]')
   .description('monitor target process')
-  .action(function(name) {
+  .action(function (name) {
     if (name === undefined) {
       return plusHandler()
     }
@@ -602,17 +603,17 @@ commander.command('monitor [name]')
 
 commander.command('unmonitor [name]')
   .description('unmonitor target process')
-  .action(function(name) {
+  .action(function (name) {
     pm2.monitorState('unmonitor', name);
   });
 
 commander.command('open')
   .description('open the pm2 monitoring dashboard')
-  .action(function(name) {
+  .action(function (name) {
     pm2.openDashboard();
   });
 
-function plusHandler (command, opts) {
+function plusHandler(command?, opts?) {
   if (opts && opts.infoNode) {
     process.env.KEYMETRICS_NODE = opts.infoNode
   }
@@ -630,13 +631,13 @@ commander.command('plus [command] [option]')
 
 commander.command('login')
   .description('Login to pm2 plus')
-  .action(function() {
+  .action(function () {
     return plusHandler('login')
   });
 
 commander.command('logout')
   .description('Logout from pm2 plus')
-  .action(function() {
+  .action(function () {
     return plusHandler('logout')
   });
 
@@ -647,7 +648,7 @@ commander.command('dump')
   .alias('save')
   .option('--force', 'force deletion of dump file, even if empty')
   .description('dump all processes for resurrecting them later')
-  .action(failOnUnknown(function(opts) {
+  .action(failOnUnknown(function (opts) {
     pm2.dump(commander.force)
   }));
 
@@ -656,7 +657,7 @@ commander.command('dump')
 //
 commander.command('cleardump')
   .description('Create empty dump file')
-  .action(failOnUnknown(function() {
+  .action(failOnUnknown(function () {
     pm2.clearDump();
   }));
 
@@ -665,7 +666,7 @@ commander.command('cleardump')
 //
 commander.command('send <pm_id> <line>')
   .description('send stdin to <pm_id>')
-  .action(function(pm_id, line) {
+  .action(function (pm_id, line) {
     pm2.sendLineToStdin(pm_id, line);
   });
 
@@ -675,7 +676,7 @@ commander.command('send <pm_id> <line>')
 //
 commander.command('attach <pm_id> [command separator]')
   .description('attach stdin/stdout to application identified by <pm_id>')
-  .action(function(pm_id, separator) {
+  .action(function (pm_id, separator) {
     pm2.attach(pm_id, separator);
   });
 
@@ -684,7 +685,7 @@ commander.command('attach <pm_id> [command separator]')
 //
 commander.command('resurrect')
   .description('resurrect previously dumped processes')
-  .action(failOnUnknown(function() {
+  .action(failOnUnknown(function () {
     console.log(cst.PREFIX_MSG + 'Resurrecting');
     pm2.resurrect();
   }));
@@ -694,7 +695,7 @@ commander.command('resurrect')
 //
 commander.command('unstartup [platform]')
   .description('disable the pm2 startup hook')
-  .action(function(platform) {
+  .action(function (platform) {
     pm2.uninstallStartup(platform, commander);
   });
 
@@ -703,7 +704,7 @@ commander.command('unstartup [platform]')
 //
 commander.command('startup [platform]')
   .description('enable the pm2 startup hook')
-  .action(function(platform) {
+  .action(function (platform) {
     pm2.startup(platform, commander);
   });
 
@@ -712,7 +713,7 @@ commander.command('startup [platform]')
 //
 commander.command('logrotate')
   .description('copy default logrotate configuration')
-  .action(function(cmd) {
+  .action(function (cmd) {
     pm2.logrotate(commander);
   });
 
@@ -723,43 +724,43 @@ commander.command('logrotate')
 commander.command('ecosystem [mode]')
   .alias('init')
   .description('generate a process conf file. (mode = null or simple)')
-  .action(function(mode) {
+  .action(function (mode) {
     pm2.generateSample(mode);
   });
 
 commander.command('reset <name|id|all>')
   .description('reset counters for process')
-  .action(function(proc_id) {
+  .action(function (proc_id) {
     pm2.reset(proc_id);
   });
 
 commander.command('describe <name|id>')
   .description('describe all parameters of a process')
-  .action(function(proc_id) {
+  .action(function (proc_id) {
     pm2.describe(proc_id);
   });
 
 commander.command('desc <name|id>')
   .description('(alias) describe all parameters of a process')
-  .action(function(proc_id) {
+  .action(function (proc_id) {
     pm2.describe(proc_id);
   });
 
 commander.command('info <name|id>')
   .description('(alias) describe all parameters of a process')
-  .action(function(proc_id) {
+  .action(function (proc_id) {
     pm2.describe(proc_id);
   });
 
 commander.command('show <name|id>')
   .description('(alias) describe all parameters of a process')
-  .action(function(proc_id) {
+  .action(function (proc_id) {
     pm2.describe(proc_id);
   });
 
 commander.command('env <id>')
   .description('list all environment variables of a process id')
-  .action(function(proc_id) {
+  .action(function (proc_id) {
     pm2.env(proc_id);
   });
 
@@ -770,25 +771,25 @@ commander
   .command('list')
   .alias('ls')
   .description('list all processes')
-  .action(function() {
+  .action(function () {
     pm2.list(commander)
   });
 
 commander.command('l')
   .description('(alias) list all processes')
-  .action(function() {
+  .action(function () {
     pm2.list()
   });
 
 commander.command('ps')
   .description('(alias) list all processes')
-  .action(function() {
+  .action(function () {
     pm2.list()
   });
 
 commander.command('status')
   .description('(alias) list all processes')
-  .action(function() {
+  .action(function () {
     pm2.list()
   });
 
@@ -796,13 +797,13 @@ commander.command('status')
 // List in raw json
 commander.command('jlist')
   .description('list all processes in JSON format')
-  .action(function() {
+  .action(function () {
     pm2.jlist()
   });
 
 commander.command('sysmonit')
   .description('start system monitoring daemon')
-  .action(function() {
+  .action(function () {
     pm2.launchSysMonitoring()
   })
 
@@ -810,14 +811,14 @@ commander.command('slist')
   .alias('sysinfos')
   .option('-t --tree', 'show as tree')
   .description('list system infos in JSON')
-  .action(function(opts) {
+  .action(function (opts) {
     pm2.slist(opts.tree)
   })
 
 // List in prettified Json
 commander.command('prettylist')
   .description('print json in a prettified JSON')
-  .action(failOnUnknown(function() {
+  .action(failOnUnknown(function () {
     pm2.jlist(true);
   }));
 
@@ -826,20 +827,20 @@ commander.command('prettylist')
 //
 commander.command('monit')
   .description('launch termcaps monitoring')
-  .action(function() {
+  .action(function () {
     pm2.dashboard();
   });
 
 commander.command('imonit')
   .description('launch legacy termcaps monitoring')
-  .action(function() {
+  .action(function () {
     pm2.monit();
   });
 
 commander.command('dashboard')
   .alias('dash')
   .description('launch dashboard with monitoring and logs')
-  .action(function() {
+  .action(function () {
     pm2.dashboard();
   });
 
@@ -849,10 +850,10 @@ commander.command('dashboard')
 //
 
 commander.command('flush [api]')
-.description('flush logs')
-.action(function(api) {
-  pm2.flush(api);
-});
+  .description('flush logs')
+  .action(function (api) {
+    pm2.flush(api);
+  });
 
 /* old version
 commander.command('flush')
@@ -866,7 +867,7 @@ commander.command('flush')
 //
 commander.command('reloadLogs')
   .description('reload all logs')
-  .action(function() {
+  .action(function () {
     pm2.reloadLogs();
   });
 
@@ -884,18 +885,18 @@ commander.command('logs [id|name|namespace]')
   .option('--nostream', 'print logs without lauching the log stream')
   .option('--highlight [value]', 'highlights the given value')
   .description('stream logs file. Default stream all logs')
-  .action(function(id, cmd) {
+  .action(function (id, cmd) {
     var Logs = require('../API/Log.js');
 
     if (!id) id = 'all';
 
     var line = 15;
-    var raw  = false;
-    var exclusive = false;
+    var raw = false;
+    var exclusive = "";
     var timestamp = false;
     var highlight = false;
 
-    if(!isNaN(parseInt(cmd.lines))) {
+    if (!isNaN(parseInt(cmd.lines))) {
       line = parseInt(cmd.lines);
     }
 
@@ -930,8 +931,8 @@ commander.command('logs [id|name|namespace]')
 //
 commander.command('kill')
   .description('kill daemon')
-  .action(failOnUnknown(function(arg) {
-    pm2.killDaemon(function() {
+  .action(failOnUnknown(function (arg) {
+    pm2.killDaemon(function () {
       process.exit(cst.SUCCESS_EXIT);
     });
   }));
@@ -942,7 +943,7 @@ commander.command('kill')
 
 commander.command('pull <name> [commit_id]')
   .description('updates repository for a given app')
-  .action(function(pm2_name, commit_id) {
+  .action(function (pm2_name, commit_id) {
 
     if (commit_id !== undefined) {
       pm2._pullCommitId({
@@ -959,7 +960,7 @@ commander.command('pull <name> [commit_id]')
 //
 commander.command('forward <name>')
   .description('updates repository to the next commit for a given app')
-  .action(function(pm2_name) {
+  .action(function (pm2_name) {
     pm2.forward(pm2_name);
   });
 
@@ -968,7 +969,7 @@ commander.command('forward <name>')
 //
 commander.command('backward <name>')
   .description('downgrades repository to the previous commit for a given app')
-  .action(function(pm2_name) {
+  .action(function (pm2_name) {
     pm2.backward(pm2_name);
   });
 
@@ -977,7 +978,7 @@ commander.command('backward <name>')
 //
 commander.command('deepUpdate')
   .description('performs a deep update of PM2')
-  .action(function() {
+  .action(function () {
     pm2.deepUpdate();
   });
 
@@ -997,7 +998,7 @@ commander.command('serve [path] [port]')
   });
 
 commander.command('autoinstall')
-  .action(function() {
+  .action(function () {
     pm2.autoinstall()
   })
 
@@ -1013,7 +1014,7 @@ commander.command('examples')
 // Catch all
 //
 commander.command('*')
-  .action(function() {
+  .action(function () {
     console.log(cst.PREFIX_MSG_ERR + chalk.bold('Command not found\n'));
     displayUsage();
     // Check if it does not forget to close fds from RPC

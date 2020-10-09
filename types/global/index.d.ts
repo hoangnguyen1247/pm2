@@ -7,5 +7,8 @@ declare global {
   }
 
   interface define {
+    [key: string]: any
   }
+
+  function define(val: any): void;
 }

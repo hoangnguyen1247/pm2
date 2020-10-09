@@ -1,14 +1,14 @@
 
-import cst          from '../../../constants';
-import Common       from '../../Common';
-import chalk       from 'chalk';
-import fs           from 'fs';
-import KMDaemon     from '@pm2/agent/src/InteractorClient';
-import pkg          from '../../../package.json';
+import cst from '../../../constants';
+import Common from '../../Common';
+import chalk from 'chalk';
+import fs from 'fs';
+import KMDaemon from '@pm2/agent/src/InteractorClient';
+import pkg from '../../../package.json';
 
-module.exports = function(CLI) {
+export default function (CLI) {
 
-  CLI.prototype.linkManagement = function(cmd, public_key, machine, opts, cb) {
+  CLI.prototype.linkManagement = function (cmd, public_key, machine, opts, cb) {
     var that = this;
 
     // pm2 link stop || kill
@@ -16,7 +16,7 @@ module.exports = function(CLI) {
       that.gl_is_km_linked = false
       console.log(cst.PM2_IO_MSG + ' Stopping agent...');
 
-      return that.killAgent(function(err) {
+      return that.killAgent(function (err) {
         if (err) {
           Common.printError(err);
           return process.exit(cst.ERROR_EXIT);
@@ -32,7 +32,7 @@ module.exports = function(CLI) {
     // pm2 link info
     if (cmd == 'info') {
       console.log(cst.PM2_IO_MSG + ' Getting agent information...');
-      that.agentInfos(function(err, infos) {
+      that.agentInfos(function (err, infos) {
         if (err) {
           console.error(cst.PM2_IO_MSG_ERR + ' ' + err.message);
           return that.exitCli(cst.ERROR_EXIT);
@@ -47,10 +47,10 @@ module.exports = function(CLI) {
     if (cmd == 'delete') {
       that.gl_is_km_linked = false
       console.log(cst.PM2_IO_MSG + ' Permanently disable agent...');
-      that.killAgent(function(err) {
+      that.killAgent(function (err) {
         try {
           fs.unlinkSync(cst.INTERACTION_CONF);
-        } catch(e) {
+        } catch (e) {
           console.log(cst.PM2_IO_MSG + ' No interaction config file found');
           return process.exit(cst.SUCCESS_EXIT);
         }
@@ -75,10 +75,10 @@ module.exports = function(CLI) {
     }
     else
       infos = {
-        public_key : public_key,
-        secret_key : cmd,
-        machine_name : machine,
-        info_node : opts.infoNode || null,
+        public_key: public_key,
+        secret_key: cmd,
+        machine_name: machine,
+        info_node: opts.infoNode || null,
         pm2_version: pkg.version
       }
 
@@ -98,13 +98,13 @@ module.exports = function(CLI) {
     that.link(infos, cb)
   };
 
-  CLI.prototype.link = function(infos, cb) {
+  CLI.prototype.link = function (infos, cb) {
     var that = this;
 
     if (infos && !infos.machine_name)
       infos.machine_name = require('os').hostname() + '-' + require('crypto').randomBytes(2).toString('hex')
 
-    KMDaemon.launchAndInteract(cst, infos, function(err, dt) {
+    KMDaemon.launchAndInteract(cst, infos, function (err, dt) {
       if (err) {
         Common.printError(cst.PM2_IO_MSG + ' Run `$ pm2 plus` to connect')
         return that.exitCli(cst.ERROR_EXIT);
@@ -117,24 +117,24 @@ module.exports = function(CLI) {
     });
   };
 
-  CLI.prototype.agentInfos = function(cb) {
-    KMDaemon.getInteractInfo(this._conf, function(err, data) {
+  CLI.prototype.agentInfos = function (cb) {
+    KMDaemon.getInteractInfo(this._conf, function (err, data) {
       if (err)
         return cb(Common.retErr(err));
       return cb(null, data);
     });
   };
 
-  CLI.prototype.killAgent = function(cb) {
+  CLI.prototype.killAgent = function (cb) {
     var that = this;
-    KMDaemon.killInteractorDaemon(that._conf, function(err) {
+    KMDaemon.killInteractorDaemon(that._conf, function (err) {
       if (err)
         return cb ? cb(Common.retErr(err)) : that.exitCli(cst.SUCCESS_EXIT);
       return cb ? cb(null) : that.exitCli(cst.SUCCESS_EXIT);
     });
   };
 
-  CLI.prototype.unlink = function(cb) {
+  CLI.prototype.unlink = function (cb) {
     this.linkManagement('delete', cb);
   };
 };

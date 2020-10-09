@@ -1,18 +1,15 @@
+import commander from 'commander';
 
-'use strict';
-
-var commander = require('commander');
-
-var PM2       = require('../..');
-var Log       = require('../../lib/API/Log');
-var cst       = require('../../constants.js');
-var pkg       = require('../../package.json');
-var path      = require('path');
+import PM2 from '../API';
+import Log from '../API/Log';
+import cst from '../../constants.js';
+import pkg from '../../package.json';
+import path from 'path';
 
 var pm2;
 
 // Do not print banner
-process.env.PM2_DISCRETE_MODE = true;
+process.env.PM2_DISCRETE_MODE = "true";
 
 commander.version(pkg.version)
   .description('pm2-runtime is an automatic pmx injection that runs in simulated no-daemon environment')
@@ -28,23 +25,23 @@ commander.version(pkg.version)
   .usage('pm2-runtime app.js');
 
 commander.command('*')
-  .action(function(cmd){
-    pm2 = new PM2.custom({
-      pm2_home : path.join(process.env.HOME, '.pm3'),
-      secret_key : cst.SECRET_KEY || commander.secret,
-      public_key : cst.PUBLIC_KEY || commander.public,
-      machine_name : cst.MACHINE_NAME || commander.machineName
+  .action(function (cmd) {
+    pm2 = new PM2({
+      pm2_home: path.join(process.env.HOME, '.pm3'),
+      secret_key: cst.SECRET_KEY || commander.secret,
+      public_key: cst.PUBLIC_KEY || commander.public,
+      machine_name: cst.MACHINE_NAME || commander.machineName
     });
 
-    pm2.connect(function() {
+    pm2.connect(function () {
       if (commander.web) {
         var port = commander.web === true ? cst.WEB_PORT : commander.web;
         pm2.web(port);
       }
 
-      pm2.start(cmd, commander, function(err, obj) {
+      pm2.start(cmd, commander, function (err, obj) {
         if (process.env.PM2_RUNTIME_DEBUG) {
-          return pm2.disconnect(function() {});
+          return pm2.disconnect(function () { });
         }
 
         if (err) {
@@ -55,7 +52,7 @@ commander.command('*')
         var pm_id = obj[0].pm2_env.pm_id;
 
         if (commander.instances == undefined) {
-          return pm2.attach(pm_id, function() {
+          return pm2.attach(pm_id, function () {
             exitPM2();
           });
         }
@@ -75,11 +72,11 @@ if (process.argv.length == 2) {
   process.exit(1);
 }
 
-process.on('SIGINT', function() {
+process.on('SIGINT', function () {
   exitPM2();
 });
 
-process.on('SIGTERM', function() {
+process.on('SIGTERM', function () {
   exitPM2();
 });
 
@@ -91,11 +88,11 @@ function exitPM2() {
     return process.exit(0);
 
   if (commander.fastBoot) {
-    return pm2.delete('all', function() {
+    return pm2.delete('all', function () {
       process.exit(0);
     });
   }
-  pm2.kill(function() {
+  pm2.kill(function () {
     process.exit(0);
   });
 }

@@ -3,19 +3,19 @@
 
 process.env.PM2_NO_INTERACTION = 'true';
 // Do not print banner
-process.env.PM2_DISCRETE_MODE = true;
+process.env.PM2_DISCRETE_MODE = "true";
 
-var commander = require('commander');
+import commander from 'commander';
 
-var PM2       = require('../..');
-var Log       = require('../API/Log');
-var cst       = require('../../constants.js');
-var pkg       = require('../../package.json');
-var chalk     = require('chalk');
-var path      = require('path');
-var fmt       = require('../tools/fmt.js');
-var exec      = require('child_process').exec;
-var os        = require('os');
+import PM2       from '../API';
+import Log       from '../API/Log';
+import cst       from '../../constants';
+import pkg       from '../../package.json';
+import chalk     from 'chalk';
+import path      from 'path';
+import * as fmt       from '../tools/fmt';
+import { exec }      from 'child_process';
+import os        from 'os';
 
 commander.version(pkg.version)
   .description('pm2-dev monitor for any file changes and automatically restart it')
@@ -31,7 +31,7 @@ commander.version(pkg.version)
   .option('--auto-exit', 'exit if all processes are errored/stopped or 0 apps launched')
   .usage('pm2-dev app.js');
 
-var pm2 = new PM2.custom({
+var pm2: any = new PM2({
   pm2_home : path.join(os.homedir ? os.homedir() : (process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE), '.pm2-dev')
 });
 
@@ -39,7 +39,7 @@ pm2.connect(function() {
   commander.parse(process.argv);
 });
 
-function postExecCmd(command, cb) {
+function postExecCmd(command, cb?) {
   var exec_cmd = exec(command);
 
   if (commander.silentExec !== true) {
@@ -150,7 +150,7 @@ function exitPM2() {
     process.exit(0);
 }
 
-function autoExit(final) {
+function autoExit(final?) {
   setTimeout(function() {
     pm2.list(function(err, apps) {
       if (err) console.error(err.stack || err);

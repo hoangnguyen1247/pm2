@@ -7,7 +7,7 @@
 
   if (typeof exports === 'object') {
     module.exports = factory();
-  } else if (typeof global.define === 'function' && global.define.amd) {
+  } else if (typeof global.define === 'function' && global.define["amd"]) {
     global.define(factory);
   } else {
     root.treeify = factory();

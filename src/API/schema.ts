@@ -1,4 +1,4 @@
-{
+export default {
   "script": {
     "type": "string",
     "require": true,

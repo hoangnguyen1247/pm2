@@ -14,13 +14,13 @@ function getDefaultPM2Home() {
   if (process.env.PM2_HOME)
     PM2_ROOT_PATH = process.env.PM2_HOME;
   else if (process.env.HOME && !process.env.HOMEPATH)
-    PM2_ROOT_PATH = p.resolve(process.env.HOME, '.pm2');
+    PM2_ROOT_PATH = p.resolve(process.env.HOME, '.pm2t');
   else if (process.env.HOME || process.env.HOMEPATH)
-    PM2_ROOT_PATH = p.resolve(process.env.HOMEDRIVE, process.env.HOME || process.env.HOMEPATH, '.pm2');
+    PM2_ROOT_PATH = p.resolve(process.env.HOMEDRIVE, process.env.HOME || process.env.HOMEPATH, '.pm2t');
   else {
     console.error('[PM2][Initialization] Environment variable HOME (Linux) or HOMEPATH (Windows) are not set!');
-    console.error('[PM2][Initialization] Defaulting to /etc/.pm2');
-    PM2_ROOT_PATH = p.resolve('/etc', '.pm2');
+    console.error('[PM2][Initialization] Defaulting to /etc/.pm2t');
+    PM2_ROOT_PATH = p.resolve('/etc', '.pm2t');
   }
 
   debug('pm2 home resolved to %s', PM2_ROOT_PATH, process.env.HOME);
@@ -54,8 +54,8 @@ module.exports = function(PM2_HOME) {
     DEFAULT_LOG_PATH         : p.resolve(PM2_HOME, 'logs'),
     DEFAULT_MODULE_PATH      : p.resolve(PM2_HOME, 'modules'),
     PM2_IO_ACCESS_TOKEN      : p.resolve(PM2_HOME, 'pm2-io-token'),
-    DUMP_FILE_PATH           : p.resolve(PM2_HOME, 'dump.pm2'),
-    DUMP_BACKUP_FILE_PATH    : p.resolve(PM2_HOME, 'dump.pm2.bak'),
+    DUMP_FILE_PATH           : p.resolve(PM2_HOME, 'dump.pm2t'),
+    DUMP_BACKUP_FILE_PATH    : p.resolve(PM2_HOME, 'dump.pm2t.bak'),
 
     DAEMON_RPC_PORT          : p.resolve(PM2_HOME, 'rpc.sock'),
     DAEMON_PUB_PORT          : p.resolve(PM2_HOME, 'pub.sock'),

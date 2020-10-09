@@ -29,6 +29,7 @@ var Client = function (opts) {
     this.conf = opts.conf;
   }
 
+  this.sub_sock = {};
   this.daemon_mode = typeof (opts.daemon_mode) === 'undefined' ? true : opts.daemon_mode;
   this.pm2_home = this.conf.PM2_ROOT_PATH;
   this.secret_key = opts.secret_key;
@@ -476,7 +477,7 @@ Client.prototype.disconnectBus = function disconnectBus(cb) {
     });
 
     timer = setTimeout(function () {
-      if (Client.sub_sock.destroy)
+      if (that.sub_sock.destroy)
         that.sub_sock.destroy();
       return cb();
     }, 200);

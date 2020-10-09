@@ -9,7 +9,7 @@
             "es7"
         ],
         "sourceMap": true,
-        "outDir": "./lib",
+        "outDir": "./lib2",
         "rootDir": ".",
         "declaration": true,
         "declarationMap": false,

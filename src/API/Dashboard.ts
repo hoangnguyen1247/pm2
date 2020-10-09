@@ -9,6 +9,7 @@ import p          from 'path';
 import blessed    from 'blessed';
 import debugLogger      from 'debug';
 import { sprintf }   from 'sprintf-js';
+import moment from 'moment';
 
 const debug = debugLogger('pm2:monit');
 // Total memory
@@ -414,7 +415,7 @@ module.exports = Dashboard;
 
 function timeSince(date) {
 
-  var seconds = Math.floor((new Date() - date) / 1000);
+  var seconds = Math.floor(moment().unix() - moment(date).unix());
 
   var interval = Math.floor(seconds / 31536000);
 

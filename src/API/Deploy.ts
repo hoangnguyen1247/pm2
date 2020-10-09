@@ -4,10 +4,10 @@
  * can be found in the LICENSE file.
  */
 
-import fs      from 'fs';
-import cst     from '../../constants.js';
-import Utility from '../Utility.js';
-import Common  from '../Common.js';
+import fs from 'fs';
+import cst from '../../constants';
+import Utility from '../Utility';
+import Common from '../Common';
 
 function deployHelper() {
   console.log('');
@@ -50,8 +50,8 @@ function deployHelper() {
   console.log('');
 };
 
-module.exports = function(CLI) {
-  CLI.prototype.deploy = function(file, commands, cb) {
+export default function (CLI) {
+  CLI.prototype.deploy = function (file, commands, cb) {
     var that = this;
 
     if (file == 'help') {
@@ -71,7 +71,7 @@ module.exports = function(CLI) {
       file = Utility.whichFileExists(defaultConfigNames);
 
       if (!file) {
-        Common.printError('Not any default deployment file exists.'+
+        Common.printError('Not any default deployment file exists.' +
           ' Allowed default config file names are: ' + defaultConfigNames.join(', '));
         return cb ? cb('Not any default ecosystem file present') : that.exitCli(cst.ERROR_EXIT);
       }
@@ -102,7 +102,7 @@ module.exports = function(CLI) {
       json_conf.deploy[env]['post-deploy'] = 'pm2 startOrRestart ' + file + ' --env ' + env;
     }
 
-    require('pm2-deploy').deployForEnv(json_conf.deploy, env, args, function(err, data) {
+    require('pm2-deploy').deployForEnv(json_conf.deploy, env, args, function (err, data) {
       if (err) {
         Common.printError('Deploy failed');
         Common.printError(err.message || err);

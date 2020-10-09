@@ -30,6 +30,24 @@ import Configuration from './Configuration';
 import semver from 'semver';
 import sexec from './tools/sexec';
 
+//////////////////////////
+// Load all API methods //
+//////////////////////////
+
+import APIExtra from './API/Extra';
+import APIDeploy from './API/Deploy';
+import APIModule from './API/Modules/index';
+
+import APIPlusLink from './API/pm2-plus/link';
+import APIPlusProcess from './API/pm2-plus/process-selector';
+import APIPlusHelper from './API/pm2-plus/helpers';
+
+import APIConfig from './API/Configuration';
+import APIVersion from './API/Version';
+import APIStartup from './API/Startup';
+import APIMgnt from './API/LogManagement';
+import APIContainer from './API/Containerizer';
+
 var debug = debugLogger('pm2:cli');
 var IMMUTABLE_MSG = chalk.bold.blue('Use --update-env to update environment variables');
 
@@ -79,7 +97,7 @@ class API {
   launchAll: (data, cb) => void;
   getVersion: (err, res?) => void;
   dump: (err) => void;
-  resurrect: (err) => void;
+  resurrect: (err?) => void;
 
   streamLogs: (a, b, c, d, e) => void;
 
@@ -191,7 +209,7 @@ class API {
    *
    * @param {Function} cb callback once pm2 is ready for commands
    */
-  connect (noDaemon, cb) {
+  connect (noDaemon, cb?) {
     var that = this;
     this.start_timer = new Date();
 
@@ -253,7 +271,7 @@ class API {
    *
    * @param {Function} [cb] optional callback once connection closed
    */
-  disconnect (cb) {
+  disconnect (cb?) {
     var that = this;
 
     if (!cb) cb = function() {};
@@ -376,7 +394,7 @@ class API {
    *
    * @method resetMetaProcess
    */
-  reset (process_name, cb) {
+  reset (process_name, cb?) {
     var that = this;
 
     function processIds(ids, cb) {
@@ -423,7 +441,7 @@ class API {
    *
    * @param {Function} cb callback when pm2 has been upgraded
    */
-  update (cb) {
+  update (cb?) {
     var that = this;
 
     Common.printOut('Be sure to have the latest version by doing `npm install pm2@latest -g` before doing this procedure.');
@@ -472,7 +490,7 @@ class API {
    * @param {Object} opts         Options
    * @param {Function} cb         Callback
    */
-  reload (process_name, opts, cb) {
+  reload (process_name, opts, cb?) {
     var that = this;
 
     if (typeof(opts) == "function") {
@@ -560,7 +578,7 @@ class API {
    * @param {String} process_name Application Name / Process id / Application file / 'all'
    * @param {Function} cb Callback
    */
-  delete (process_name, jsonVia, cb) {
+  delete (process_name, jsonVia, cb?) {
     var that = this;
 
     if (typeof(jsonVia) === "function") {
@@ -624,7 +642,7 @@ class API {
    *
    * @param {Function} cb Callback
    */
-  list (opts, cb) {
+  list (opts?, cb?) {
     var that = this;
 
     if (typeof(opts) == 'function') {
@@ -934,7 +952,7 @@ class API {
    *
    * @private
    */
-  _startJson (file, opts, action, pipe, cb?) {
+  _startJson (file, opts, action, pipe?, cb?) {
     var config: any     = {};
     var appConf: any[]    = [];
     var staticConf = [];
@@ -1673,7 +1691,7 @@ class API {
     return appConf;
   }
 
-  getProcessIdByName (name, cb) {
+  getProcessIdByName (name, cb?) {
     var that = this;
 
     this.Client.getProcessIdByName(name, function(err, id) {
@@ -1692,7 +1710,7 @@ class API {
    * @param {} debug
    * @return
    */
-  jlist (debug) {
+  jlist (debug?) {
     var that = this;
 
     that.Client.executeRemote('getMonitorData', {}, function(err, list) {
@@ -1825,7 +1843,7 @@ class API {
    * Scale up/down a process
    * @method scale
    */
-  scale (app_name, number, cb) {
+  scale (app_name, number, cb?) {
     var that = this;
 
     function addProcs(proc, value, cb) {
@@ -1892,7 +1910,7 @@ class API {
    * @param {} pm2_id
    * @return
    */
-  describe (pm2_id, cb) {
+  describe (pm2_id, cb?) {
     var that = this;
 
     var found_proc = [];
@@ -1943,23 +1961,22 @@ class API {
   }
 };
 
-
 //////////////////////////
 // Load all API methods //
 //////////////////////////
 
-require('./API/Extra.js')(API);
-require('./API/Deploy.js')(API);
-require('./API/Modules/index.js')(API);
+APIExtra(API);
+APIDeploy(API);
+APIModule(API);
 
-require('./API/pm2-plus/link.js')(API);
-require('./API/pm2-plus/process-selector.js')(API);
-require('./API/pm2-plus/helpers.js')(API);
+APIPlusLink(API);
+APIPlusProcess(API);
+APIPlusHelper(API);
 
-require('./API/Configuration.js')(API);
-require('./API/Version.js')(API);
-require('./API/Startup.js')(API);
-require('./API/LogManagement.js')(API);
-require('./API/Containerizer.js')(API);
+APIConfig(API);
+APIVersion(API);
+APIStartup(API);
+APIMgnt(API);
+APIContainer(API);
 
 export default API;

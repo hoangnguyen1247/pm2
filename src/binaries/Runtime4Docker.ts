@@ -1,17 +1,15 @@
-'use strict';
-
 /**
  * Specialized PM2 CLI for Containers
  */
-var commander = require('commander');
-var PM2       = require('../..');
-var Log       = require('../../lib/API/Log');
-var cst       = require('../../constants.js');
-var pkg       = require('../../package.json');
-var path      = require('path');
-var DEFAULT_FAIL_COUNT = 3;
+import commander from 'commander';
+import PM2       from '../API';
+import Log       from '../API/Log';
+import cst       from '../../constants';
+import pkg       from '../../package.json';
+import path      from 'path';
+const DEFAULT_FAIL_COUNT = "3";
 
-process.env.PM2_DISCRETE_MODE = true;
+process.env.PM2_DISCRETE_MODE = "true";
 
 commander.version(pkg.version)
   .description('pm2-runtime is a drop-in replacement Node.js binary for containers')
@@ -62,7 +60,7 @@ if (process.argv.length == 2) {
 var Runtime = {
   pm2 : null,
   instanciate : function(cmd) {
-    this.pm2 = new PM2.custom({
+    this.pm2 = new PM2({
       pm2_home : process.env.PM2_HOME || path.join(process.env.HOME, '.pm2'),
       secret_key : cst.SECRET_KEY || commander.secret,
       public_key : cst.PUBLIC_KEY || commander.public,
@@ -137,7 +135,7 @@ var Runtime = {
   /**
    * Exit runtime mgmt
    */
-  exit : function(code) {
+  exit : function(code?) {
     if (!this.pm2) return process.exit(1);
 
     this.pm2.kill(function() {
@@ -149,7 +147,7 @@ var Runtime = {
    * Exit current PM2 instance if 0 app is online
    * function activated via --auto-exit
    */
-  autoExitWorker : function(fail_count) {
+  autoExitWorker : function(fail_count?) {
     var interval = 2000;
 
     if (typeof(fail_count) =='undefined')
