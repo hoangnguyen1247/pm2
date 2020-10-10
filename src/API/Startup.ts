@@ -3,18 +3,18 @@
  * Use of this source code is governed by a license that
  * can be found in the LICENSE file.
  */
-import chalk        from 'chalk';
-import path         from 'path';
-import fs           from 'fs';
+import chalk from 'chalk';
+import path from 'path';
+import fs from 'fs';
 import forEachLimit from 'async/forEachLimit';
-import eachLimit    from 'async/eachLimit';
-import Common       from '../Common.js';
-import cst          from '../../constants.js';
-import util 	       from 'util';
-import { tmpdir as tmpPath }     from 'os';
-import which        from '../tools/which.js';
+import eachLimit from 'async/eachLimit';
+import Common from '../Common';
+import cst from '../../constants';
+import util from 'util';
+import { tmpdir as tmpPath } from 'os';
+import which from '../tools/which';
 import sexec from '../tools/sexec';
-export default function(CLI) {
+export default function (CLI) {
   /**
    * If command is launched without root right
    * Display helper
@@ -25,7 +25,7 @@ export default function(CLI) {
       console.log('sudo env PATH=$PATH:' + path.dirname(process.execPath) + ' pm2 ' + opts.args[1].name() + ' ' + platform + ' -u ' + opts.user + ' --hp ' + process.env.HOME);
       return cb(new Error('You have to run this with elevated rights'));
     }
-    return sexec('whoami', {silent: true}, function(err, stdout, stderr) {
+    return sexec('whoami', { silent: true }, function (err, stdout, stderr) {
       console.log('sudo env PATH=$PATH:' + path.dirname(process.execPath) + ' ' + require.main.filename + ' ' + opts.args[1].name() + ' ' + platform + ' -u ' + stdout.trim() + ' --hp ' + process.env.HOME);
       return cb(new Error('You have to run this with elevated rights'));
     });
@@ -36,14 +36,14 @@ export default function(CLI) {
    */
   function detectInitSystem() {
     var hash_map = {
-      'systemctl'  : 'systemd',
+      'systemctl': 'systemd',
       'update-rc.d': 'upstart',
-      'chkconfig'  : 'systemv',
-      'rc-update'  : 'openrc',
-      'launchctl'  : 'launchd',
-      'sysrc'      : 'rcd',
-      'rcctl'      : 'rcd-openbsd',
-      'svcadm'     : 'smf'
+      'chkconfig': 'systemv',
+      'rc-update': 'openrc',
+      'launchctl': 'launchd',
+      'sysrc': 'rcd',
+      'rcctl': 'rcd-openbsd',
+      'svcadm': 'smf'
     };
     var init_systems = Object.keys(hash_map);
 
@@ -61,7 +61,7 @@ export default function(CLI) {
     return hash_map[init_systems[i]];
   }
 
-  CLI.prototype.uninstallStartup = function(platform, opts, cb) {
+  CLI.prototype.uninstallStartup = function (platform, opts, cb) {
     var commands;
     var that = this;
     var actual_platform = detectInitSystem();
@@ -83,7 +83,7 @@ export default function(CLI) {
       throw new Error('Init system not found')
 
     if (!cb) {
-      cb = function(err, data) {
+      cb = function (err, data) {
         if (err)
           return that.exitCli(cst.ERROR_EXIT);
         return that.exitCli(cst.SUCCESS_EXIT);
@@ -98,76 +98,76 @@ export default function(CLI) {
       platform = 'oldsystem';
     }
 
-    switch(platform) {
-    case 'systemd':
-      commands = [
-        'systemctl stop ' + service_name,
-        'systemctl disable ' + service_name,
-        'rm /etc/systemd/system/' + service_name + '.service'
-      ];
-      break;
-    case 'systemv':
-      commands = [
-        'chkconfig ' + service_name + ' off',
-        'rm /etc/init.d/' + service_name
-      ];
-      break;
-    case 'oldsystem':
-      Common.printOut(cst.PREFIX_MSG + 'Disabling and deleting old startup system');
-      commands = [
-        'update-rc.d pm2-init.sh disable',
-        'update-rc.d -f pm2-init.sh remove',
-        'rm /etc/init.d/pm2-init.sh'
-      ];
-      break;
-    case 'openrc':
-      service_name = openrc_service_name;
-      commands = [
-        '/etc/init.d/' + service_name + ' stop',
-        'rc-update delete ' + service_name + ' default',
-        'rm /etc/init.d/' + service_name
-      ];
-      break;
-    case 'upstart':
-      commands = [
-        'update-rc.d ' + service_name + ' disable',
-        'update-rc.d -f ' + service_name + ' remove',
-        'rm /etc/init.d/' + service_name
-      ];
-      break;
-    case 'launchd':
-      var destination = path.join(process.env.HOME, 'Library/LaunchAgents/' + launchd_service_name + '.plist');
-      commands = [
-        'launchctl remove ' + launchd_service_name + ' || true',
-        'rm ' + destination
-      ];
-      break;
-    case 'rcd':
-      service_name = (opts.serviceName || 'pm2_' + user);
-      commands = [
-        '/usr/local/etc/rc.d/' + service_name + ' stop',
-        'sysrc -x ' + service_name  + '_enable',
-        'rm /usr/local/etc/rc.d/' + service_name
-      ];
-      break;
-    case 'rcd-openbsd':
-      service_name = (opts.serviceName || 'pm2_' + user);
-      var destination = path.join('/etc/rc.d', service_name);
-      commands = [
-        'rcctl stop ' + service_name,
-        'rcctl disable ' + service_name,
-        'rm ' + destination
-      ];
-      break;
-    case 'smf':
-      service_name = (opts.serviceName || 'pm2_' + user);
-      commands = [
-        'svcadm disable ' + service_name,
-        'svccfg delete -f ' + service_name
-      ]
+    switch (platform) {
+      case 'systemd':
+        commands = [
+          'systemctl stop ' + service_name,
+          'systemctl disable ' + service_name,
+          'rm /etc/systemd/system/' + service_name + '.service'
+        ];
+        break;
+      case 'systemv':
+        commands = [
+          'chkconfig ' + service_name + ' off',
+          'rm /etc/init.d/' + service_name
+        ];
+        break;
+      case 'oldsystem':
+        Common.printOut(cst.PREFIX_MSG + 'Disabling and deleting old startup system');
+        commands = [
+          'update-rc.d pm2-init.sh disable',
+          'update-rc.d -f pm2-init.sh remove',
+          'rm /etc/init.d/pm2-init.sh'
+        ];
+        break;
+      case 'openrc':
+        service_name = openrc_service_name;
+        commands = [
+          '/etc/init.d/' + service_name + ' stop',
+          'rc-update delete ' + service_name + ' default',
+          'rm /etc/init.d/' + service_name
+        ];
+        break;
+      case 'upstart':
+        commands = [
+          'update-rc.d ' + service_name + ' disable',
+          'update-rc.d -f ' + service_name + ' remove',
+          'rm /etc/init.d/' + service_name
+        ];
+        break;
+      case 'launchd':
+        var destination = path.join(process.env.HOME, 'Library/LaunchAgents/' + launchd_service_name + '.plist');
+        commands = [
+          'launchctl remove ' + launchd_service_name + ' || true',
+          'rm ' + destination
+        ];
+        break;
+      case 'rcd':
+        service_name = (opts.serviceName || 'pm2_' + user);
+        commands = [
+          '/usr/local/etc/rc.d/' + service_name + ' stop',
+          'sysrc -x ' + service_name + '_enable',
+          'rm /usr/local/etc/rc.d/' + service_name
+        ];
+        break;
+      case 'rcd-openbsd':
+        service_name = (opts.serviceName || 'pm2_' + user);
+        var destination = path.join('/etc/rc.d', service_name);
+        commands = [
+          'rcctl stop ' + service_name,
+          'rcctl disable ' + service_name,
+          'rm ' + destination
+        ];
+        break;
+      case 'smf':
+        service_name = (opts.serviceName || 'pm2_' + user);
+        commands = [
+          'svcadm disable ' + service_name,
+          'svccfg delete -f ' + service_name
+        ]
     };
 
-    sexec(commands.join('&& '), function(code, stdout, stderr) {
+    sexec(commands.join('&& '), function (code, stdout, stderr) {
       Common.printOut(stdout);
       Common.printOut(stderr);
       if (code == 0) {
@@ -177,8 +177,8 @@ export default function(CLI) {
       }
 
       cb(null, {
-        commands : commands,
-        platform : platform
+        commands: commands,
+        platform: platform
       });
     });
   };
@@ -188,7 +188,7 @@ export default function(CLI) {
    * @method startup
    * @param {string} platform type (centos|redhat|amazon|gentoo|systemd|smf)
    */
-  CLI.prototype.startup = function(platform, opts, cb) {
+  CLI.prototype.startup = function (platform, opts, cb) {
     var that = this;
     var actual_platform = detectInitSystem();
     var user = (opts.user || process.env.USER || process.env.LOGNAME); // Use LOGNAME on Solaris-like systems
@@ -209,7 +209,7 @@ export default function(CLI) {
       throw new Error('Init system not found');
 
     if (!cb) {
-      cb = function(err, data) {
+      cb = function (err, data) {
         if (err)
           return that.exitCli(cst.ERROR_EXIT);
         return that.exitCli(cst.SUCCESS_EXIT);
@@ -225,102 +225,102 @@ export default function(CLI) {
     var template;
 
     function getTemplate(type) {
-      return fs.readFileSync(path.join(__dirname, '..', 'templates/init-scripts', type + '.tpl'), {encoding: 'utf8'});
+      return fs.readFileSync(path.join(__dirname, '..', 'templates/init-scripts', type + '.tpl'), { encoding: 'utf8' });
     }
 
-    switch(platform) {
-    case 'ubuntu':
-    case 'centos':
-    case 'arch':
-    case 'oracle':
-    case 'systemd':
-      if (opts.waitIp)
-        template = getTemplate('systemd-online');
-      else
-        template = getTemplate('systemd');
-      destination = '/etc/systemd/system/' + service_name + '.service';
-      commands = [
-        'systemctl enable ' + service_name
-      ];
-      break;
-    case 'ubuntu14':
-    case 'ubuntu12':
-    case 'upstart':
-      template = getTemplate('upstart');
-      destination = '/etc/init.d/' + service_name;
-      commands = [
-        'chmod +x ' + destination,
-        'mkdir -p /var/lock/subsys',
-        'touch /var/lock/subsys/' + service_name,
-        'update-rc.d ' + service_name + ' defaults'
-      ];
-      break;
-    case 'systemv':
-    case 'amazon':
-    case 'centos6':
-      template = getTemplate('upstart');
-      destination = '/etc/init.d/' + service_name;
-      commands = [
-        'chmod +x ' + destination,
-        'mkdir -p /var/lock/subsys',
-        'touch /var/lock/subsys/' + service_name,
-        'chkconfig --add ' + service_name,
-        'chkconfig ' + service_name + ' on',
-        'initctl list'
-      ];
-      break;
-    case 'macos':
-    case 'darwin':
-    case 'launchd':
-      template = getTemplate('launchd');
-      destination = path.join(process.env.HOME, 'Library/LaunchAgents/' + launchd_service_name + '.plist');
-      commands = [
-        'launchctl load -w ' + destination
-      ]
-      break;
-    case 'freebsd':
-    case 'rcd':
-      template = getTemplate('rcd');
-      service_name = (opts.serviceName || 'pm2_' + user);
-      destination = '/usr/local/etc/rc.d/' + service_name;
-      commands = [
-        'chmod 755 ' + destination,
-        'sysrc ' + service_name + '_enable=YES'
-      ];
-      break;
-    case 'openbsd':
-    case 'rcd-openbsd':
-      template = getTemplate('rcd-openbsd');
-      service_name = (opts.serviceName || 'pm2_' + user);
-      destination = path.join('/etc/rc.d/', service_name);
-      commands = [
-        'chmod 755 ' + destination,
-        'rcctl enable ' + service_name,
-        'rcctl start ' + service_name
-      ];
-      break;
-    case 'openrc':
-      template = getTemplate('openrc');
-      service_name = openrc_service_name;
-      destination = '/etc/init.d/' + service_name;
-      commands = [
-        'chmod +x ' + destination,
-        'rc-update add ' + service_name + ' default'
-      ];
-      break;
-    case 'smf':
-    case 'sunos':
-    case 'solaris':
-      template = getTemplate('smf');
-      service_name = (opts.serviceName || 'pm2_' + user);
-      destination = path.join(tmpPath(), service_name + '.xml');
-      commands = [
-        'svccfg import ' + destination,
-        'svcadm enable ' + service_name
-      ];
-      break;
-    default:
-      throw new Error('Unknown platform / init system name');
+    switch (platform) {
+      case 'ubuntu':
+      case 'centos':
+      case 'arch':
+      case 'oracle':
+      case 'systemd':
+        if (opts.waitIp)
+          template = getTemplate('systemd-online');
+        else
+          template = getTemplate('systemd');
+        destination = '/etc/systemd/system/' + service_name + '.service';
+        commands = [
+          'systemctl enable ' + service_name
+        ];
+        break;
+      case 'ubuntu14':
+      case 'ubuntu12':
+      case 'upstart':
+        template = getTemplate('upstart');
+        destination = '/etc/init.d/' + service_name;
+        commands = [
+          'chmod +x ' + destination,
+          'mkdir -p /var/lock/subsys',
+          'touch /var/lock/subsys/' + service_name,
+          'update-rc.d ' + service_name + ' defaults'
+        ];
+        break;
+      case 'systemv':
+      case 'amazon':
+      case 'centos6':
+        template = getTemplate('upstart');
+        destination = '/etc/init.d/' + service_name;
+        commands = [
+          'chmod +x ' + destination,
+          'mkdir -p /var/lock/subsys',
+          'touch /var/lock/subsys/' + service_name,
+          'chkconfig --add ' + service_name,
+          'chkconfig ' + service_name + ' on',
+          'initctl list'
+        ];
+        break;
+      case 'macos':
+      case 'darwin':
+      case 'launchd':
+        template = getTemplate('launchd');
+        destination = path.join(process.env.HOME, 'Library/LaunchAgents/' + launchd_service_name + '.plist');
+        commands = [
+          'launchctl load -w ' + destination
+        ]
+        break;
+      case 'freebsd':
+      case 'rcd':
+        template = getTemplate('rcd');
+        service_name = (opts.serviceName || 'pm2_' + user);
+        destination = '/usr/local/etc/rc.d/' + service_name;
+        commands = [
+          'chmod 755 ' + destination,
+          'sysrc ' + service_name + '_enable=YES'
+        ];
+        break;
+      case 'openbsd':
+      case 'rcd-openbsd':
+        template = getTemplate('rcd-openbsd');
+        service_name = (opts.serviceName || 'pm2_' + user);
+        destination = path.join('/etc/rc.d/', service_name);
+        commands = [
+          'chmod 755 ' + destination,
+          'rcctl enable ' + service_name,
+          'rcctl start ' + service_name
+        ];
+        break;
+      case 'openrc':
+        template = getTemplate('openrc');
+        service_name = openrc_service_name;
+        destination = '/etc/init.d/' + service_name;
+        commands = [
+          'chmod +x ' + destination,
+          'rc-update add ' + service_name + ' default'
+        ];
+        break;
+      case 'smf':
+      case 'sunos':
+      case 'solaris':
+        template = getTemplate('smf');
+        service_name = (opts.serviceName || 'pm2_' + user);
+        destination = path.join(tmpPath(), service_name + '.xml');
+        commands = [
+          'svccfg import ' + destination,
+          'svcadm enable ' + service_name
+        ];
+        break;
+      default:
+        throw new Error('Unknown platform / init system name');
     }
 
     /**
@@ -360,10 +360,10 @@ export default function(CLI) {
 
     Common.printOut(cst.PREFIX_MSG + 'Making script booting at startup...');
 
-    forEachLimit(commands, 1, function(command, next) {
+    forEachLimit(commands, 1, function (command, next) {
       Common.printOut(cst.PREFIX_MSG + '[-] Executing: %s...', chalk.bold(command));
 
-      sexec(command, function(code, stdout, stderr) {
+      sexec(command, function (code, stdout, stderr) {
         if (code === 0) {
           Common.printOut(cst.PREFIX_MSG + chalk.bold('[v] Command successfully executed.'));
           return next();
@@ -373,21 +373,21 @@ export default function(CLI) {
         }
       })
 
-    }, function(err) {
+    }, function (err) {
       if (err) {
         console.error(cst.PREFIX_MSG_ERR + (err.message || err));
         return cb(err);
       }
       Common.printOut(chalk.bold.blue('+---------------------------------------+'));
-      Common.printOut(chalk.bold.blue((cst.PREFIX_MSG + 'Freeze a process list on reboot via:' )));
+      Common.printOut(chalk.bold.blue((cst.PREFIX_MSG + 'Freeze a process list on reboot via:')));
       Common.printOut(chalk.bold('$ pm2 save'));
       Common.printOut('');
       Common.printOut(chalk.bold.blue(cst.PREFIX_MSG + 'Remove init script via:'));
       Common.printOut(chalk.bold('$ pm2 unstartup ' + platform));
 
       return cb(null, {
-        destination  : destination,
-        template : template
+        destination: destination,
+        template: template
       });
     });
   };
@@ -396,7 +396,7 @@ export default function(CLI) {
    * DISABLED FEATURE
    * KEEPING METHOD FOR BACKWARD COMPAT
    */
-  CLI.prototype.autodump = function(cb) {
+  CLI.prototype.autodump = function (cb) {
     return cb()
   }
 
@@ -406,11 +406,11 @@ export default function(CLI) {
    * @param {} cb
    * @return
    */
-  CLI.prototype.dump = function(force, cb) {
+  CLI.prototype.dump = function (force, cb) {
     var env_arr = [];
     var that = this;
 
-    if (typeof(force) === 'function') {
+    if (typeof (force) === 'function') {
       cb = force
       force = false
     }
@@ -418,7 +418,7 @@ export default function(CLI) {
     if (!cb)
       Common.printOut(cst.PREFIX_MSG + 'Saving current process list...');
 
-    that.Client.executeRemote('getMonitorData', {}, function(err, list) {
+    that.Client.executeRemote('getMonitorData', {}, function (err, list) {
       if (err) {
         Common.printError('Error retrieving process list: ' + err);
         return cb ? cb(Common.retErr(err)) : that.exitCli(cst.ERROR_EXIT);
@@ -438,14 +438,14 @@ export default function(CLI) {
 
           // fix : if no dump file, no process, only module and after pm2 update
           if (!fs.existsSync(cst.DUMP_FILE_PATH)) {
-            that.clearDump(function(){});
+            that.clearDump(function () { });
           }
 
           // if no process in list don't modify dump file
           // process list should not be empty
           if (cb) {
             return cb(new Error('Process list empty, cannot save empty list'));
-          } else  {
+          } else {
             Common.printOut(cst.PREFIX_MSG_WARNING + 'PM2 is not managing any process, skipping save...');
             Common.printOut(cst.PREFIX_MSG_WARNING + 'To force saving use: pm2 save --force');
             that.exitCli(cst.SUCCESS_EXIT);
@@ -481,7 +481,7 @@ export default function(CLI) {
           Common.printOut(cst.PREFIX_MSG_ERR + 'Failed to save dump file in %s', cst.DUMP_FILE_PATH);
           return that.exitCli(cst.ERROR_EXIT);
         }
-        if (cb) return cb(null, {success:true});
+        if (cb) return cb(null, { success: true });
 
         Common.printOut(cst.PREFIX_MSG + 'Successfully saved in %s', cst.DUMP_FILE_PATH);
         return that.exitCli(cst.SUCCESS_EXIT);
@@ -506,10 +506,10 @@ export default function(CLI) {
    * @param {} cb
    * @return
    */
-  CLI.prototype.clearDump = function(cb) {
+  CLI.prototype.clearDump = function (cb) {
     fs.writeFileSync(cst.DUMP_FILE_PATH, JSON.stringify([]));
 
-    if(cb && typeof cb === 'function') return cb();
+    if (cb && typeof cb === 'function') return cb();
 
     Common.printOut(cst.PREFIX_MSG + 'Successfully created %s', cst.DUMP_FILE_PATH);
     return this.exitCli(cst.SUCCESS_EXIT);
@@ -521,7 +521,7 @@ export default function(CLI) {
    * @param {} cb
    * @return
    */
-  CLI.prototype.resurrect = function(cb) {
+  CLI.prototype.resurrect = function (cb) {
     var apps = {};
     var that = this;
 
@@ -559,11 +559,11 @@ export default function(CLI) {
     try {
       apps = readDumpFile(cst.DUMP_FILE_PATH);
       processes = parseDumpFile(cst.DUMP_FILE_PATH, apps);
-    } catch(e) {
+    } catch (e) {
       try {
         apps = readDumpFile(cst.DUMP_BACKUP_FILE_PATH);
         processes = parseDumpFile(cst.DUMP_BACKUP_FILE_PATH, apps);
-      } catch(e) {
+      } catch (e) {
         Common.printError(cst.PREFIX_MSG_ERR + 'No processes saved; DUMP file doesn\'t exist');
         // if (cb) return cb(Common.retErr(e));
         // else return that.exitCli(cst.ERROR_EXIT);
@@ -571,7 +571,7 @@ export default function(CLI) {
       }
     }
 
-    that.Client.executeRemote('getMonitorData', {}, function(err, list) {
+    that.Client.executeRemote('getMonitorData', {}, function (err, list) {
       if (err) {
         Common.printError(err);
         return that.exitCli(1);
@@ -580,33 +580,33 @@ export default function(CLI) {
       var current = [];
       var target = [];
 
-      list.forEach(function(app) {
+      list.forEach(function (app) {
         if (!current[app.name])
           current[app.name] = 0;
         current[app.name]++;
       });
 
-      processes.forEach(function(app) {
+      processes.forEach(function (app) {
         if (!target[app.name])
           target[app.name] = 0;
         target[app.name]++;
       });
 
-      var tostart = Object.keys(target).filter(function(i) {
+      var tostart = Object.keys(target).filter(function (i) {
         return Object.keys(current).indexOf(i) < 0;
       })
 
-      eachLimit(processes, cst.CONCURRENT_ACTIONS, function(app, next) {
+      eachLimit(processes, cst.CONCURRENT_ACTIONS, function (app, next) {
         if (tostart.indexOf(app.name) == -1)
           return next();
-        that.Client.executeRemote('prepare', app, function(err, dt) {
+        that.Client.executeRemote('prepare', app, function (err, dt) {
           if (err)
             Common.printError(err);
           else
             Common.printOut(cst.PREFIX_MSG + 'Process %s restored', app.pm_exec_path);
           next();
         });
-      }, function(err) {
+      }, function (err) {
         return cb ? cb(null, apps) : that.speedList();
       });
     });

@@ -10,12 +10,12 @@
  * @author Alexandre Strzelewicz <as@unitech.io>
  * @project PM2
  */
-import debugLogger           from 'debug';
-import fs            from 'fs';
-import Utility       from '../Utility.js';
-import path          from 'path';
-import dayjs         from 'dayjs';
-import semver  from 'semver';
+import debugLogger from 'debug';
+import fs from 'fs';
+import Utility from '../Utility';
+import path from 'path';
+import dayjs from 'dayjs';
+import semver from 'semver';
 
 const log = debugLogger('pm2:fork_mode');
 /**
@@ -35,13 +35,13 @@ export default function ForkMode(God) {
    */
   God.forkMode = function forkMode(pm2_env, cb) {
     var command = '';
-    var args    = [];
+    var args = [];
 
     console.log(`App [${pm2_env.name}:${pm2_env.pm_id}] starting in -fork mode-`)
     var spawn = require('child_process').spawn;
 
     var interpreter = pm2_env.exec_interpreter || 'node';
-    var pidFile     = pm2_env.pm_pid_path;
+    var pidFile = pm2_env.pm_pid_path;
 
     if (interpreter !== 'none') {
       command = interpreter;
@@ -68,7 +68,7 @@ export default function ForkMode(God) {
     }
     else {
       command = pm2_env.pm_exec_path;
-      args = [ ];
+      args = [];
     }
 
     if (pm2_env.args) {
@@ -82,13 +82,13 @@ export default function ForkMode(God) {
     };
 
     // entire log std if necessary.
-    if ('pm_log_path' in pm2_env){
+    if ('pm_log_path' in pm2_env) {
       stds.std = pm2_env.pm_log_path;
     }
 
     log("stds: %j", stds);
 
-    Utility.startLogging(stds, function(err, result) {
+    Utility.startLogging(stds, function (err, result) {
       if (err) {
         God.logAndGenerateError(err);
         return cb(err);
@@ -96,13 +96,13 @@ export default function ForkMode(God) {
 
       try {
         var options: any = {
-          env      : pm2_env,
-          detached : true,
-          cwd      : pm2_env.pm_cwd || process.cwd(),
-          stdio    : ['pipe', 'pipe', 'pipe', 'ipc'] //Same as fork() in node core
+          env: pm2_env,
+          detached: true,
+          cwd: pm2_env.pm_cwd || process.cwd(),
+          stdio: ['pipe', 'pipe', 'pipe', 'ipc'] //Same as fork() in node core
         }
 
-        if (typeof(pm2_env.windowsHide) === "boolean") {
+        if (typeof (pm2_env.windowsHide) === "boolean") {
           options.windowsHide = pm2_env.windowsHide;
         } else {
           options.windowsHide = true;
@@ -117,7 +117,7 @@ export default function ForkMode(God) {
         }
 
         var cspr = spawn(command, args, options);
-      } catch(e) {
+      } catch (e) {
         God.logAndGenerateError(e);
         return cb(e);
       }
@@ -134,11 +134,11 @@ export default function ForkMode(God) {
 
       function transformLogToJson(pm2_env, type, data) {
         return JSON.stringify({
-          message : data.toString(),
-          timestamp : pm2_env.log_date_format ? dayjs().format(pm2_env.log_date_format) : new Date().toISOString(),
-          type : type,
-          process_id : cspr.pm2_env.pm_id,
-          app_name : cspr.pm2_env.name
+          message: data.toString(),
+          timestamp: pm2_env.log_date_format ? dayjs().format(pm2_env.log_date_format) : new Date().toISOString(),
+          type: type,
+          process_id: cspr.pm2_env.pm_id,
+          app_name: cspr.pm2_env.name
         }) + '\n'
       }
 
@@ -165,14 +165,14 @@ export default function ForkMode(God) {
           log_data = data.toString();
 
         God.bus.emit('log:err', {
-          process : {
-            pm_id      : cspr.pm2_env.pm_id,
-            name       : cspr.pm2_env.name,
-            rev        : (cspr.pm2_env.versioning && cspr.pm2_env.versioning.revision) ? cspr.pm2_env.versioning.revision : null,
-            namespace  : cspr.pm2_env.namespace
+          process: {
+            pm_id: cspr.pm2_env.pm_id,
+            name: cspr.pm2_env.name,
+            rev: (cspr.pm2_env.versioning && cspr.pm2_env.versioning.revision) ? cspr.pm2_env.versioning.revision : null,
+            namespace: cspr.pm2_env.namespace
           },
-          at  : Utility.getDate(),
-          data : log_data
+          at: Utility.getDate(),
+          data: log_data
         });
 
         if (Utility.checkPathIsNull(pm2_env.pm_err_log_path) &&
@@ -198,14 +198,14 @@ export default function ForkMode(God) {
           log_data = data.toString()
 
         God.bus.emit('log:out', {
-          process : {
-            pm_id      : cspr.pm2_env.pm_id,
-            name       : cspr.pm2_env.name,
-            rev        : (cspr.pm2_env.versioning && cspr.pm2_env.versioning.revision) ? cspr.pm2_env.versioning.revision : null,
-            namespace  : cspr.pm2_env.namespace
+          process: {
+            pm_id: cspr.pm2_env.pm_id,
+            name: cspr.pm2_env.name,
+            rev: (cspr.pm2_env.versioning && cspr.pm2_env.versioning.revision) ? cspr.pm2_env.versioning.revision : null,
+            namespace: cspr.pm2_env.namespace
           },
-          at  : Utility.getDate(),
-          data : log_data
+          at: Utility.getDate(),
+          data: log_data
         });
 
         if (Utility.checkPathIsNull(pm2_env.pm_out_log_path) &&
@@ -225,15 +225,15 @@ export default function ForkMode(God) {
          * Do the same in ClusterMode.js !
          *********************************/
         if (msg.data && msg.type) {
-          process.nextTick(function() {
+          process.nextTick(function () {
             return God.bus.emit(msg.type ? msg.type : 'process:msg', {
-              at      : Utility.getDate(),
-              data    : msg.data,
-              process : {
-                pm_id      : cspr.pm2_env.pm_id,
-                name       : cspr.pm2_env.name,
-                versioning : cspr.pm2_env.versioning,
-                namespace  : cspr.pm2_env.namespace
+              at: Utility.getDate(),
+              data: msg.data,
+              process: {
+                pm_id: cspr.pm2_env.pm_id,
+                name: cspr.pm2_env.name,
+                versioning: cspr.pm2_env.versioning,
+                namespace: cspr.pm2_env.namespace
               }
             });
           });
@@ -246,19 +246,19 @@ export default function ForkMode(God) {
           } else if (typeof msg == 'object' && 'cron_restart' in msg) {
             // cron onTick is invoked in the process
             return God.restartProcessId({
-              id : cspr.pm2_env.pm_id
-            }, function() {
+              id: cspr.pm2_env.pm_id
+            }, function () {
               console.log('Application %s has been restarted via CRON', cspr.pm2_env.name);
             });
           }
 
           return God.bus.emit('process:msg', {
-            at      : Utility.getDate(),
-            raw     : msg,
-            process :  {
-              pm_id      : cspr.pm2_env.pm_id,
-              name       : cspr.pm2_env.name,
-              namespace  : cspr.pm2_env.namespace
+            at: Utility.getDate(),
+            raw: msg,
+            process: {
+              pm_id: cspr.pm2_env.pm_id,
+              name: cspr.pm2_env.name,
+              namespace: cspr.pm2_env.namespace
             }
           });
         }
@@ -266,7 +266,7 @@ export default function ForkMode(God) {
 
       try {
         var pid = cspr.pid
-        if (typeof(pid) !== 'undefined')
+        if (typeof (pid) !== 'undefined')
           fs.writeFileSync(pidFile, pid.toString());
       } catch (e) {
         console.error(e.stack || e);
@@ -274,24 +274,24 @@ export default function ForkMode(God) {
 
       cspr.once('exit', function forkClose(status) {
         try {
-          for(var k in stds){
+          for (var k in stds) {
             if (stds[k] && stds[k].destroy) stds[k].destroy();
             else if (stds[k] && stds[k].end) stds[k].end();
             else if (stds[k] && stds[k].close) stds[k].close();
             stds[k] = stds[k]._file;
           }
-        } catch(e) { God.logAndGenerateError(e);}
+        } catch (e) { God.logAndGenerateError(e); }
       });
 
-      cspr._reloadLogs = function(cb) {
+      cspr._reloadLogs = function (cb) {
         try {
-          for (var k in stds){
+          for (var k in stds) {
             if (stds[k] && stds[k].destroy) stds[k].destroy();
             else if (stds[k] && stds[k].end) stds[k].end();
             else if (stds[k] && stds[k].close) stds[k].close();
             stds[k] = stds[k]._file;
           }
-        } catch(e) { God.logAndGenerateError(e);}
+        } catch (e) { God.logAndGenerateError(e); }
         //cspr.removeAllListeners();
         Utility.startLogging(stds, cb);
       };

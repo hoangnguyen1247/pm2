@@ -1,17 +1,17 @@
 import Table from 'cli-tableau';
 import chalk from 'chalk';
-import UxHelpers from './helpers.js';
-import Common from '../../Common.js';
+import UxHelpers from './helpers';
+import Common from '../../Common';
 
-var postModuleInfos = function(module_name, human_info) {
+var postModuleInfos = function (module_name, human_info) {
   var table = new Table({
-    style : {'padding-left' : 1, head : ['cyan', 'bold'], compact : true}
+    style: { 'padding-left': 1, head: ['cyan', 'bold'], compact: true }
   })
 
   var disp = {}
 
   human_info.unshift(['Module name', module_name])
-  human_info.forEach(function(info) {
+  human_info.forEach(function (info) {
     var obj = {}
     obj[chalk.bold.cyan(info[0])] = info[1]
     table.push(obj)
@@ -27,9 +27,9 @@ var postModuleInfos = function(module_name, human_info) {
  * @method describeTable
  * @param {Object} proc process list
  */
-export default function(proc) {
+export default function (proc) {
   var table = new Table({
-    style : {'padding-left' : 1, head : ['cyan', 'bold'], compact : true}
+    style: { 'padding-left': 1, head: ['cyan', 'bold'], compact: true }
   })
 
   var pm2_env = proc.pm2_env
@@ -48,38 +48,38 @@ export default function(proc) {
 
   console.log(chalk.bold.inverse(' Describing process with id %d - name %s '), pm2_env.pm_id, pm2_env.name)
   UxHelpers.safe_push(table,
-            { 'status' : UxHelpers.colorStatus(pm2_env.status) },
-            { 'name': pm2_env.name },
-            { 'namespace': pm2_env.namespace },
-            { 'version': pm2_env.version },
-            { 'restarts' : pm2_env.restart_time },
-            { 'uptime' : (pm2_env.pm_uptime && pm2_env.status == 'online') ? UxHelpers.timeSince(pm2_env.pm_uptime) : 0 },
-            { 'script path' : pm2_env.pm_exec_path },
-            { 'script args' : pm2_env.args ? (typeof pm2_env.args == 'string' ? JSON.parse(pm2_env.args.replace(/'/g, '"')):pm2_env.args).join(' ') : null },
-            { 'error log path' : pm2_env.pm_err_log_path },
-            { 'out log path' : pm2_env.pm_out_log_path },
-            { 'pid path' : pm2_env.pm_pid_path },
+    { 'status': UxHelpers.colorStatus(pm2_env.status) },
+    { 'name': pm2_env.name },
+    { 'namespace': pm2_env.namespace },
+    { 'version': pm2_env.version },
+    { 'restarts': pm2_env.restart_time },
+    { 'uptime': (pm2_env.pm_uptime && pm2_env.status == 'online') ? UxHelpers.timeSince(pm2_env.pm_uptime) : 0 },
+    { 'script path': pm2_env.pm_exec_path },
+    { 'script args': pm2_env.args ? (typeof pm2_env.args == 'string' ? JSON.parse(pm2_env.args.replace(/'/g, '"')) : pm2_env.args).join(' ') : null },
+    { 'error log path': pm2_env.pm_err_log_path },
+    { 'out log path': pm2_env.pm_out_log_path },
+    { 'pid path': pm2_env.pm_pid_path },
 
-            { 'interpreter' : pm2_env.exec_interpreter },
-            { 'interpreter args' : pm2_env.node_args.length != 0 ? pm2_env.node_args : null },
+    { 'interpreter': pm2_env.exec_interpreter },
+    { 'interpreter args': pm2_env.node_args.length != 0 ? pm2_env.node_args : null },
 
-            { 'script id' : pm2_env.pm_id },
-            { 'exec cwd' : pm2_env.pm_cwd },
+    { 'script id': pm2_env.pm_id },
+    { 'exec cwd': pm2_env.pm_cwd },
 
-            { 'exec mode' : pm2_env.exec_mode },
-            { 'node.js version' : pm2_env.node_version },
-            { 'node env': pm2_env.env.NODE_ENV },
-            { 'watch & reload' : pm2_env.watch ? chalk.green.bold('✔') : '✘' },
-            { 'unstable restarts' : pm2_env.unstable_restarts },
-            { 'created at' : created_at }
-           )
+    { 'exec mode': pm2_env.exec_mode },
+    { 'node.js version': pm2_env.node_version },
+    { 'node env': pm2_env.env.NODE_ENV },
+    { 'watch & reload': pm2_env.watch ? chalk.green.bold('✔') : '✘' },
+    { 'unstable restarts': pm2_env.unstable_restarts },
+    { 'created at': created_at }
+  )
 
-  if ('pm_log_path' in pm2_env){
-    table.splice(6, 0, {'entire log path': pm2_env.pm_log_path})
+  if ('pm_log_path' in pm2_env) {
+    table.splice(6, 0, { 'entire log path': pm2_env.pm_log_path })
   }
 
-  if ('cron_restart' in pm2_env){
-    table.splice(5, 0, {'cron restart': pm2_env.cron_restart})
+  if ('cron_restart' in pm2_env) {
+    table.splice(5, 0, { 'cron restart': pm2_env.cron_restart })
   }
 
   console.log(table.toString())
@@ -88,14 +88,14 @@ export default function(proc) {
    * Module conf display
    */
   if (pm2_env.axm_options &&
-      pm2_env.axm_options.module_conf &&
-      Object.keys(pm2_env.axm_options.module_conf).length > 0) {
+    pm2_env.axm_options.module_conf &&
+    Object.keys(pm2_env.axm_options.module_conf).length > 0) {
     var table_conf = new Table({
-      style : {'padding-left' : 1, head : ['cyan', 'bold'], compact : true}
+      style: { 'padding-left': 1, head: ['cyan', 'bold'], compact: true }
     })
     console.log('Process configuration')
 
-    Object.keys(pm2_env.axm_options.module_conf).forEach(function(key) {
+    Object.keys(pm2_env.axm_options.module_conf).forEach(function (key) {
       var tmp = {}
       tmp[key] = pm2_env.axm_options.module_conf[key]
       UxHelpers.safe_push(table_conf, tmp)
@@ -110,29 +110,29 @@ export default function(proc) {
   if (pm2_env.versioning) {
 
     var table2 = new Table({
-      style : {'padding-left' : 1, head : ['cyan', 'bold'], compact : true}
+      style: { 'padding-left': 1, head: ['cyan', 'bold'], compact: true }
     })
 
     console.log(chalk.inverse.bold(' Revision control metadata '))
     UxHelpers.safe_push(table2,
-              { 'revision control' : pm2_env.versioning.type },
-              { 'remote url' : pm2_env.versioning.url },
-              { 'repository root' : pm2_env.versioning.repo_path },
-              { 'last update' : pm2_env.versioning.update_time },
-              { 'revision' : pm2_env.versioning.revision },
-              { 'comment' :  pm2_env.versioning.comment ? pm2_env.versioning.comment.trim().slice(0, 60) : '' },
-              { 'branch' :  pm2_env.versioning.branch }
-             )
+      { 'revision control': pm2_env.versioning.type },
+      { 'remote url': pm2_env.versioning.url },
+      { 'repository root': pm2_env.versioning.repo_path },
+      { 'last update': pm2_env.versioning.update_time },
+      { 'revision': pm2_env.versioning.revision },
+      { 'comment': pm2_env.versioning.comment ? pm2_env.versioning.comment.trim().slice(0, 60) : '' },
+      { 'branch': pm2_env.versioning.branch }
+    )
     console.log(table2.toString())
   }
 
   if (pm2_env.axm_actions && Object.keys(pm2_env.axm_actions).length > 0) {
     var table_actions = new Table({
-      style : {'padding-left' : 1, head : ['cyan', 'bold'], compact : true}
+      style: { 'padding-left': 1, head: ['cyan', 'bold'], compact: true }
     })
 
     console.log(chalk.inverse.bold(' Actions available '))
-    pm2_env.axm_actions.forEach(function(action_set) {
+    pm2_env.axm_actions.forEach(function (action_set) {
       UxHelpers.safe_push(table_actions, [action_set.action_name])
     })
 
@@ -142,11 +142,11 @@ export default function(proc) {
 
   if (pm2_env.axm_monitor && Object.keys(pm2_env.axm_monitor).length > 0) {
     var table_probes = new Table({
-      style : {'padding-left' : 1, head : ['cyan', 'bold'], compact : true}
+      style: { 'padding-left': 1, head: ['cyan', 'bold'], compact: true }
     })
 
     console.log(chalk.inverse.bold(' Code metrics value '))
-    Object.keys(pm2_env.axm_monitor).forEach(function(key) {
+    Object.keys(pm2_env.axm_monitor).forEach(function (key) {
       var obj = {}
       var metric_name = pm2_env.axm_monitor[key].hasOwnProperty("value") ? pm2_env.axm_monitor[key].value : pm2_env.axm_monitor[key]
       var metric_unit = pm2_env.axm_monitor[key].hasOwnProperty("unit") ? pm2_env.axm_monitor[key].unit : ''
@@ -159,7 +159,7 @@ export default function(proc) {
   }
 
   var table_env = new Table({
-    style : {'padding-left' : 1, head : ['cyan', 'bold'], compact : true}
+    style: { 'padding-left': 1, head: ['cyan', 'bold'], compact: true }
   })
 
   console.log(chalk.inverse.bold(' Divergent env variables from local env '))
@@ -173,7 +173,7 @@ export default function(proc) {
     }
   })
 
-  Object.keys(diff_env).forEach(function(key) {
+  Object.keys(diff_env).forEach(function (key) {
     var obj = {}
     if (_env[key]) {
       obj[key] = _env[key].slice(0, process.stdout.columns - 60)

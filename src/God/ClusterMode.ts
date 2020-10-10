@@ -10,9 +10,9 @@
  * @author Alexandre Strzelewicz <as@unitech.io>
  * @project PM2
  */
-import cluster       from 'cluster';
-import Utility       from '../Utility.js';
-import pkg           from '../../package.json';
+import cluster from 'cluster';
+import Utility from '../Utility';
+import pkg from '../../package.json';
 
 /**
  * Description
@@ -30,7 +30,7 @@ export default function ClusterMode(God) {
    * @param {} cb
    * @return Literal
    */
-  God.nodeApp = function nodeApp(env_copy, cb){
+  God.nodeApp = function nodeApp(env_copy, cb) {
     var clu = null;
 
     console.log(`App [${env_copy.name}:${env_copy.pm_id}] starting in -cluster mode-`)
@@ -45,8 +45,8 @@ export default function ClusterMode(God) {
       // { "args": ["foo", "bar"], "env": { "foo1": "bar1" }} will be parsed to
       // { "args": "foo, bar", "env": "[object Object]"}
       // So we passing a stringified JSON here.
-      clu = cluster.fork({pm2_env: JSON.stringify(env_copy), windowsHide: true});
-    } catch(e) {
+      clu = cluster.fork({ pm2_env: JSON.stringify(env_copy), windowsHide: true });
+    } catch (e) {
       God.logAndGenerateError(e);
       return cb(e);
     }
@@ -63,13 +63,13 @@ export default function ClusterMode(God) {
        *********************************/
       if (msg.data && msg.type) {
         return God.bus.emit(msg.type ? msg.type : 'process:msg', {
-          at      : Utility.getDate(),
-          data    : msg.data,
-          process :  {
-            pm_id      : clu.pm2_env.pm_id,
-            name       : clu.pm2_env.name,
-            rev        : (clu.pm2_env.versioning && clu.pm2_env.versioning.revision) ? clu.pm2_env.versioning.revision : null,
-            namespace  : clu.pm2_env.namespace
+          at: Utility.getDate(),
+          data: msg.data,
+          process: {
+            pm_id: clu.pm2_env.pm_id,
+            name: clu.pm2_env.name,
+            rev: (clu.pm2_env.versioning && clu.pm2_env.versioning.revision) ? clu.pm2_env.versioning.revision : null,
+            namespace: clu.pm2_env.namespace
           }
         });
       }
@@ -80,19 +80,19 @@ export default function ClusterMode(God) {
           return false;
         } else if (typeof msg == 'object' && 'cron_restart' in msg) {
           return God.restartProcessId({
-            id : clu.pm2_env.pm_id
-          }, function() {
+            id: clu.pm2_env.pm_id
+          }, function () {
             console.log('Application %s has been restarted via CRON', clu.pm2_env.name);
           });
         }
 
         return God.bus.emit('process:msg', {
-          at      : Utility.getDate(),
-          raw     : msg,
-          process :  {
-            pm_id      : clu.pm2_env.pm_id,
-            name       : clu.pm2_env.name,
-            namespace  : clu.pm2_env.namespace
+          at: Utility.getDate(),
+          raw: msg,
+          process: {
+            pm_id: clu.pm2_env.pm_id,
+            name: clu.pm2_env.name,
+            namespace: clu.pm2_env.namespace
           }
         });
       }

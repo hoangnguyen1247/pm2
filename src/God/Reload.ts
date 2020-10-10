@@ -11,8 +11,8 @@
  * @project PM2
  */
 
-import cst           from '../../constants.js';
-import Utility       from '../Utility.js';
+import cst from '../../constants';
+import Utility from '../Utility';
 
 /**
  * softReload will wait permission from process to exit
@@ -43,7 +43,7 @@ function softReload(God, id, cb) {
   old_worker.pm2_env.pm_id = t_key;
   old_worker.pm_id = t_key;
 
-  God.executeApp(new_env, function(err, new_worker) {
+  God.executeApp(new_env, function (err, new_worker) {
     if (err) return cb(err);
 
     var timer = null;
@@ -57,7 +57,7 @@ function softReload(God, id, cb) {
     // Bind to know when the new process is up
     new_worker.once('listening', onListen);
 
-    timer = setTimeout(function() {
+    timer = setTimeout(function () {
       new_worker.removeListener('listening', onListen);
       softCleanDeleteProcess();
     }, new_env.listen_timeout || cst.GRACEFUL_LISTEN_TIMEOUT);
@@ -80,7 +80,7 @@ function softReload(God, id, cb) {
           console.error('Worker %d is already disconnected', old_worker.pm2_env.pm_id);
           return God.deleteProcessId(t_key, cb);
         }
-      } catch(e) {
+      } catch (e) {
         clearTimeout(timer);
         console.error('Worker %d is already disconnected', old_worker.pm2_env.pm_id);
         return God.deleteProcessId(t_key, cb);
@@ -134,8 +134,8 @@ function hardReload(God, id, wait_msg, cb) {
 
   var listener = function (packet) {
     if (packet.raw === 'ready' &&
-        packet.process.name === old_worker.pm2_env.name &&
-        packet.process.pm_id === id) {
+      packet.process.name === old_worker.pm2_env.name &&
+      packet.process.pm_id === id) {
       God.bus.removeListener('process:msg', listener);
       return onListen();
     }
@@ -145,7 +145,7 @@ function hardReload(God, id, wait_msg, cb) {
     God.bus.on('process:msg', listener);
   }
 
-  God.executeApp(new_env, function(err, new_worker) {
+  God.executeApp(new_env, function (err, new_worker) {
     if (err) return cb(err);
 
     // Bind to know when the new process is up
@@ -153,7 +153,7 @@ function hardReload(God, id, wait_msg, cb) {
       new_worker.once('listening', onListen);
     }
 
-    timer = setTimeout(function() {
+    timer = setTimeout(function () {
       if (readySignalSent) {
         return;
       }
@@ -177,7 +177,7 @@ function hardReload(God, id, wait_msg, cb) {
  * @param {} God
  * @return
  */
-export default function(God) {
+export default function (God) {
 
   /**
    * Reload
@@ -186,16 +186,16 @@ export default function(God) {
    * @param {} cb
    * @return CallExpression
    */
-  God.softReloadProcessId = function(opts, cb) {
-    var id  = opts.id;
+  God.softReloadProcessId = function (opts, cb) {
+    var id = opts.id;
     var env = opts.env || {};
 
     if (!(id in God.clusters_db))
       return cb(new Error(`pm_id ${id} not available in ${id}`));
 
     if (God.clusters_db[id].pm2_env.status == cst.ONLINE_STATUS &&
-        God.clusters_db[id].pm2_env.exec_mode == 'cluster_mode' &&
-        !God.clusters_db[id].pm2_env.wait_ready) {
+      God.clusters_db[id].pm2_env.exec_mode == 'cluster_mode' &&
+      !God.clusters_db[id].pm2_env.wait_ready) {
 
       Utility.extend(God.clusters_db[id].pm2_env.env, opts.env);
       Utility.extendExtraConfig(God.clusters_db[id], opts);
@@ -215,15 +215,15 @@ export default function(God) {
    * @param {} cb
    * @return CallExpression
    */
-  God.reloadProcessId = function(opts, cb) {
-    var id  = opts.id;
+  God.reloadProcessId = function (opts, cb) {
+    var id = opts.id;
     var env = opts.env || {};
 
     if (!(id in God.clusters_db))
       return cb(new Error('PM2 ID unknown'));
 
     if (God.clusters_db[id].pm2_env.status == cst.ONLINE_STATUS &&
-        God.clusters_db[id].pm2_env.exec_mode == 'cluster_mode') {
+      God.clusters_db[id].pm2_env.exec_mode == 'cluster_mode') {
 
       Utility.extend(God.clusters_db[id].pm2_env.env, opts.env);
       Utility.extendExtraConfig(God.clusters_db[id], opts);

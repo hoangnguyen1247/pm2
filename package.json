@@ -100,6 +100,8 @@
   "types": "types/index.d.ts",
   "scripts": {
     "clean:build": "rimraf lib2",
+    "start": "node ./bin/pm2t",
+    "start:ts": "ts-node ./src/binaries/CLI",
     "type-check": "tsc -p tsconfig.types.json --noEmit",
     "build:lib": "babel src --out-dir lib2 --extensions \".js,.ts,.tsx\"",
     "build": "npm run clean:build && npm run build:lib",

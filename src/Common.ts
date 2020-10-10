@@ -18,7 +18,7 @@ import semver from 'semver';
 import dayjs from 'dayjs';
 import { execSync } from 'child_process';
 import isBinary from './tools/isbinaryfile';
-import cst from '../constants.js';
+import cst from '../constants';
 import extItps from './API/interpreter';
 import Config from './tools/Config';
 import pkg from '../package.json';

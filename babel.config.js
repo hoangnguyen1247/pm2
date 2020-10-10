@@ -23,7 +23,7 @@ module.exports = {
                 "server": ["./server/"]
             }
         }],
-        "@babel/plugin-transform-runtime"
+        "@babel/plugin-transform-runtime",
     ],
     "sourceMaps": "inline"
 }

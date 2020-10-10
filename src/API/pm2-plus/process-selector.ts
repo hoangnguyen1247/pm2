@@ -1,8 +1,8 @@
 import fs  from 'fs';
 import forEachLimit from 'async/forEachLimit';
 
-import cst from '../../../constants.js';
-import Common from '../../Common.js';
+import cst from '../../../constants';
+import Common from '../../Common';
 
 export default function(CLI) {
   /**

@@ -1,5 +1,5 @@
 
-import UxHelpers from './helpers.js';
+import UxHelpers from './helpers';
 import p from 'path';
 
 /**

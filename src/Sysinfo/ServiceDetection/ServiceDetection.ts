@@ -1,5 +1,5 @@
 
-import PM2 from './../../API'
+import PM2 from '../../API'
 import psList from '../psList'
 
 const SERVICES_ASSOCIATION = {

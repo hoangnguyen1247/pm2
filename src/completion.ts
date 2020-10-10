@@ -9,7 +9,7 @@ import pth from 'path';
 //  hacked from node-tabtab 0.0.4 https://github.com/mklabs/node-tabtab.git
 //  Itself based on npm completion by @isaac
 
-export const complete = function complete(name, completer, cb?) {
+export const complete = function complete(name, completer?, cb?) {
 
   // cb not there, assume callback is completer and
   // the completer is the executable itself

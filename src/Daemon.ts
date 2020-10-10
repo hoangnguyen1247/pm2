@@ -6,11 +6,11 @@
 
 import debugLogger from 'debug';
 import pkg from '../package.json';
-import cst from '../constants.js';
+import cst from '../constants';
 import rpc from 'pm2-axon-rpc';
 import axon from 'pm2-axon';
 import domain from 'domain';
-import Utility from './Utility.js';
+import Utility from './Utility';
 import util from 'util';
 import fs from 'fs';
 import God from './God';
