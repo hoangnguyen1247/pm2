@@ -46,9 +46,9 @@ const Config = {
                 this._schema[k].alias.forEach(function (alias) {
                     aliases.splice(0, 0, alias);
                 });
-            }
-            else if (this._schema[k].alias)
+            } else if (this._schema[k].alias) {
                 aliases.splice(0, 0, this._schema[k].alias);
+            }
 
             this._schema[k].alias = aliases;
         }
@@ -81,8 +81,8 @@ const Config = {
      */
     validateJSON: function (json) {
         // clone config
-        var conf: any = util.inherits({}, json),
-            res = {};
+        var conf: any = Object.assign({}, json);
+        let res = {};
         this._errors = [];
 
         var regexKeys = {}, defines = this.schema;

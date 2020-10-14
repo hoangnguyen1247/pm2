@@ -257,9 +257,9 @@ export default function (CLI) {
         var projects = []
         var enquirer = require('enquirer')
 
-        fs.readdir(path.join(__dirname, '../templates/sample-apps'), (err, items) => {
+        fs.readdir(path.join(__dirname, '../../templates/sample-apps'), (err, items) => {
             require('async').forEach(items, (app, next) => {
-                var fp = path.join(__dirname, '../templates/sample-apps', app)
+                var fp = path.join(__dirname, '../../templates/sample-apps', app)
                 fs.readFile(path.join(fp, 'package.json'), "utf8", (err, dt) => {
                     var meta = JSON.parse(dt)
                     meta.fullpath = fp
