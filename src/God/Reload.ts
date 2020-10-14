@@ -11,7 +11,7 @@
  * @project PM2
  */
 
-import cst from '../../constants';
+import cst from '../constants';
 import Utility from '../Utility';
 
 /**

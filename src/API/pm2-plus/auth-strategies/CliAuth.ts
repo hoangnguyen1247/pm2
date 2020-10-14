@@ -10,7 +10,7 @@ import needle from 'needle'
 import chalk from 'chalk'
 import promptly from 'promptly'
 
-import cst from '../../../../constants'
+import cst from '../../../constants'
 
 export default class CliStrategy extends AuthStrategy {
     authenticated: boolean;

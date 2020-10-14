@@ -5,7 +5,7 @@
  *
  **************************/
 
-import cst from '../../../constants';
+import cst from '../../constants';
 import Common from '../../Common';
 
 import Modularizer from './Modularizer';

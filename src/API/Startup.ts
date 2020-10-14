@@ -9,11 +9,12 @@ import fs from 'fs';
 import forEachLimit from 'async/forEachLimit';
 import eachLimit from 'async/eachLimit';
 import Common from '../Common';
-import cst from '../../constants';
+import cst from '../constants';
 import util from 'util';
 import { tmpdir as tmpPath } from 'os';
 import which from '../tools/which';
 import sexec from '../tools/sexec';
+
 export default function (CLI) {
   /**
    * If command is launched without root right

@@ -17,7 +17,7 @@ import eachLimit from 'async/eachLimit';
 import util from 'util';
 import debugLogger from 'debug';
 
-import cst from '../../constants';
+import cst from '../constants';
 import pkg from '../../package.json';
 import pidusage from 'pidusage';
 import Utility from '../Utility';

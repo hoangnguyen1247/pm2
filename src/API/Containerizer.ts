@@ -6,7 +6,7 @@ import util from 'util';
 import * as fmt from '../tools/fmt';
 import fs from 'fs';
 import path from 'path';
-import cst from '../../constants';
+import cst from '../constants';
 import Promise from '../tools/promise.min';
 
 function pspawn(cmd) {

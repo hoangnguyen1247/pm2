@@ -17,7 +17,7 @@ import mkdirp from 'mkdirp';
 import Common from './Common';
 import pkg from '../package.json';
 import which from './tools/which';
-import cst from '../constants';
+import cst from './constants';
 import Daemon from './Daemon';
 import vCheck from './VersionCheck'
 
@@ -28,9 +28,9 @@ function noop() { }
 var Client = function (opts) {
     if (!opts) opts = {};
 
-    if (!opts.conf)
+    if (!opts.conf) {
         this.conf = cst;
-    else {
+    } else {
         this.conf = opts.conf;
     }
 
@@ -111,8 +111,9 @@ Client.prototype.start = function (cb) {
                 return cb ? cb(err) : process.exit(this.conf.ERROR_EXIT);
             }
 
-            if (!process.env.PM2_DISCRETE_MODE)
+            if (!process.env.PM2_DISCRETE_MODE) {
                 Common.printOut(this.conf.PREFIX_MSG + 'PM2 Successfully daemonized');
+            }
 
             this.launchRPC((err, meta) => {
                 return cb(null, {
@@ -238,12 +239,14 @@ Client.prototype.launchDaemon = function (opts, cb) {
     /**
      * Add node [arguments] depending on PM2_NODE_OPTIONS env variable
      */
-    if (process.env.PM2_NODE_OPTIONS)
+    if (process.env.PM2_NODE_OPTIONS) {
         node_args = node_args.concat(process.env.PM2_NODE_OPTIONS.split(' '));
+    }
     node_args.push(ClientJS);
 
-    if (!process.env.PM2_DISCRETE_MODE)
+    if (!process.env.PM2_DISCRETE_MODE) {
         Common.printOut(this.conf.PREFIX_MSG + 'Spawning PM2 daemon with pm2_home=' + this.pm2_home);
+    }
 
     var interpreter = 'node';
 

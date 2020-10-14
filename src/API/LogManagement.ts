@@ -5,7 +5,7 @@ import { exec } from 'child_process';
 import path from 'path';
 
 import Log from './Log';
-import cst from '../../constants';
+import cst from '../constants';
 import Common from '../Common';
 
 export default function (CLI) {

@@ -11,7 +11,7 @@ import copydirSync from '../../tools/copydirSync'
 import deleteFolderRecursive from '../../tools/deleteFolderRecursive'
 
 import Configuration from '../../Configuration';
-import cst from '../../../constants';
+import cst from '../../constants';
 import Common from '../../Common';
 import Utility from '../../Utility';
 

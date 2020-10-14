@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import Table from 'cli-tableau';
 
-import cst from '../../../constants';
+import cst from '../../constants';
 import Common from '../../Common';
 import Configuration from '../../Configuration';
 import UxHelpers from './helpers';
@@ -25,8 +25,7 @@ function checkIfProcessAreDumped(list) {
         var diff = apps_dumped.filter(a => !apps_running.includes(a))
         if (diff.length > 0) {
             Common.printOut(`Current process list running is not in sync with saved list. ${chalk.italic(diff.join(' '))} differs. Type 'pm2 save' to synchronize.`)
-        }
-        else if (apps_dumped.length != apps_running.length) {
+        } else if (apps_dumped.length != apps_running.length) {
             Common.printOut(`Current process list running is not in sync with saved list. Type 'pm2 save' to synchronize'`)
         }
     } catch (e) {
@@ -208,8 +207,7 @@ function listModulesAndAppsManaged(list) {
             }
 
             UxHelpers.safe_push(module_table, obj)
-        }
-        else {
+        } else {
             // pm2 ls for Applications
             obj[key] = []
 
@@ -264,8 +262,9 @@ function listModulesAndAppsManaged(list) {
             }
 
             // Watch status
-            if (!CONDENSED_MODE)
+            if (!CONDENSED_MODE) {
                 obj[key].push(l.pm2_env.watch ? chalk.green.bold('enabled') : chalk.grey('disabled'))
+            }
 
             UxHelpers.safe_push(app_table, obj)
         }
@@ -322,9 +321,9 @@ function containersListing(sys_infos) {
         var id = chalk.bold.cyan(proc_id++)
         var state = UxHelpers.colorStatus(c.state)
 
-        if (stacked_docker)
+        if (stacked_docker) {
             docker_table.push([id, c.image, state, `${cpu}%`, `${mem}mb`])
-        else {
+        } else {
             docker_table.push([
                 id,
                 c.image,
@@ -406,8 +405,7 @@ function miniMonitBar(sys_infos) {
         var latency = (sys_infos.network.latency).toFixed(1)
         if (latency == -1) {
             sys_summary_line += `| ${chalk.bold('net')}: ${chalk.red('offline')} `
-        }
-        else {
+        } else {
             sys_summary_line += `| ${chalk.bold('net')}: `
             //sys_summary_line += `${colorizedMetric(latency, 100, 150, 'ms')} `
             sys_summary_line += `⇓ ${UxHelpers.colorizedMetric(sys_infos.network.rx_5, 10, 20, 'mb/s')} `

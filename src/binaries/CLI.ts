@@ -12,7 +12,7 @@ import Common from '../Common';
 import PM2ioHandler from '../API/pm2-plus/PM2IO';
 import Logs from '../API/Log';
 
-import cst from '../../constants';
+import cst from '../constants';
 
 const debug = debugLogger('pm2:cli');
 

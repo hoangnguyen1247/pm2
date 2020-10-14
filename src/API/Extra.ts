@@ -3,17 +3,17 @@
  * Extra methods
  *
  **************************/
-
-import cst from '../../constants';
-import Common from '../Common';
-import UX from './UX';
+import dayjs from 'dayjs';
 import chalk from 'chalk';
 import path from 'path';
 import fs from 'fs';
-import * as fmt from '../tools/fmt';
-import dayjs from 'dayjs';
-import pkg from '../../package.json';
 import semver from 'semver';
+
+import cst from '../constants';
+import Common from '../Common';
+import UX from './UX';
+import * as fmt from '../tools/fmt';
+import pkg from '../../package.json';
 import copyDirSync from '../tools/copydirSync'
 import Log from './Log';
 import Dashboard from './Dashboard';
@@ -26,10 +26,8 @@ export default function (CLI) {
      * @callback cb
      */
     CLI.prototype.getVersion = function (cb) {
-        var that = this;
-
-        that.Client.executeRemote('getVersion', {}, function (err) {
-            return cb ? cb.apply(null, arguments) : that.exitCli(cst.SUCCESS_EXIT);
+        this.Client.executeRemote('getVersion', {}, (err) => {
+            return cb ? cb.apply(null, arguments) : this.exitCli(cst.SUCCESS_EXIT);
         });
     };
 

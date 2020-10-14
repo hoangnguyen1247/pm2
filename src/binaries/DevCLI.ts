@@ -13,7 +13,7 @@ import chalk from 'chalk';
 
 import PM2 from '../API';
 import Log from '../API/Log';
-import cst from '../../constants';
+import cst from '../constants';
 import pkg from '../../package.json';
 import * as fmt from '../tools/fmt';
 

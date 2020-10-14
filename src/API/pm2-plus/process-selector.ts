@@ -1,6 +1,6 @@
 import forEachLimit from 'async/forEachLimit';
 
-import cst from '../../../constants';
+import cst from '../../constants';
 import Common from '../../Common';
 
 export default function (CLI) {

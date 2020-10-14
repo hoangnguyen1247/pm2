@@ -4,7 +4,7 @@ import { spawn } from 'child_process';
 import chalk from 'chalk';
 import parallel from 'async/parallel';
 
-import cst from '../../../constants';
+import cst from '../../constants';
 import Common from '../../Common';
 
 var INTERNAL_MODULES = {

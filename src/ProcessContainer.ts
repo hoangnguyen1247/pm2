@@ -10,7 +10,7 @@
  */
 import fs from 'fs';
 import p from 'path';
-import cst from '../constants';
+import cst from './constants';
 import Utility from './Utility';
 import ProcessUtils from './ProcessUtils';
 

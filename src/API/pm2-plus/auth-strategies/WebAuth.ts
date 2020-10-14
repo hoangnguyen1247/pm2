@@ -7,7 +7,7 @@ import url from 'url'
 import { exec } from 'child_process'
 import async from 'async'
 
-import cst from '../../../../constants';
+import cst from '../../../constants';
 
 export default class WebStrategy extends AuthStrategy {
 

@@ -23,7 +23,7 @@ import { CronJob } from 'cron';
 import mkdirp from 'mkdirp';
 
 import isBinary from './tools/isbinaryfile';
-import cst from '../constants';
+import cst from './constants';
 import extItps from './API/interpreter';
 import Config from './tools/Config';
 import pkg from '../package.json';

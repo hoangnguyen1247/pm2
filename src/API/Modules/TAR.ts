@@ -6,7 +6,7 @@ import { exec } from 'child_process';
 import { execSync } from 'child_process';
 
 import Configuration from '../../Configuration';
-import cst from '../../../constants';
+import cst from '../../constants';
 import Common from '../../Common';
 import forEachLimit from 'async/forEachLimit';
 import sexec from '../../tools/sexec'

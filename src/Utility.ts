@@ -14,7 +14,7 @@ import waterfall from 'async/waterfall';
 import url from 'url';
 import dayjs from 'dayjs';
 
-import cst from '../constants';
+import cst from './constants';
 import findPackageJson from './tools/find-package-json';
 
 var Utility = {

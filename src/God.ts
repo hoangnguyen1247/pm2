@@ -22,7 +22,7 @@ import fs from 'fs';
 import vizion from 'vizion';
 import debugLogger from 'debug';
 import Utility from './Utility';
-import cst from '../constants';
+import cst from './constants';
 import timesLimit from 'async/timesLimit';
 import Configuration from './Configuration';
 import semver from 'semver';

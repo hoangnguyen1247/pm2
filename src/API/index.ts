@@ -20,7 +20,7 @@ import dayjs from 'dayjs';
 import KMDaemon from '@pm2/agent/src/InteractorClient';
 
 import DockerMgmt from './ExtraMgmt/Docker';
-import cst from '../../constants';
+import cst from '../constants';
 import Client from '../Client';
 import Common from '../Common';
 import Config from '../tools/Config';
@@ -104,8 +104,7 @@ const API = function(opts?) {
         // Override default conf file
         this.pm2_home = opts.pm2_home;
         conf = util.inherits(conf, path_structure(this.pm2_home));
-    }
-    else if (opts.independent == true && conf.IS_WINDOWS === false) {
+    } else if (opts.independent == true && conf.IS_WINDOWS === false) {
         // Create an unique pm2 instance
         var random_file = crypto.randomBytes(8).toString('hex');
         this.pm2_home = path.join('/tmp', random_file);

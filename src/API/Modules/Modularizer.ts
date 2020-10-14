@@ -7,7 +7,7 @@ import eachLimit from 'async/eachLimit';
 import forEachLimit from 'async/forEachLimit';
 
 import Configuration from '../../Configuration';
-import cst from '../../../constants';
+import cst from '../../constants';
 import Common from '../../Common';
 import NPM from './NPM';
 import TAR from './TAR';

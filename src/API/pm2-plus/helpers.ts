@@ -3,7 +3,7 @@ import forEach from 'async/forEach';
 import semver from 'semver';
 
 import open from '../../tools/open';
-import cst from '../../../constants';
+import cst from '../../constants';
 import Common from '../../Common';
 
 function processesAreAlreadyMonitored(CLI, cb) {

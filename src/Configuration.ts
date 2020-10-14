@@ -7,17 +7,18 @@ import fs from 'fs';
 
 import Common from './Common';
 import eachSeries from 'async/eachSeries';
-import cst from '../constants.js';
+import cst from './constants';
 
 var Configuration: any = {};
 
 function splitKey(key) {
     var values = [key];
 
-    if (key.indexOf('.') > -1)
+    if (key.indexOf('.') > -1) {
         values = key.match(/(?:[^."]+|"[^"]*")+/g).map(function (dt) { return dt.replace(/"/g, '') });
-    else if (key.indexOf(':') > -1)
+    } else if (key.indexOf(':') > -1) {
         values = key.match(/(?:[^:"]+|"[^"]*")+/g).map(function (dt) { return dt.replace(/"/g, '') });
+    }
 
     return values;
 }
@@ -40,15 +41,15 @@ Configuration.set = function (key, value, cb) {
             var tmp = json_conf;
 
             levels.forEach(function (key, index) {
-                if (index == levels.length - 1)
+                if (index == levels.length - 1) {
                     tmp[key] = value;
-                else if (!tmp[key]) {
+                } else if (!tmp[key]) {
                     tmp[key] = {};
                     tmp = tmp[key];
-                }
-                else {
-                    if (typeof (tmp[key]) != 'object')
+                } else {
+                    if (typeof (tmp[key]) != 'object') {
                         tmp[key] = {};
+                    }
                     tmp = tmp[key];
                 }
             });
@@ -84,27 +85,26 @@ Configuration.unset = function (key, cb) {
             var tmp = json_conf;
 
             levels.forEach(function (key, index) {
-                if (index == levels.length - 1)
+                if (index == levels.length - 1) {
                     delete tmp[key];
-                else if (!tmp[key]) {
+                } else if (!tmp[key]) {
                     tmp[key] = {};
                     tmp = tmp[key];
-                }
-                else {
+                } else {
                     if (typeof (tmp[key]) != 'object')
                         tmp[key] = {};
                     tmp = tmp[key];
                 }
             });
 
-        }
-        else
+        } else
             delete json_conf[key];
 
         if (err) return cb(err);
 
-        if (key === 'all')
+        if (key === 'all') {
             json_conf = {};
+        }
 
         fs.writeFile(cst.PM2_MODULE_CONF_FILE, serializeConfiguration(json_conf), function (err) {
             if (err) return cb(err);
@@ -127,8 +127,9 @@ Configuration.setSyncIfNotExist = function (key, value) {
 
     if (values.length > 1 && conf && conf[values[0]]) {
         exists = Object.keys(conf[values[0]]).some(function (key) {
-            if (key == values[1])
+            if (key == values[1]) {
                 return true;
+            }
             return false;
         });
     }
@@ -156,21 +157,19 @@ Configuration.setSync = function (key, value) {
         var tmp = json_conf;
 
         levels.forEach(function (key, index) {
-            if (index == levels.length - 1)
+            if (index == levels.length - 1) {
                 tmp[key] = value;
-            else if (!tmp[key]) {
+            } else if (!tmp[key]) {
                 tmp[key] = {};
                 tmp = tmp[key];
-            }
-            else {
+            } else {
                 if (typeof (tmp[key]) != 'object')
                     tmp[key] = {};
                 tmp = tmp[key];
             }
         });
 
-    }
-    else {
+    } else {
         if (json_conf[key] && typeof (json_conf[key]) === 'string')
             Common.printOut(cst.PREFIX_MSG + 'Replacing current value key %s by %s', key, value);
 
@@ -206,13 +205,12 @@ Configuration.unsetSync = function (key) {
         var tmp = json_conf;
 
         levels.forEach(function (key, index) {
-            if (index == levels.length - 1)
+            if (index == levels.length - 1) {
                 delete tmp[key];
-            else if (!tmp[key]) {
+            } else if (!tmp[key]) {
                 tmp[key] = {};
                 tmp = tmp[key];
-            }
-            else {
+            } else {
                 if (typeof (tmp[key]) != 'object')
                     tmp[key] = {};
                 tmp = tmp[key];

@@ -7,7 +7,7 @@ import http from 'http';
 import os from 'os';
 import pm2 from '../index.js';
 import urlT from 'url';
-import cst from '../constants.js';
+import cst from './constants';
 
 // Default, attach to default local PM2
 
@@ -63,10 +63,8 @@ function startWebServer(pm2) {
                 res.statusCode = 200;
                 res.write(JSON.stringify(data));
                 return res.end();
-
             })
-        }
-        else {
+        } else {
             // 404
             res.statusCode = 404;
             res.write(JSON.stringify({ err: '404' }));
@@ -75,5 +73,4 @@ function startWebServer(pm2) {
     }).listen(process.env.PM2_WEB_PORT || cst.WEB_PORT, cst.WEB_IPADDR, function () {
         console.log('Web interface listening on  %s:%s', cst.WEB_IPADDR, cst.WEB_PORT);
     });
-
 }

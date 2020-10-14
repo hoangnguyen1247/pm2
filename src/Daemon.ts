@@ -13,7 +13,7 @@ import axon from 'pm2-axon';
 import rpc from 'pm2-axon-rpc';
 import { spawn } from 'child_process';
 import pkg from '../package.json';
-import cst from '../constants';
+import cst from './constants';
 import Utility from './Utility';
 import God from './God';
 import eachLimit from 'async/eachLimit';

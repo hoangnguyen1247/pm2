@@ -5,9 +5,10 @@
  */
 
 import fs from 'fs';
-import cst from '../../constants';
+import cst from '../constants';
 import Utility from '../Utility';
 import Common from '../Common';
+import pm2Deploy from 'pm2-deploy';
 
 function deployHelper() {
     console.log('');
@@ -75,9 +76,9 @@ export default function (CLI) {
                     ' Allowed default config file names are: ' + defaultConfigNames.join(', '));
                 return cb ? cb('Not any default ecosystem file present') : that.exitCli(cst.ERROR_EXIT);
             }
-        }
-        else
+        } else {
             env = args[1];
+        }
 
         var json_conf = null;
 
@@ -102,7 +103,7 @@ export default function (CLI) {
             json_conf.deploy[env]['post-deploy'] = 'pm2 startOrRestart ' + file + ' --env ' + env;
         }
 
-        require('pm2-deploy').deployForEnv(json_conf.deploy, env, args, function (err, data) {
+        pm2Deploy.deployForEnv(json_conf.deploy, env, args, function (err, data) {
             if (err) {
                 Common.printError('Deploy failed');
                 Common.printError(err.message || err);

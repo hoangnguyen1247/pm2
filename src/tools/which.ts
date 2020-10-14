@@ -1,7 +1,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import cst from '../../constants'
+import cst from '../constants'
 
 // XP's system default value for `PATHEXT` system variable, just in case it's not
 // set on Windows.

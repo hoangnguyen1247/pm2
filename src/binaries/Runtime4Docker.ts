@@ -6,7 +6,7 @@ import commander from 'commander';
 
 import PM2 from '../API';
 import Log from '../API/Log';
-import cst from '../../constants';
+import cst from '../constants';
 import pkg from '../../package.json';
 
 const DEFAULT_FAIL_COUNT = "3";

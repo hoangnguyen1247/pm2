@@ -7,7 +7,7 @@ import { exec } from 'child_process';
 import promptly from 'promptly';
 import IOAPI from '@pm2/js-api';
 
-import cst from '../../../constants';
+import cst from '../../constants';
 import pkg from '../../../package.json';
 import CLIStrategy from './auth-strategies/CliAuth';
 import WebStrategy from './auth-strategies/WebAuth';

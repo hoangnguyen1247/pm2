@@ -2,7 +2,7 @@ import fs from 'fs';
 import chalk from 'chalk';
 import KMDaemon from '@pm2/agent/src/InteractorClient';
 
-import cst from '../../../constants';
+import cst from '../../constants';
 import Common from '../../Common';
 import pkg from '../../../package.json';
 

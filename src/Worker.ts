@@ -9,7 +9,7 @@ import domain from 'domain';
 import eachLimit from 'async/eachLimit';
 import { CronJob } from 'cron';
 
-import cst from '../constants';
+import cst from './constants';
 import vCheck from './VersionCheck';
 import pkg from '../package.json';
 
