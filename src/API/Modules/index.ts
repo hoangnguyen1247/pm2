@@ -7,8 +7,6 @@
 
 import cst from '../../../constants';
 import Common from '../../Common';
-import chalk from 'chalk';
-import forEachLimit from 'async/forEachLimit';
 
 import Modularizer from './Modularizer';
 

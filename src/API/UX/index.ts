@@ -4,10 +4,10 @@ import list from './pm2-ls'
 import list_min from './pm2-ls-minimal'
 
 const UX = {
-  helpers: helpers,
-  describe: describe,
-  list: list,
-  list_min: list_min
+    helpers: helpers,
+    describe: describe,
+    list: list,
+    list_min: list_min
 }
 
 export default UX

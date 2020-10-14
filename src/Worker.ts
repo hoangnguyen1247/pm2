@@ -4,11 +4,12 @@
  * can be found in the LICENSE file.
  */
 import vizion from 'vizion';
-import cst from '../constants';
-import eachLimit from 'async/eachLimit';
 import debugLogger from 'debug';
 import domain from 'domain';
+import eachLimit from 'async/eachLimit';
 import { CronJob } from 'cron';
+
+import cst from '../constants';
 import vCheck from './VersionCheck';
 import pkg from '../package.json';
 

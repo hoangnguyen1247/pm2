@@ -1,18 +1,18 @@
 process.env.PM2_USAGE = 'CLI';
 
-import cst from '../../constants';
-
 import commander from 'commander';
 import chalk from 'chalk';
 import forEachLimit from 'async/forEachLimit';
-
 import debugLogger from 'debug';
+
 import PM2 from '../API';
 import pkg from '../../package.json';
 import * as tabtab from '../completion';
 import Common from '../Common';
 import PM2ioHandler from '../API/pm2-plus/PM2IO';
 import Logs from '../API/Log';
+
+import cst from '../../constants';
 
 const debug = debugLogger('pm2:cli');
 
@@ -192,7 +192,7 @@ if (_arr.indexOf('--no-daemon') > -1) {
         daemon_mode: false
     });
 
-    pm2NoDaeamon.connect(function () {
+    pm2NoDaeamon.connect(() => {
         pm2 = pm2NoDaeamon;
         beginCommandProcessing();
     });
@@ -203,7 +203,7 @@ if (_arr.indexOf('--no-daemon') > -1) {
     }, 100);
 } else {
     // HERE we instanciate the Client object
-    pm2.connect(function () {
+    pm2.connect(() => {
         debug('Now connected to daemon');
         if (process.argv.slice(2)[0] === 'completion') {
             checkCompletion();
@@ -219,7 +219,6 @@ if (_arr.indexOf('--no-daemon') > -1) {
 
 //
 // Helper function to fail when unknown command arguments are passed
-//
 function failOnUnknown(fn) {
     return function (arg) {
         if (arguments.length > 1) {
@@ -260,10 +259,11 @@ commander.command('start [name|namespace|file|ecosystem|id...]')
     .option('--dockerdaemon', 'for debugging purpose')
     .description('start and daemonize an app')
     .action(function (cmd, opts) {
-        if (opts.container == true && opts.dist == true)
+        if (opts.container == true && opts.dist == true) {
             return pm2.dockerMode(cmd, opts, 'distribution');
-        else if (opts.container == true)
+        } else if (opts.container == true) {
             return pm2.dockerMode(cmd, opts, 'development');
+        }
 
         if (cmd == "-") {
             process.stdin.resume();
@@ -272,8 +272,7 @@ commander.command('start [name|namespace|file|ecosystem|id...]')
                 process.stdin.pause();
                 pm2._startJson(cmd, commander, 'restartProcessId', 'pipe');
             });
-        }
-        else {
+        } else {
             // Commander.js patch
             cmd = patchCommanderArg(cmd);
             if (cmd.length === 0) {
@@ -285,14 +284,14 @@ commander.command('start [name|namespace|file|ecosystem|id...]')
                     acc = acc.concat(apps)
                     next(err)
                 });
-            }, function (err, dt) {
+            }, (err, dt) => {
                 if (err && err.message &&
                     (err.message.includes('Script not found') === true ||
                         err.message.includes('NOT AVAILABLE IN PATH') === true)) {
                     pm2.exitCli(1)
-                }
-                else
+                } else {
                     pm2.speedList(err ? 1 : 0, acc);
+                }
             });
         }
     });
@@ -341,7 +340,6 @@ commander.command('startOrGracefulReload <json>')
 
 //
 // Stop specific id
-//
 commander.command('stop <id|name|namespace|all|json|stdin...>')
     .option('--watch', 'Stop watching folder for changes')
     .description('stop a process')
@@ -355,7 +353,6 @@ commander.command('stop <id|name|namespace|all|json|stdin...>')
 
 //
 // Stop All processes
-//
 commander.command('restart <id|name|namespace|all|json|stdin...>')
     .option('--watch', 'Toggle watching folder for changes')
     .description('restart a process')
@@ -375,7 +372,6 @@ commander.command('restart <id|name|namespace|all|json|stdin...>')
 
 //
 // Scale up/down a process in cluster mode
-//
 commander.command('scale <app_name> <number>')
     .description('scale up/down a process in cluster mode depending on total_number param')
     .action(function (app_name, number) {
@@ -384,7 +380,6 @@ commander.command('scale <app_name> <number>')
 
 //
 // snapshot PM2
-//
 commander.command('profile:mem [time]')
     .description('Sample PM2 heap memory')
     .action(function (time) {
@@ -393,7 +388,6 @@ commander.command('profile:mem [time]')
 
 //
 // snapshot PM2
-//
 commander.command('profile:cpu [time]')
     .description('Profile PM2 cpu')
     .action(function (time) {
@@ -402,7 +396,6 @@ commander.command('profile:cpu [time]')
 
 //
 // Reload process(es)
-//
 commander.command('reload <id|name|namespace|all>')
     .description('reload processes (note that its for app using HTTP/HTTPS)')
     .action(function (pm2_id) {
@@ -424,7 +417,6 @@ commander.command('inspect <name>')
 
 //
 // Stop and delete a process by name from database
-//
 commander.command('delete <name|id|namespace|script|all|json|stdin...>')
     .alias('del')
     .description('stop and delete a process from pm2 process list')
@@ -446,7 +438,6 @@ commander.command('delete <name|id|namespace|script|all|json|stdin...>')
 
 //
 // Send system signal to process
-//
 commander.command('sendSignal <signal> <pm2_id|name>')
     .description('send a system signal to the target process')
     .action(function (signal, pm2_id) {
@@ -461,7 +452,6 @@ commander.command('sendSignal <signal> <pm2_id|name>')
 
 //
 // Stop and delete a process by name from database
-//
 commander.command('ping')
     .description('ping pm2 daemon - if not up it will launch it')
     .action(function () {
@@ -473,6 +463,7 @@ commander.command('updatePM2')
     .action(function () {
         pm2.update();
     });
+
 commander.command('update')
     .description('(alias) update in-memory PM2 with local PM2')
     .action(function () {
@@ -500,7 +491,6 @@ commander.command('module:update <module|git:// url>')
     .action(function (plugin_name) {
         pm2.install(plugin_name);
     });
-
 
 commander.command('module:generate [app_name]')
     .description('Generate a sample module in current folder')
@@ -573,7 +563,6 @@ commander.command('report')
 
 //
 // PM2 I/O
-//
 commander.command('link [secret] [public] [name]')
     .option('--info-node [url]', 'set url info node')
     .option('--ws', 'websocket mode')
@@ -638,7 +627,6 @@ commander.command('logout')
 
 //
 // Save processes to file
-//
 commander.command('dump')
     .alias('save')
     .option('--force', 'force deletion of dump file, even if empty')
@@ -649,7 +637,6 @@ commander.command('dump')
 
 //
 // Delete dump file
-//
 commander.command('cleardump')
     .description('Create empty dump file')
     .action(failOnUnknown(function () {
@@ -658,7 +645,6 @@ commander.command('cleardump')
 
 //
 // Save processes to file
-//
 commander.command('send <pm_id> <line>')
     .description('send stdin to <pm_id>')
     .action(function (pm_id, line) {
@@ -668,7 +654,6 @@ commander.command('send <pm_id> <line>')
 //
 // Attach to stdin/stdout
 // Not TTY ready
-//
 commander.command('attach <pm_id> [command separator]')
     .description('attach stdin/stdout to application identified by <pm_id>')
     .action(function (pm_id, separator) {
@@ -677,7 +662,6 @@ commander.command('attach <pm_id> [command separator]')
 
 //
 // Resurrect
-//
 commander.command('resurrect')
     .description('resurrect previously dumped processes')
     .action(failOnUnknown(function () {
@@ -687,7 +671,6 @@ commander.command('resurrect')
 
 //
 // Set pm2 to startup
-//
 commander.command('unstartup [platform]')
     .description('disable the pm2 startup hook')
     .action(function (platform) {
@@ -696,7 +679,6 @@ commander.command('unstartup [platform]')
 
 //
 // Set pm2 to startup
-//
 commander.command('startup [platform]')
     .description('enable the pm2 startup hook')
     .action(function (platform) {
@@ -705,7 +687,6 @@ commander.command('startup [platform]')
 
 //
 // Logrotate
-//
 commander.command('logrotate')
     .description('copy default logrotate configuration')
     .action(function (cmd) {
@@ -714,8 +695,6 @@ commander.command('logrotate')
 
 //
 // Sample generate
-//
-
 commander.command('ecosystem [mode]')
     .alias('init')
     .description('generate a process conf file. (mode = null or simple)')
@@ -761,7 +740,6 @@ commander.command('env <id>')
 
 //
 // List command
-//
 commander
     .command('list')
     .alias('ls')
@@ -787,7 +765,6 @@ commander.command('status')
     .action(function () {
         pm2.list()
     });
-
 
 // List in raw json
 commander.command('jlist')
@@ -819,7 +796,6 @@ commander.command('prettylist')
 
 //
 // Dashboard command
-//
 commander.command('monit')
     .description('launch termcaps monitoring')
     .action(function () {
@@ -838,7 +814,6 @@ commander.command('dashboard')
     .action(function () {
         pm2.dashboard();
     });
-
 
 //
 // Flushing command

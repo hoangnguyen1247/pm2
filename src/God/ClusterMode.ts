@@ -11,6 +11,7 @@
  * @project PM2
  */
 import cluster from 'cluster';
+
 import Utility from '../Utility';
 import pkg from '../../package.json';
 

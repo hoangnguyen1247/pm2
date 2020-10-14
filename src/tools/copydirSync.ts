@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+
 /*
   options: {
     utimes: false,  // Boolean | Object, keep utimes if true

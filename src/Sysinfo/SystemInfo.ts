@@ -1,12 +1,12 @@
-
-import sysinfo from 'systeminformation'
-import psList from './psList'
-import async from 'async'
-import MeanCalc from './MeanCalc'
-import { fork } from 'child_process'
 import os from 'os'
 import fs from 'fs'
 import debugLogger from 'debug'
+import async from 'async';
+import sysinfo from 'systeminformation'
+import { fork } from 'child_process';
+
+import psList from './psList';
+import MeanCalc from './MeanCalc';
 
 const debug = debugLogger('pm2:sysinfos');
 

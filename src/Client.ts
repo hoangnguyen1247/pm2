@@ -3,23 +3,23 @@
  * Use of this source code is governed by a license that
  * can be found in the LICENSE file.
  */
-
+import os from 'os';
 import debugLogger from 'debug';
-import Common from './Common';
+import { spawn } from 'child_process';
 import KMDaemon from '@pm2/agent/src/InteractorClient';
 import rpc from 'pm2-axon-rpc';
 import forEach from 'async/forEach';
 import axon from 'pm2-axon';
 import fs from 'fs';
 import path from 'path';
+import mkdirp from 'mkdirp';
+
+import Common from './Common';
 import pkg from '../package.json';
 import which from './tools/which';
 import cst from '../constants';
 import Daemon from './Daemon';
-import mkdirp from 'mkdirp';
 import vCheck from './VersionCheck'
-import os from 'os';
-import { spawn } from 'child_process';
 
 const debug = debugLogger('pm2:client');
 

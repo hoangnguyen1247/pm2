@@ -5,6 +5,7 @@
 */
 // Inject custom modules
 import ProcessUtils from './ProcessUtils';
+
 ProcessUtils.injectModules()
 
 if (typeof (process.env.source_map_support) != "undefined" &&
@@ -26,9 +27,9 @@ if (process.connected &&
 // Require the real application
 if (process.env.pm_exec_path) {
     require('module')._load(process.env.pm_exec_path, null, true);
-}
-else
+} else {
     throw new Error('Could not _load() the script');
+}
 
 // Change some values to make node think that the user's application
 // was started directly such as `node app.js`

@@ -3,7 +3,6 @@
  * Use of this source code is governed by a license that
  * can be found in the LICENSE file.
  */
-import path from 'path';
 import eachLimit from 'async/eachLimit';
 import forEachLimit from 'async/forEachLimit';
 

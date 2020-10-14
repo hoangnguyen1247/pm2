@@ -14,12 +14,12 @@
 import fs from 'fs';
 import path from 'path';
 import eachLimit from 'async/eachLimit';
-import os from 'os';
+import util from 'util';
+import debugLogger from 'debug';
+
 import cst from '../../constants';
 import pkg from '../../package.json';
 import pidusage from 'pidusage';
-import util from 'util';
-import debugLogger from 'debug';
 import Utility from '../Utility';
 
 const debug = debugLogger('pm2:ActionMethod');

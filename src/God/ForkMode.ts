@@ -12,10 +12,11 @@
  */
 import debugLogger from 'debug';
 import fs from 'fs';
-import Utility from '../Utility';
 import path from 'path';
 import dayjs from 'dayjs';
 import semver from 'semver';
+
+import Utility from '../Utility';
 
 const log = debugLogger('pm2:fork_mode');
 

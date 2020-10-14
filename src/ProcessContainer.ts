@@ -8,7 +8,6 @@
  * - rename process
  * - pid
  */
-
 import fs from 'fs';
 import p from 'path';
 import cst from '../constants';

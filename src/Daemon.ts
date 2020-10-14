@@ -3,22 +3,21 @@
  * Use of this source code is governed by a license that
  * can be found in the LICENSE file.
  */
-
-import debugLogger from 'debug';
-import pkg from '../package.json';
-import cst from '../constants';
-import rpc from 'pm2-axon-rpc';
-import axon from 'pm2-axon';
-import domain from 'domain';
-import Utility from './Utility';
 import util from 'util';
 import fs from 'fs';
+import inspector from 'inspector'
+import debugLogger from 'debug';
+import semver from 'semver';
+import domain from 'domain';
+import axon from 'pm2-axon';
+import rpc from 'pm2-axon-rpc';
+import { spawn } from 'child_process';
+import pkg from '../package.json';
+import cst from '../constants';
+import Utility from './Utility';
 import God from './God';
 import eachLimit from 'async/eachLimit';
 import * as fmt from './tools/fmt';
-import semver from 'semver';
-import { spawn } from 'child_process';
-import inspector from 'inspector'
 
 const debug = debugLogger('pm2:daemon');
 

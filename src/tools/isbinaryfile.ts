@@ -62,8 +62,7 @@ function isBinaryCheck(bytes, size) {
     for (var i = 0; i < total_bytes; i++) {
         if (bytes[i] === 0) { // NULL byte--it's binary!
             return true;
-        }
-        else if ((bytes[i] < 7 || bytes[i] > 14) && (bytes[i] < 32 || bytes[i] > 127)) {
+        } else if ((bytes[i] < 7 || bytes[i] > 14) && (bytes[i] < 32 || bytes[i] > 127)) {
             // UTF-8 detection
             if (bytes[i] > 193 && bytes[i] < 224 && i + 1 < total_bytes) {
                 i++;

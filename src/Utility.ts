@@ -7,13 +7,13 @@
 /**
  * Common Utilities ONLY USED IN ->DAEMON<-
  */
-
 import fclone from 'fclone';
 import fs from 'fs';
-import waterfall from 'async/waterfall';
 import util from 'util';
+import waterfall from 'async/waterfall';
 import url from 'url';
 import dayjs from 'dayjs';
+
 import cst from '../constants';
 import findPackageJson from './tools/find-package-json';
 

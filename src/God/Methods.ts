@@ -12,7 +12,7 @@
  */
 import p from 'path';
 import treekill from '../TreeKill';
-import cst from '../../constants.js';
+import cst from '../../constants';
 
 /**
  * Description
