@@ -23,3 +23,4 @@ e2e_time
 unit_time
 *.heapprofile
 a.out
+/lib2
