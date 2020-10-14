@@ -8,30 +8,30 @@ import Utility from './Utility';
 
 export default function (God) {
 
-  God.notify = function (action_name, data, manually) {
-    God.bus.emit('process:event', {
-      event: action_name,
-      manually: typeof (manually) == 'undefined' ? false : true,
-      process: Utility.formatCLU(data),
-      at: Utility.getDate()
-    });
-  };
+    God.notify = function (action_name, data, manually) {
+        God.bus.emit('process:event', {
+            event: action_name,
+            manually: typeof (manually) == 'undefined' ? false : true,
+            process: Utility.formatCLU(data),
+            at: Utility.getDate()
+        });
+    };
 
-  God.notifyByProcessId = function (opts, cb) {
-    if (typeof (opts.id) === 'undefined') { return cb(new Error('process id missing')); }
-    var proc = God.clusters_db[opts.id];
-    if (!proc) { return cb(new Error('process id doesnt exists')); }
+    God.notifyByProcessId = function (opts, cb) {
+        if (typeof (opts.id) === 'undefined') { return cb(new Error('process id missing')); }
+        var proc = God.clusters_db[opts.id];
+        if (!proc) { return cb(new Error('process id doesnt exists')); }
 
-    God.bus.emit('process:event', {
-      event: opts.action_name,
-      manually: typeof (opts.manually) == 'undefined' ? false : true,
-      process: Utility.formatCLU(proc),
-      at: Utility.getDate()
-    });
+        God.bus.emit('process:event', {
+            event: opts.action_name,
+            manually: typeof (opts.manually) == 'undefined' ? false : true,
+            process: Utility.formatCLU(proc),
+            at: Utility.getDate()
+        });
 
-    process.nextTick(function () {
-      return cb ? cb(null) : false;
-    });
-    return false;
-  };
+        process.nextTick(function () {
+            return cb ? cb(null) : false;
+        });
+        return false;
+    };
 };

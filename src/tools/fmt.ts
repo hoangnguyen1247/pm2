@@ -13,14 +13,14 @@ import util from 'util';
 
 // --------------------------------------------------------------------------------------------------------------------
 
-var sepC  = '===============================================================================';
+var sepC = '===============================================================================';
 var lineC = '-------------------------------------------------------------------------------';
 var fieldC = '                    ';
 
 // --------------------------------------------------------------------------------------------------------------------
 
 // separator
-export const separator = function() {
+export const separator = function () {
     console.log(sepC);
 };
 
@@ -28,35 +28,35 @@ export const separator = function() {
 export const sep = separator;
 
 // line
-export const line = function() {
+export const line = function () {
     console.log(lineC);
 };
 
 // title
-export const title = function(title) {
+export const title = function (title) {
     var out = '--- ' + title + ' ';
     out += lineC.substr(out.length);
     console.log(out);
 };
 
 // field
-export const field = function(key, value) {
+export const field = function (key, value) {
     console.log('' + key + fieldC.substr(key.length) + ' : ' + value);
 };
 
 // subfield
-export const subfield = function(key, value) {
+export const subfield = function (key, value) {
     console.log('- ' + key + fieldC.substr(key.length + 2) + ' : ' + value);
 };
 
 // list item
-export const li = function(msg) {
+export const li = function (msg) {
     console.log('* ' + msg);
 };
 
 // dump
-export const dump = function(data, name) {
-    if ( name ) {
+export const dump = function (data, name) {
+    if (name) {
         console.log(name + ' :', util.inspect(data, false, null, true));
     }
     else {
@@ -65,7 +65,7 @@ export const dump = function(data, name) {
 };
 
 // msg
-export const msg = function(msg) {
+export const msg = function (msg) {
     console.log(msg);
 };
 
