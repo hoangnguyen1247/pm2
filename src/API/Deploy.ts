@@ -100,7 +100,7 @@ export default function (CLI) {
         }
 
         if (!json_conf.deploy[env]['post-deploy']) {
-            json_conf.deploy[env]['post-deploy'] = 'pm2 startOrRestart ' + file + ' --env ' + env;
+            json_conf.deploy[env]['post-deploy'] = 'pm2t startOrRestart ' + file + ' --env ' + env;
         }
 
         pm2Deploy.deployForEnv(json_conf.deploy, env, args, function (err, data) {

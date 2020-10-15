@@ -21,7 +21,7 @@ import cst from './constants';
 import Daemon from './Daemon';
 import vCheck from './VersionCheck'
 
-const debug = debugLogger('pm2:client');
+const debug = debugLogger('pm2t:client');
 
 function noop() { }
 
