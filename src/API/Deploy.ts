@@ -8,7 +8,7 @@ import fs from 'fs';
 import cst from '../constants';
 import Utility from '../Utility';
 import Common from '../Common';
-import pm2Deploy from 'pm2-deploy';
+import pm2Deploy from 'pm2t-deploy';
 
 function deployHelper() {
     console.log('');
