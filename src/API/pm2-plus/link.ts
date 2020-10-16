@@ -1,6 +1,6 @@
 import fs from 'fs';
 import chalk from 'chalk';
-import KMDaemon from '@pm2/agent/src/InteractorClient';
+import KMDaemon from 'pm2t-io-agent';
 
 import cst from '../../constants';
 import Common from '../../Common';

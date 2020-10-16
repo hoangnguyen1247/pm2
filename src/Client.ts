@@ -6,7 +6,7 @@
 import os from 'os';
 import debugLogger from 'debug';
 import { spawn } from 'child_process';
-import KMDaemon from '@pm2/agent/src/InteractorClient';
+import KMDaemon from 'pm2t-io-agent';
 import rpc from 'pm2-axon-rpc';
 import forEach from 'async/forEach';
 import axon from 'pm2-axon';

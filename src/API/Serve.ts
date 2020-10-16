@@ -11,12 +11,12 @@ import url from 'url';
 import path from 'path';
 import debugLogger from 'debug'
 import semver from 'semver';
+import probe from 'pm2-io-apm';
 
 var isNode4 = semver.lt(process.version, '6.0.0')
 
 const debug = debugLogger('pm2:serve');
 if (!isNode4) {
-    var probe = require('@pm2/io');
     var errorMeter = probe.meter({
         name: '404/sec',
         samples: 1,

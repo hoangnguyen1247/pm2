@@ -1,10 +1,10 @@
 'use strict'
 
+import pmx from 'pm2t-io-apm';
+
 export default {
     injectModules: function () {
         if (process.env.pmx !== 'false') {
-            const pmx = require('@pm2/io')
-
             let conf = {}
             const hasSpecificConfig = typeof process.env.io === 'string' || process.env.trace === 'true'
             // pmx is already init, no need to do it twice

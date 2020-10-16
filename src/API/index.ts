@@ -17,7 +17,7 @@ import fclone from 'fclone';
 import crypto from 'crypto';
 import semver from 'semver';
 import dayjs from 'dayjs';
-import KMDaemon from '@pm2/agent/src/InteractorClient';
+import KMDaemon from 'pm2t-io-agent';
 
 import DockerMgmt from './ExtraMgmt/Docker';
 import cst from '../constants';
