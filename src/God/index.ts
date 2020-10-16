@@ -21,25 +21,25 @@ import { EventEmitter2 } from 'eventemitter2';
 import fs from 'fs';
 import vizion from 'vizion';
 import debugLogger from 'debug';
-import Utility from './Utility';
-import cst from './constants';
+import Utility from '../Utility';
+import cst from '../constants';
 import timesLimit from 'async/timesLimit';
-import Configuration from './Configuration';
+import Configuration from '../Configuration';
 import semver from 'semver';
 
 /**
  * Populate God namespace
  */
-import GodEvent from './Event';
-import GodMethods from './God/Methods';
-import GodForkMode from './God/ForkMode';
-import GodClusterMode from './God/ClusterMode';
-import GodReload from './God/Reload';
-import GodActionMethods from './God/ActionMethods';
-import GodWatcher from './Watcher';
-import GodWorker from './Worker';
+import GodEvent from '../Event';
+import GodMethods from './Methods';
+import GodForkMode from './ForkMode';
+import GodClusterMode from './ClusterMode';
+import GodReload from './Reload';
+import GodActionMethods from './ActionMethods';
+import GodWatcher from '../Watcher';
+import GodWorker from '../Worker';
 
-import sysinfo from './Sysinfo/SystemInfo'
+import sysinfo from '../Sysinfo/SystemInfo'
 
 const numCPUs = os.cpus() ? os.cpus().length : 1;
 const debug = debugLogger('pm2:god');
@@ -53,8 +53,7 @@ if (semver.lt(process.version, '10.0.0')) {
         // windowsHide: true,
         exec: path.resolve(path.dirname(module.filename), 'ProcessContainerLegacy.js')
     });
-}
-else {
+} else {
     cluster.setupMaster({
         // TODO: please check this
         // windowsHide: true,

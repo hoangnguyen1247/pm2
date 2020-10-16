@@ -11,7 +11,7 @@ import url from 'url';
 import path from 'path';
 import debugLogger from 'debug'
 import semver from 'semver';
-import probe from 'pm2-io-apm';
+import probe from 'pm2t-io-apm';
 
 var isNode4 = semver.lt(process.version, '6.0.0')
 
@@ -21,7 +21,7 @@ if (!isNode4) {
         name: '404/sec',
         samples: 1,
         timeframe: 60
-    })
+    } as any)
 }
 
 /**

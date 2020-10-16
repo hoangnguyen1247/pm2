@@ -564,8 +564,7 @@ Client.prototype.killDaemon = function killDaemon(fn) {
             clearTimeout(timeout);
             quit();
         });
-    }
-    else {
+    } else {
         // if under windows, try to ping the daemon to see if it still here
         setTimeout(() => {
             this.pingDaemon(function (alive) {

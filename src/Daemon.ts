@@ -134,25 +134,26 @@ Daemon.prototype.innerStart = function (cb) {
 
     this.rpc_socket = this.rep.bind(this.rpc_socket_file);
 
-    this.rpc_socket.once('bind', function () {
+    this.rpc_socket.once('bind', () => {
         fs.chmod(that.rpc_socket_file, '775', function (e) {
             if (e) console.error(e);
 
             try {
-                if (process.env.PM2_SOCKET_USER && process.env.PM2_SOCKET_GROUP)
+                if (process.env.PM2_SOCKET_USER && process.env.PM2_SOCKET_GROUP) {
                     fs.chown(that.rpc_socket_file,
                         parseInt(process.env.PM2_SOCKET_USER),
                         parseInt(process.env.PM2_SOCKET_GROUP), function (e) {
                             if (e) console.error(e);
                         });
+                }
             } catch (e) {
                 console.error(e);
             }
         });
 
 
-        that.rpc_socket_ready = true;
-        that.sendReady(cb);
+        this.rpc_socket_ready = true;
+        this.sendReady(cb);
     });
 
 
@@ -263,14 +264,15 @@ Daemon.prototype.close = function (opts, cb) {
         msg: 'pm2 has been killed via CLI'
     });
 
-    if (God.system_infos_proc !== null)
+    if (God.system_infos_proc !== null) {
         God.system_infos_proc.kill()
+    }
 
     /**
      * Cleanly kill pm2
      */
-    that.rpc_socket.close(function () {
-        that.pub_socket.close(function () {
+    this.rpc_socket.close(() => {
+        this.pub_socket.close(() => {
 
             // notify cli that the daemon is shuting down (only under unix since windows doesnt handle signals)
             if (cst.IS_WINDOWS === false) {
@@ -282,7 +284,7 @@ Daemon.prototype.close = function (opts, cb) {
             }
 
             try {
-                fs.unlinkSync(that.pid_path);
+                fs.unlinkSync(this.pid_path);
             } catch (e) { }
 
             console.log('PM2 successfully stopped');
@@ -312,8 +314,9 @@ Daemon.prototype.sendReady = function (cb) {
             pid: process.pid,
             pm2_version: pkg.version
         });
-        if (typeof (process.send) != 'function')
+        if (typeof (process.send) != 'function') {
             return false;
+        }
 
         process.send({
             online: true,
@@ -340,8 +343,9 @@ Daemon.prototype.gracefullExit = function () {
 
     console.log('pm2 has been killed by signal, dumping process list before exit...');
 
-    if (God.system_infos_proc !== null)
+    if (God.system_infos_proc !== null) {
         God.system_infos_proc.kill()
+    }
 
     God.dumpProcessList(function () {
 
@@ -352,12 +356,12 @@ Daemon.prototype.gracefullExit = function () {
             God.deleteProcessId(proc.pm2_env.pm_id, function () {
                 return next();
             });
-        }, function (err) {
+        }, (err) => {
             try {
                 fs.unlinkSync(that.pid_path);
             } catch (e) { }
-            setTimeout(function () {
-                that.isExiting = false
+            setTimeout(() => {
+                this.isExiting = false
                 console.log('Exited peacefully');
                 process.exit(cst.SUCCESS_EXIT);
             }, 2);

@@ -219,8 +219,7 @@ export default function (God) {
                     console.error(e.stack, e.message)
                 }
                 return God.processIsDead(pid, pm2_env, cb);
-            }
-            else {
+            } else {
                 console.log(`[AppKill] ${pid} pid cannot be notified with send()`)
             }
         }
@@ -232,8 +231,7 @@ export default function (God) {
                 console.error('[SimpleKill] %s pid can not be killed', pid, e.stack, e.message);
             }
             return God.processIsDead(pid, pm2_env, cb);
-        }
-        else {
+        } else {
             treekill(parseInt(pid), cst.KILL_SIGNAL, function (err) {
                 return God.processIsDead(pid, pm2_env, cb);
             });

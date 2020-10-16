@@ -405,7 +405,7 @@ API.prototype.reset = function (process_name, cb?) {
  * @param {Function} cb callback when pm2 has been upgraded
  */
 API.prototype.update = function(cb?){
-    Common.printOut('Be sure to have the latest version by doing `npm install pm2@latest -g` before doing this procedure.');
+    Common.printOut('Be sure to have the latest version by doing `npm install pm2t@latest -g` before doing this procedure.');
 
     // Dump PM2 processes
     this.Client.executeRemote('notifyKillPM2', {}, function () { });
@@ -692,14 +692,16 @@ API.prototype._startScript = function (script, opts, cb) {
     // Retrieve arguments via -- <args>
     var argsIndex;
 
-    if (opts.rawArgs && (argsIndex = opts.rawArgs.indexOf('--')) >= 0)
+    if (opts.rawArgs && (argsIndex = opts.rawArgs.indexOf('--')) >= 0) {
         app_conf.args = opts.rawArgs.slice(argsIndex + 1);
-    else if (opts.scriptArgs)
+    } else if (opts.scriptArgs) {
         app_conf.args = opts.scriptArgs;
+    }
 
     app_conf.script = script;
-    if (!app_conf.namespace)
+    if (!app_conf.namespace) {
         app_conf.namespace = 'default';
+    }
 
     if ((appConf = Common.verifyConfs(app_conf)) instanceof Error) {
         Common.err(appConf)
@@ -709,16 +711,17 @@ API.prototype._startScript = function (script, opts, cb) {
     app_conf = appConf[0];
 
     if (opts.watchDelay) {
-        if (typeof opts.watchDelay === "string" && opts.watchDelay.indexOf("ms") !== -1)
+        if (typeof opts.watchDelay === "string" && opts.watchDelay.indexOf("ms") !== -1) {
             app_conf.watch_delay = parseInt(opts.watchDelay);
-        else {
+        } else {
             app_conf.watch_delay = parseFloat(opts.watchDelay) * 1000;
         }
     }
 
     var mas = [];
-    if (typeof opts.ext != 'undefined')
+    if (typeof opts.ext != 'undefined') {
         hf.make_available_extension(opts, mas); // for -e flag
+    }
     mas.length > 0 ? app_conf.ignore_watch = mas : 0;
 
     /**
@@ -778,8 +781,7 @@ API.prototype._startScript = function (script, opts, cb) {
                 }
                 else return cb(null);
             });
-        }
-        else {
+        } else {
             this._operate('restartProcessId', 'all', function (err, list) {
                 if (err) return cb(err);
                 Common.printOut(conf.PREFIX_MSG + 'Process successfully started');
@@ -828,8 +830,7 @@ API.prototype._startScript = function (script, opts, cb) {
                     return cb(true, list);
                 });
                 return false;
-            }
-            else if (managed_script && !opts.force) {
+            } else if (managed_script && !opts.force) {
                 Common.err('Script already launched, add -f option to force re-execution');
                 return cb(new Error('Script already launched'));
             }
@@ -879,8 +880,9 @@ API.prototype._startScript = function (script, opts, cb) {
         restartExistingProcessId,
         restartExistingProcessPathOrStartNew
     ], (err, data) => {
-        if (err instanceof Error)
+        if (err instanceof Error) {
             return cb ? cb(err) : this.exitCli(conf.ERROR_EXIT);
+        }
 
         var ret = {};
 
@@ -944,21 +946,25 @@ API.prototype._startJson = function (file, opts, action, pipe?, cb?) {
     /**
      * Alias some optional fields
      */
-    if (config.deploy)
+    if (config.deploy) {
         deployConf = config.deploy;
-    if (config.static)
+    }
+    if (config.static) {
         staticConf = config.static;
-    if (config.apps)
+    }
+    if (config.apps) {
         appConf = config.apps;
-    else if (config.pm2)
+    } else if (config.pm2) {
         appConf = config.pm2;
-    else
+    } else {
         appConf = config;
+    }
     if (!Array.isArray(appConf))
         appConf = [appConf];
 
-    if ((appConf = Common.verifyConfs(appConf)) instanceof Error)
+    if ((appConf = Common.verifyConfs(appConf)) instanceof Error) {
         return cb ? cb(appConf) : this.exitCli(conf.ERROR_EXIT);
+    }
 
     process.env.PM2_JSON_PROCESSING = "true";
 
@@ -1236,18 +1242,20 @@ API.prototype.actionFromJson = function (action, file, opts, jsonVia, cb) {
         var name = '';
         var new_env;
 
-        if (!proc.name)
+        if (!proc.name) {
             name = path.basename(proc.script);
-        else
+        } else {
             name = proc.name;
+        }
 
         if (opts.only && opts.only != name)
             return process.nextTick(next1);
 
-        if (opts && opts.env)
+        if (opts && opts.env) {
             new_env = Common.mergeEnvironmentVariables(proc, opts.env);
-        else
+        } else {
             new_env = Common.mergeEnvironmentVariables(proc);
+        }
 
         this.Client.getProcessIdByName(name, (err, ids) => {
             if (err) {
@@ -1307,8 +1315,9 @@ API.prototype._operate = function (action_name, process_name, envs, cb?) {
     var ret = [];
 
     // Make sure all options exist
-    if (!envs)
+    if (!envs) {
         envs = {};
+    }
 
     if (typeof (envs) == 'function') {
         cb = envs;
@@ -1316,8 +1325,9 @@ API.prototype._operate = function (action_name, process_name, envs, cb?) {
     }
 
     // Set via env.update (JSON processing)
-    if (envs.updateEnv === true)
+    if (envs.updateEnv === true) {
         update_env = true;
+    }
 
     var concurrent_actions = envs.parallel || conf.CONCURRENT_ACTIONS;
 
@@ -1344,11 +1354,13 @@ API.prototype._operate = function (action_name, process_name, envs, cb?) {
     const processIds = (ids, cb) => {
         Common.printOut(conf.PREFIX_MSG + 'Applying action %s on app [%s](ids: %s)', action_name, process_name, ids);
 
-        if (ids.length <= 2)
+        if (ids.length <= 2) {
             concurrent_actions = 1;
+        }
 
-        if (action_name == 'deleteProcessId')
+        if (action_name == 'deleteProcessId') {
             concurrent_actions = 10;
+        }
 
         eachLimit(ids, concurrent_actions, (id, next) => {
             var opts;
@@ -1368,8 +1380,7 @@ API.prototype._operate = function (action_name, process_name, envs, cb?) {
                     Object.keys(envs).forEach(function (k) {
                         new_env[k] = envs[k];
                     });
-                }
-                else {
+                } else {
                     new_env = envs;
                 }
 
@@ -1377,8 +1388,7 @@ API.prototype._operate = function (action_name, process_name, envs, cb?) {
                     id: id,
                     env: new_env
                 };
-            }
-            else {
+            } else {
                 opts = id;
             }
 
@@ -1442,14 +1452,15 @@ API.prototype._operate = function (action_name, process_name, envs, cb?) {
         // When using shortcuts like 'all', do not delete modules
         var fn
 
-        if (process.env.PM2_STATUS == 'stopping')
+        if (process.env.PM2_STATUS == 'stopping') {
             this.Client.getAllProcessId(function (err, ids) {
                 reoperate(err, ids)
             });
-        else
+        } else {
             this.Client.getAllProcessIdWithoutModules((err, ids) => {
                 reoperate(err, ids)
             });
+        }
 
         const reoperate = (err, ids) => {
             if (err) {
@@ -1486,8 +1497,7 @@ API.prototype._operate = function (action_name, process_name, envs, cb?) {
 
             return processIds(found_proc, cb);
         });
-    }
-    else if (isNaN(process_name)) {
+    } else if (isNaN(process_name)) {
         /**
          * We can not stop or delete a module but we can restart it
          * to refresh configuration variable
@@ -1561,8 +1571,7 @@ API.prototype._operate = function (action_name, process_name, envs, cb?) {
                     });
                 });
             })
-        }
-        else {
+        } else {
             // Check if application name as number is an app name
             this.Client.getProcessIdByName(process_name, (err, ids) => {
                 if (ids.length > 0)
@@ -1570,8 +1579,9 @@ API.prototype._operate = function (action_name, process_name, envs, cb?) {
 
                 // Check if application name as number is an namespace
                 this.Client.getProcessIdsByNamespace(process_name, function (err, ns_process_ids) {
-                    if (ns_process_ids.length > 0)
+                    if (ns_process_ids.length > 0) {
                         return processIds(ns_process_ids, cb);
+                    }
                     // Else operate on pm id
                     return processIds([process_name], cb);
                 });

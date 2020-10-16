@@ -13,13 +13,13 @@ const debug = debugLogger('pm2:paths');
 function getDefaultPM2Home() {
     var PM2_ROOT_PATH;
 
-    if (process.env.PM2_HOME)
+    if (process.env.PM2_HOME) {
         PM2_ROOT_PATH = process.env.PM2_HOME;
-    else if (process.env.HOME && !process.env.HOMEPATH)
+    } else if (process.env.HOME && !process.env.HOMEPATH) {
         PM2_ROOT_PATH = p.resolve(process.env.HOME, '.pm2t');
-    else if (process.env.HOME || process.env.HOMEPATH)
+    } else if (process.env.HOME || process.env.HOMEPATH) {
         PM2_ROOT_PATH = p.resolve(process.env.HOMEDRIVE, process.env.HOME || process.env.HOMEPATH, '.pm2t');
-    else {
+    } else {
         console.error('[PM2][Initialization] Environment variable HOME (Linux) or HOMEPATH (Windows) are not set!');
         console.error('[PM2][Initialization] Defaulting to /etc/.pm2t');
         PM2_ROOT_PATH = p.resolve('/etc', '.pm2t');
@@ -47,8 +47,8 @@ export default function (PM2_HOME) {
         PM2_CONF_FILE: p.resolve(PM2_HOME, 'conf.js'),
         PM2_MODULE_CONF_FILE: p.resolve(PM2_HOME, 'module_conf.json'),
 
-        PM2_LOG_FILE_PATH: p.resolve(PM2_HOME, 'pm2.log'),
-        PM2_PID_FILE_PATH: p.resolve(PM2_HOME, 'pm2.pid'),
+        PM2_LOG_FILE_PATH: p.resolve(PM2_HOME, 'pm2t.log'),
+        PM2_PID_FILE_PATH: p.resolve(PM2_HOME, 'pm2t.pid'),
 
         PM2_RELOAD_LOCKFILE: p.resolve(PM2_HOME, 'reload.lock'),
 
