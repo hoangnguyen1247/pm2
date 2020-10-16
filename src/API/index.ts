@@ -992,7 +992,7 @@ API.prototype._startJson = function (file, opts, action, pipe?, cb?) {
     });
 
     // Here we pick only the field we want from the CLI when starting a JSON
-    appConf.forEach(function (app) {
+    appConf.forEach((app) => {
         if (!app.env) { app.env = {}; }
         app.env.io = app.io;
         // --only <app>
@@ -1100,7 +1100,7 @@ API.prototype._startJson = function (file, opts, action, pipe?, cb?) {
             if (apps_name.length > 0 && action != 'start')
                 Common.printOut(conf.PREFIX_MSG_WARNING + 'Applications %s not running, starting...', apps_name.join(', '));
             // Start missing apps
-            return startApps(apps_name, function (err, apps) {
+            return startApps(apps_name, (err, apps) => {
                 apps_info = apps_info.concat(apps);
                 return cb ? cb(err, apps_info) : this.speedList(err ? 1 : 0);
             });
