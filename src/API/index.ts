@@ -103,7 +103,7 @@ const API = function(opts?) {
     if (opts.pm2_home) {
         // Override default conf file
         this.pm2_home = opts.pm2_home;
-        conf = util.inherits(conf, path_structure(this.pm2_home));
+        conf = Object.assign({}, conf, path_structure(this.pm2_home));
     } else if (opts.independent == true && conf.IS_WINDOWS === false) {
         // Create an unique pm2 instance
         var random_file = crypto.randomBytes(8).toString('hex');
@@ -113,7 +113,7 @@ const API = function(opts?) {
         // It will go as in proc
         if (typeof (opts.daemon_mode) == 'undefined')
             this.daemon_mode = false;
-        conf = util.inherits(conf, path_structure(this.pm2_home));
+        conf = Object.assign({}, conf, path_structure(this.pm2_home));
     }
 
     this._conf = conf;
@@ -856,7 +856,7 @@ API.prototype._startScript = function (script, opts, cb) {
             resolved_paths.env['PM2_HOME'] = this.pm2_home;
 
             var additional_env = Modularizer.getAdditionalConf(resolved_paths.name);
-            util.inherits(resolved_paths.env, additional_env);
+            resolved_paths.env = Object.assign({}, resolved_paths.env, additional_env);
 
             // Is KM linked?
             resolved_paths.km_link = this.gl_is_km_linked;
@@ -1075,7 +1075,8 @@ API.prototype._startJson = function (file, opts, action, pipe?, cb?) {
             // Notice: if people use the same name in different apps,
             //         duplicated envs will be overrode by the last one
             var env = envs.reduce(function (e1, e2) {
-                return util.inherits(e1, e2);
+                e1 = { ...e1, ...e2 }
+                return e1;
             });
 
             // When we are processing JSON, allow to keep the new env by default
@@ -1107,7 +1108,7 @@ API.prototype._startJson = function (file, opts, action, pipe?, cb?) {
         return false;
     });
 
-    function startApps(app_name_to_start, cb) {
+    const startApps = (app_name_to_start, cb) => {
         var apps_to_start = [];
         var apps_started = [];
         var apps_errored = [];
@@ -1150,7 +1151,7 @@ API.prototype._startJson = function (file, opts, action, pipe?, cb?) {
             resolved_paths.env['PM2_HOME'] = this.pm2_home;
 
             var additional_env = Modularizer.getAdditionalConf(resolved_paths.name);
-            util.inherits(resolved_paths.env, additional_env);
+            resolved_paths.env = { ...(resolved_paths.env || {}), ...(additional_env || {})}
 
             resolved_paths.env = Common.mergeEnvironmentVariables(resolved_paths, opts.env, deployConf);
 
@@ -1162,7 +1163,7 @@ API.prototype._startJson = function (file, opts, action, pipe?, cb?) {
             if (resolved_paths.wait_ready) {
                 Common.warn(`App ${resolved_paths.name} has option 'wait_ready' set, waiting for app to be ready...`)
             }
-            this.Client.executeRemote('prepare', resolved_paths, function (err, data) {
+            this.Client.executeRemote('prepare', resolved_paths, (err, data) => {
                 if (err) {
                     Common.printError(conf.PREFIX_MSG_ERR + 'Process failed to launch %s', err.message ? err.message : err);
                     return next();
@@ -1372,10 +1373,11 @@ API.prototype._operate = function (action_name, process_name, envs, cb?) {
                 var new_env: any = {};
 
                 if (update_env === true) {
-                    if (conf.PM2_PROGRAMMATIC == true)
+                    if (conf.PM2_PROGRAMMATIC == true) {
                         new_env = Common.safeExtend({}, process.env);
-                    else
-                        new_env = util.inherits({}, process.env);
+                    } else {
+                        new_env = Object.assign({}, process.env);
+                    }
 
                     Object.keys(envs).forEach(function (k) {
                         new_env[k] = envs[k];
@@ -1515,7 +1517,7 @@ API.prototype._operate = function (action_name, process_name, envs, cb?) {
                  * if yes load configuration variables and merge with the current environment
                  */
                 var additional_env = Modularizer.getAdditionalConf(process_name);
-                util.inherits(envs, additional_env);
+                envs = { ...envs, ...additional_env }
                 return processIds(ids, cb);
             }
 
@@ -1534,7 +1536,7 @@ API.prototype._operate = function (action_name, process_name, envs, cb?) {
                  * if yes load configuration variables and merge with the current environment
                  */
                 var ns_additional_env = Modularizer.getAdditionalConf(process_name);
-                util.inherits(envs, ns_additional_env);
+                envs = { ...envs, ...ns_additional_env }
                 return processIds(ns_process_ids, cb);
             });
         });

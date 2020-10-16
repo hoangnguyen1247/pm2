@@ -430,10 +430,11 @@ Daemon.prototype.startLogic = function () {
         if (!msg.process)
             return console.error('[axm:monitor] no process defined');
 
-        if (!msg.process || !God.clusters_db[msg.process.pm_id])
+        if (!msg.process || !God.clusters_db[msg.process.pm_id]) {
             return console.error('AXM MONITOR Unknown id %s', msg.process.pm_id);
+        }
 
-        util.inherits(God.clusters_db[msg.process.pm_id].pm2_env.axm_monitor, Utility.clone(msg.data));
+        God.clusters_db[msg.process.pm_id].pm2_env.axm_monitor = Object.assign({}, God.clusters_db[msg.process.pm_id].pm2_env.axm_monitor, Utility.clone(msg.data));
         msg = null;
     });
 

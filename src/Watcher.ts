@@ -44,7 +44,7 @@ export default function ClusterMode(God) {
         };
 
         if (pm2_env.watch_options) {
-            watch_options = util.inherits(watch_options, pm2_env.watch_options);
+            watch_options = Object.assign({}, watch_options, pm2_env.watch_options);
         }
 
         log('Watch opts', watch_options);

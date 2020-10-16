@@ -214,8 +214,9 @@ Common.prepareAppConf = function (opts, app) {
 
     app.env = [
         {}, (app.filter_env && app.filter_env.length > 0) ? filterEnv(process.env) : env, app.env || {}
-    ].reduce(function (e1, e2) {
-        return util.inherits(e1, e2);
+    ].reduce((e1, e2) => {
+        e1 = { ...e1, ...e2 }
+        return e1;
     });
 
     app.pm_cwd = cwd;
@@ -597,21 +598,20 @@ Common.mergeEnvironmentVariables = function (app_env, env_name, deploy_conf) {
     /**
      * Extra configuration update
      */
-    util.inherits(new_conf, app)
+    new_conf = { ...new_conf, ...app }
 
     if (env_name) {
         // First merge variables from deploy.production.env object as least priority.
         if (deploy_conf && deploy_conf[env_name] && deploy_conf[env_name]['env']) {
-            util.inherits(new_conf.env, deploy_conf[env_name]['env']);
+            new_conf.env = { ...new_conf.env, ...deploy_conf[env_name]['env'] };
         }
 
-        util.inherits(new_conf.env, app.env);
+        new_conf.env = { ...new_conf.env, ...app.env };
 
         // Then, last and highest priority, merge the app.env_production object.
         if ('env_' + env_name in app) {
-            util.inherits(new_conf.env, app['env_' + env_name]);
-        }
-        else {
+            new_conf.env = { ...new_conf.env, ...app['env_' + env_name] };
+        } else {
             Common.printOut(cst.PREFIX_MSG_WARNING + chalk.bold('Environment [%s] is not defined in process file'), env_name);
         }
     }
@@ -622,8 +622,8 @@ Common.mergeEnvironmentVariables = function (app_env, env_name, deploy_conf) {
         current_conf: {}
     }
 
-    util.inherits(res, new_conf.env)
-    util.inherits(res.current_conf, new_conf)
+    res = { ...res, ...new_conf.env }
+    res.current_conf = { ...res.current_conf, ...new_conf }
 
     // #2541 force resolution of node interpreter
     if (app.exec_interpreter &&
